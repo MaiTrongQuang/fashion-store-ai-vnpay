@@ -69,4 +69,4 @@ ehthumbs.db
 $RECYCLE.BIN/
 
 # Supabase
-supabase/migrations
+supabase/
