@@ -58,18 +58,20 @@ export default function Header() {
 
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === "SIGNED_IN" && session?.user) {
-                const { data: profile } = await supabase
-                    .from("profiles")
-                    .select("*")
-                    .eq("id", session.user.id)
-                    .single();
-                setUser(profile);
-            } else if (event === "SIGNED_OUT") {
-                setUser(null);
-            }
-        });
+        } = supabase.auth.onAuthStateChange(
+            async (event: string, session: any) => {
+                if (event === "SIGNED_IN" && session?.user) {
+                    const { data: profile } = await supabase
+                        .from("profiles")
+                        .select("*")
+                        .eq("id", session.user.id)
+                        .single();
+                    setUser(profile);
+                } else if (event === "SIGNED_OUT") {
+                    setUser(null);
+                }
+            },
+        );
 
         return () => subscription.unsubscribe();
     }, [supabase]);

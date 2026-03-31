@@ -58,7 +58,7 @@ export default async function AdminProductsPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {products?.map((product) => {
+                        {products?.map((product: any) => {
                             const primaryImage =
                                 product.images?.find(
                                     (img: any) => img.is_primary,

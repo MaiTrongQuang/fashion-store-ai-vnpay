@@ -63,7 +63,8 @@ export default async function ProductDetailPage({ params }: Props) {
 
     const avgRating =
         reviews && reviews.length > 0
-            ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+            ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) /
+              reviews.length
             : 0;
 
     return (
@@ -125,7 +126,7 @@ export default async function ProductDetailPage({ params }: Props) {
                         Sản Phẩm Liên Quan
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                        {relatedProducts.map((p) => (
+                        {relatedProducts.map((p: any) => (
                             <ProductCard key={p.id} product={p} />
                         ))}
                     </div>

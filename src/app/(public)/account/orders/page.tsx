@@ -40,7 +40,7 @@ export default async function UserOrdersPage() {
                 </div>
             ) : (
                 <div className="space-y-3">
-                    {orders.map((order) => {
+                    {orders.map((order: any) => {
                         const statusInfo = ORDER_STATUS_MAP[order.status] || {
                             label: order.status,
                             color: "bg-gray-100 text-gray-800",

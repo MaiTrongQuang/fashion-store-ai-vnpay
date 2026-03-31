@@ -43,7 +43,10 @@ export default async function AdminDashboard() {
     ]);
 
     const totalRevenue =
-        revenueData?.reduce((sum, o) => sum + Number(o.total), 0) || 0;
+        revenueData?.reduce(
+            (sum: number, o: any) => sum + Number(o.total),
+            0,
+        ) || 0;
 
     const stats = [
         {
@@ -87,7 +90,7 @@ export default async function AdminDashboard() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {stats.map((stat, index) => (
+                {stats.map((stat, index: number) => (
                     <Card key={index} className="border-0 shadow-sm">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
@@ -121,7 +124,7 @@ export default async function AdminDashboard() {
                 <CardContent>
                     {recentOrders && recentOrders.length > 0 ? (
                         <div className="space-y-4">
-                            {recentOrders.map((order) => {
+                            {recentOrders.map((order: any) => {
                                 const statusInfo = ORDER_STATUS_MAP[
                                     order.status
                                 ] || {

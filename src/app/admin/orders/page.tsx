@@ -48,7 +48,7 @@ export default async function AdminOrdersPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {orders?.map((order) => {
+                        {orders?.map((order: any) => {
                             const statusInfo = ORDER_STATUS_MAP[
                                 order.status
                             ] || {

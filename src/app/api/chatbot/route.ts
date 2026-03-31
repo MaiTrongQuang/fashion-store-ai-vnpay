@@ -31,12 +31,12 @@ export async function POST(request: Request) {
 
         // Build context
         const faqContext = faqs
-            ?.map((f) => `Q: ${f.question}\nA: ${f.answer}`)
+            ?.map((f: any) => `Q: ${f.question}\nA: ${f.answer}`)
             .join("\n\n");
 
         const productContext = products
             ?.map(
-                (p) =>
+                (p: any) =>
                     `- ${p.name} (${(p.category as any)?.name || ""}): ${
                         p.sale_price
                             ? `Giá ${p.sale_price.toLocaleString()}đ (giảm từ ${p.base_price.toLocaleString()}đ)`
@@ -97,7 +97,7 @@ Hãy trả lời ngắn gọn, hữu ích và thân thiện.`;
         if (!reply) {
             const lowerMsg = message.toLowerCase();
             const matchedFaq = faqs?.find(
-                (f) =>
+                (f: any) =>
                     f.question.toLowerCase().includes(lowerMsg) ||
                     lowerMsg.includes(
                         f.question
