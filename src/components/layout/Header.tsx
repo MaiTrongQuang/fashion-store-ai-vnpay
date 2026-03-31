@@ -55,8 +55,27 @@ export default function Header() {
                         .from("profiles")
                         .select("*")
                         .eq("id", authUser.id)
-                        .single();
-                    setUser(profile);
+                        .maybeSingle();
+
+                    if (profile) {
+                        setUser(profile);
+                    } else {
+                        // Fallback in case the DB trigger for profile creation is delayed
+                        setUser({
+                            id: authUser.id,
+                            email: authUser.email || "",
+                            full_name:
+                                authUser.user_metadata?.full_name ||
+                                authUser.email?.split("@")[0] ||
+                                "Tài khoản",
+                            phone: authUser.phone || null,
+                            avatar_url:
+                                authUser.user_metadata?.avatar_url || null,
+                            role: "customer",
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString(),
+                        } as Profile);
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching user session:", error);
@@ -75,8 +94,26 @@ export default function Header() {
                         .from("profiles")
                         .select("*")
                         .eq("id", session.user.id)
-                        .single();
-                    setUser(profile);
+                        .maybeSingle();
+
+                    if (profile) {
+                        setUser(profile);
+                    } else {
+                        setUser({
+                            id: session.user.id,
+                            email: session.user.email || "",
+                            full_name:
+                                session.user.user_metadata?.full_name ||
+                                session.user.email?.split("@")[0] ||
+                                "Tài khoản",
+                            phone: session.user.phone || null,
+                            avatar_url:
+                                session.user.user_metadata?.avatar_url || null,
+                            role: "customer",
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString(),
+                        } as Profile);
+                    }
                 } else if (event === "SIGNED_OUT") {
                     setUser(null);
                 }
