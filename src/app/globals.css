@@ -160,10 +160,7 @@
     }
 
     /* 3. Form controls kế thừa font và cấu trúc, bỏ style hệ thống */
-    button,
-    input,
-    textarea,
-    select {
+    button {
         font: inherit;
         color: inherit;
         background: transparent;
@@ -173,13 +170,28 @@
         box-shadow: none;
     }
 
+    input,
+    textarea,
+    select {
+        font: inherit;
+        color: inherit;
+        background: transparent;
+        border: 1px solid var(--input); /* Border mỏng mặc định kiểu shadcn */
+        padding: 0;
+        margin: 0;
+        box-shadow: none;
+        transition:
+            border-color 0.15s ease,
+            box-shadow 0.15s ease;
+    }
+
     /* Tránh style webkit mặc định gây lồi lõm UI trên iOS/Safari/Chrome */
     input,
     textarea,
     select {
         appearance: none;
         -webkit-appearance: none;
-        border-radius: 0;
+        border-radius: var(--radius-sm); /* Default radius như shadcn */
     }
 
     /* Bỏ hoàn toàn behavior và icon clear text/search mặc định của input type="search" trên trình duyệt */
@@ -193,23 +205,31 @@
 
     /* 4. Tắt outline mặc định của hệ thống. 
        Với shadcn, chúng ta sẽ để component tự quản lý trạng thái focus bằng utility (vd: focus-visible:ring)
-       thay vì ép outline cứng. Mặc định giờ click vào sẽ không có box nổi lên. */
+       thay vì ép outline cứng. Mặc định giờ click vào sẽ không có box nổi lên. 
+       Riêng input sẽ có focus ring mỏng nhạt kiểu shadcn */
     button:focus,
-    input:focus,
-    textarea:focus,
-    select:focus,
     a:focus {
         outline: none;
         box-shadow: none;
     }
 
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: none;
+    }
+
     button:focus-visible,
+    a:focus-visible {
+        outline: none;
+    }
+
     input:focus-visible,
     textarea:focus-visible,
-    select:focus-visible,
-    a:focus-visible {
-        /* Bỏ outline cứng, nhường sân chơi hoàn toàn cho class của component Tailwind */
+    select:focus-visible {
         outline: none;
+        border-color: var(--ring);
+        box-shadow: 0 0 0 1px var(--ring);
     }
 
     /* Con trỏ hợp lý cho button và các phần tử tương tác */
