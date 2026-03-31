@@ -67,3 +67,6 @@ supabase/.branches/
 Desktop.ini
 ehthumbs.db
 $RECYCLE.BIN/
+
+# Supabase
+supabase/migrations
