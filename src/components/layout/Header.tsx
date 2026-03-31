@@ -12,7 +12,8 @@ import {
     ChevronDown,
     LogOut,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -192,35 +193,48 @@ export default function Header() {
 
                     {/* Right Actions */}
                     <div className="flex items-center gap-1">
-                        <Link href="/search">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="hidden sm:inline-flex"
-                            >
-                                <Search className="h-4 w-4" />
-                            </Button>
+                        <Link
+                            href="/search"
+                            className={cn(
+                                buttonVariants({
+                                    variant: "ghost",
+                                    size: "icon",
+                                }),
+                                "hidden sm:inline-flex",
+                            )}
+                        >
+                            <Search className="h-4 w-4" />
                         </Link>
 
-                        <Link href="/account/wishlist">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="hidden sm:inline-flex"
-                            >
-                                <Heart className="h-4 w-4" />
-                            </Button>
+                        <Link
+                            href="/account/wishlist"
+                            className={cn(
+                                buttonVariants({
+                                    variant: "ghost",
+                                    size: "icon",
+                                }),
+                                "hidden sm:inline-flex",
+                            )}
+                        >
+                            <Heart className="h-4 w-4" />
                         </Link>
 
-                        <Link href="/cart" className="relative">
-                            <Button variant="ghost" size="icon">
-                                <ShoppingBag className="h-4 w-4" />
-                                {cartCount > 0 && (
-                                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]">
-                                        {cartCount}
-                                    </Badge>
-                                )}
-                            </Button>
+                        <Link
+                            href="/cart"
+                            className={cn(
+                                buttonVariants({
+                                    variant: "ghost",
+                                    size: "icon",
+                                }),
+                                "relative",
+                            )}
+                        >
+                            <ShoppingBag className="h-4 w-4" />
+                            {cartCount > 0 && (
+                                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]">
+                                    {cartCount}
+                                </Badge>
+                            )}
                         </Link>
 
                         {user ? (
@@ -288,17 +302,20 @@ export default function Header() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
-                            <Link href="/login">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-2"
-                                >
-                                    <User className="h-4 w-4" />
-                                    <span className="hidden sm:inline">
-                                        Đăng nhập
-                                    </span>
-                                </Button>
+                            <Link
+                                href="/login"
+                                className={cn(
+                                    buttonVariants({
+                                        variant: "outline",
+                                        size: "sm",
+                                    }),
+                                    "gap-2",
+                                )}
+                            >
+                                <User className="h-4 w-4" />
+                                <span className="hidden sm:inline">
+                                    Đăng nhập
+                                </span>
                             </Link>
                         )}
                     </div>
