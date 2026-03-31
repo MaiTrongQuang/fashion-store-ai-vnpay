@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
@@ -30,6 +32,7 @@ import type { Profile } from "@/lib/types";
 export default function Header() {
     const pathname = usePathname();
     const [user, setUser] = useState<Profile | null>(null);
+    const [isLoadingUser, setIsLoadingUser] = useState(true);
     const [cartCount, setCartCount] = useState(0);
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -43,16 +46,22 @@ export default function Header() {
 
     useEffect(() => {
         async function getUser() {
-            const {
-                data: { user: authUser },
-            } = await supabase.auth.getUser();
-            if (authUser) {
-                const { data: profile } = await supabase
-                    .from("profiles")
-                    .select("*")
-                    .eq("id", authUser.id)
-                    .single();
-                setUser(profile);
+            try {
+                const {
+                    data: { user: authUser },
+                } = await supabase.auth.getUser();
+                if (authUser) {
+                    const { data: profile } = await supabase
+                        .from("profiles")
+                        .select("*")
+                        .eq("id", authUser.id)
+                        .single();
+                    setUser(profile);
+                }
+            } catch (error) {
+                console.error("Error fetching user session:", error);
+            } finally {
+                setIsLoadingUser(false);
             }
         }
         getUser();
@@ -71,6 +80,7 @@ export default function Header() {
                 } else if (event === "SIGNED_OUT") {
                     setUser(null);
                 }
+                setIsLoadingUser(false);
             },
         );
 
@@ -237,20 +247,36 @@ export default function Header() {
                             )}
                         </Link>
 
-                        {user ? (
+                        {isLoadingUser ? (
+                            <div className="flex items-center gap-2 px-2">
+                                <Skeleton className="h-8 w-8 rounded-full" />
+                                <Skeleton className="h-4 w-20 hidden sm:block" />
+                            </div>
+                        ) : user ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger
                                     render={
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="gap-2"
+                                            className="gap-2 px-2"
                                         >
-                                            <User className="h-4 w-4" />
-                                            <span className="hidden sm:inline text-sm">
+                                            <Avatar size="sm">
+                                                <AvatarImage
+                                                    src={user.avatar_url || ""}
+                                                />
+                                                <AvatarFallback className="bg-primary/10 text-primary uppercase">
+                                                    {user.full_name?.charAt(
+                                                        0,
+                                                    ) ||
+                                                        user.email?.charAt(0) ||
+                                                        "U"}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span className="hidden sm:inline text-sm font-medium">
                                                 {user.full_name || "Tài khoản"}
                                             </span>
-                                            <ChevronDown className="h-3 w-3" />
+                                            <ChevronDown className="h-3 w-3 text-muted-foreground" />
                                         </Button>
                                     }
                                 />
