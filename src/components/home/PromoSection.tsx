@@ -1,48 +1,65 @@
-import { Truck, Shield, RotateCcw, Headphones } from "lucide-react";
+"use client";
+
+import { Truck, Shield, RotateCcw, Cpu } from "lucide-react";
+import { GridPattern } from "@/components/ui/backgrounds";
+import { motion } from "framer-motion";
 
 const features = [
     {
+        icon: Cpu,
+        title: "AI Trợ Lý Cá Nhân",
+        description: "Gợi ý phối đồ chuẩn xác",
+    },
+    {
         icon: Truck,
-        title: "Giao Hàng Toàn Quốc",
-        description: "Miễn phí ship cho đơn từ 500K",
+        title: "Giao Hàng Nhanh",
+        description: "Thông tin đơn AI theo dõi",
     },
     {
         icon: Shield,
-        title: "Cam Kết Chính Hãng",
-        description: "100% sản phẩm chất lượng",
+        title: "Hàng Hiệu Cao Cấp",
+        description: "Công nghệ quét Auth 100%",
     },
     {
         icon: RotateCcw,
-        title: "Đổi Trả Dễ Dàng",
-        description: "Đổi trả trong 7 ngày",
-    },
-    {
-        icon: Headphones,
-        title: "Hỗ Trợ 24/7",
-        description: "Tư vấn nhiệt tình",
+        title: "Chính Sách Linh Hoạt",
+        description: "Đổi trả tức thì 7 ngày",
     },
 ];
 
 export default function PromoSection() {
     return (
-        <section className="py-12 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5">
-            <div className="container mx-auto px-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <section className="relative py-24 bg-primary/10 overflow-hidden">
+            {/* AI Pattern Layer */}
+            <GridPattern
+                width={20}
+                height={20}
+                x={-1}
+                y={-1}
+                className="absolute inset-0 h-full opacity-40 mask-[linear-gradient(to_bottom,white,transparent)] stroke-primary/30"
+            />
+
+            <div className="container relative mx-auto px-4 z-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
                     {features.map((feature, index) => (
-                        <div
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6, delay: index * 0.15 }}
                             key={index}
-                            className="flex flex-col items-center text-center space-y-3 group"
+                            className="relative flex flex-col items-center p-8 bg-background/50 hover:bg-background/80 backdrop-blur-xl border border-primary/20 rounded-3xl transition-all duration-500 shadow-xl group hover:-translate-y-2 hover:shadow-primary/20"
                         >
-                            <div className="w-14 h-14 rounded-2xl bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors duration-300">
-                                <feature.icon className="h-6 w-6 text-primary" />
+                            <div className="w-16 h-16 rounded-full bg-linear-to-tr from-primary to-primary/40 flex items-center justify-center mb-6 shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform duration-500">
+                                <feature.icon className="h-8 w-8 text-primary-foreground" />
                             </div>
-                            <h3 className="font-semibold text-sm md:text-base">
+                            <h3 className="text-xl font-bold text-foreground mb-2 text-center">
                                 {feature.title}
                             </h3>
-                            <p className="text-xs md:text-sm text-muted-foreground">
+                            <p className="text-sm text-foreground/70 text-center font-medium">
                                 {feature.description}
                             </p>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </div>

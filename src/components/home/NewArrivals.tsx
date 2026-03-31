@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Zap } from "lucide-react";
 import ProductCard from "@/components/product/ProductCard";
 import type { Product } from "@/lib/types";
+import { GridPattern } from "@/components/ui/backgrounds";
+import { motion } from "framer-motion";
 
 interface NewArrivalsProps {
     products: Product[];
@@ -11,29 +15,64 @@ export default function NewArrivals({ products }: NewArrivalsProps) {
     if (products.length === 0) return null;
 
     return (
-        <section className="py-16 md:py-20">
-            <div className="container mx-auto px-4">
-                <div className="flex items-end justify-between mb-8">
-                    <div>
-                        <p className="text-sm font-medium text-emerald-600 uppercase tracking-widest mb-2">
-                            Vừa Ra Mắt
-                        </p>
-                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+        <section className="relative py-24 bg-background overflow-hidden">
+            {/* Background pattern */}
+            <div className="absolute inset-0 bg-background/5" />
+            <GridPattern
+                width={40}
+                height={40}
+                x={-1}
+                y={-1}
+                className="absolute inset-0 opacity-20 stroke-primary/30 mask-[linear-gradient(to_bottom,white,transparent)]"
+            />
+
+            <div className="container relative mx-auto px-4 z-10">
+                <div className="flex flex-col md:flex-row items-start justify-between mb-12 gap-6">
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                    >
+                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-primary uppercase tracking-widest mb-3 border border-primary/20 rounded-full px-4 py-1.5 bg-background shadow-sm">
+                            <Zap className="w-4 h-4" />
+                            <span>Vừa cập nhật AI</span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
                             Hàng Mới Về
                         </h2>
-                    </div>
-                    <Link
-                        href="/products?new=true"
-                        className="text-sm font-medium text-primary hover:underline flex items-center gap-1 group"
+                        <p className="mt-3 text-muted-foreground text-lg max-w-xl">
+                            Khám phá các bộ sưu tập mới nhất vừa được hệ thống
+                            AI xử lý và đưa lên kệ.
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        className="self-end md:self-auto mt-4 md:mt-0"
                     >
-                        Xem tất cả
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </Link>
+                        <Link
+                            href="/products?new=true"
+                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full hover:bg-primary/5 transition-all outline outline-border hover:outline-primary/50"
+                        >
+                            <span className="font-semibold">Xem Tất Cả</span>
+                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        </Link>
+                    </motion.div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                    {products.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
+                    {products.map((product, index) => (
+                        <motion.div
+                            key={product.id}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                        >
+                            <ProductCard product={product} />
+                        </motion.div>
                     ))}
                 </div>
             </div>
