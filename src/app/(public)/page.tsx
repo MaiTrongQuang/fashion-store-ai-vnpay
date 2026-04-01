@@ -4,6 +4,10 @@ import FeaturedProducts from "@/components/home/FeaturedProducts";
 import CategoryGrid from "@/components/home/CategoryGrid";
 import NewArrivals from "@/components/home/NewArrivals";
 import PromoSection from "@/components/home/PromoSection";
+import FlashSale from "@/components/home/FlashSale";
+import BestSellers from "@/components/home/BestSellers";
+import BrandShowcase from "@/components/home/BrandShowcase";
+import Newsletter from "@/components/home/Newsletter";
 import type { Metadata } from "next";
 import { SITE_NAME } from "@/lib/constants";
 
@@ -16,7 +20,15 @@ export const metadata: Metadata = {
 export default async function HomePage() {
     const supabase = await createClient();
 
-    const [bannersRes, featuredRes, newRes, categoriesRes] = await Promise.all([
+    const [
+        bannersRes,
+        featuredRes,
+        newRes,
+        categoriesRes,
+        saleRes,
+        bestRes,
+        brandsRes,
+    ] = await Promise.all([
         supabase
             .from("banners")
             .select("*")
@@ -46,15 +58,40 @@ export default async function HomePage() {
             .eq("is_active", true)
             .is("parent_id", null)
             .order("sort_order"),
+        // Sale products: có sale_price
+        supabase
+            .from("products")
+            .select(
+                "*, category:categories(*), brand:brands(*), images:product_images(*)",
+            )
+            .eq("is_active", true)
+            .not("sale_price", "is", null)
+            .order("created_at", { ascending: false })
+            .limit(8),
+        // Best sellers: lấy theo updated_at (giả lập popular)
+        supabase
+            .from("products")
+            .select(
+                "*, category:categories(*), brand:brands(*), images:product_images(*)",
+            )
+            .eq("is_active", true)
+            .order("updated_at", { ascending: false })
+            .limit(8),
+        // Brands
+        supabase.from("brands").select("*").eq("is_active", true).order("name"),
     ]);
 
     return (
         <div className="flex flex-col">
             <HeroBanner banners={bannersRes.data || []} />
             <CategoryGrid categories={categoriesRes.data || []} />
+            <FlashSale products={saleRes.data || []} />
             <FeaturedProducts products={featuredRes.data || []} />
             <PromoSection />
+            <BestSellers products={bestRes.data || []} />
             <NewArrivals products={newRes.data || []} />
+            <BrandShowcase brands={brandsRes.data || []} />
+            <Newsletter />
         </div>
     );
 }

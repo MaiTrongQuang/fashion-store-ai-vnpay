@@ -19,6 +19,29 @@ const CATEGORY_IMAGES: Record<string, string> = {
         "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=600",
 };
 
+const PLACEHOLDER_CATEGORIES = [
+    {
+        name: "Áo",
+        slug: "ao",
+        image: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=600",
+    },
+    {
+        name: "Quần",
+        slug: "quan",
+        image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600",
+    },
+    {
+        name: "Đầm & Váy",
+        slug: "dam-vay",
+        image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600",
+    },
+    {
+        name: "Phụ Kiện",
+        slug: "phu-kien",
+        image: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=600",
+    },
+];
+
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -39,11 +62,13 @@ const itemVariants: Variants = {
 };
 
 export default function CategoryGrid({ categories }: CategoryGridProps) {
-    if (categories.length === 0) return null;
+    const hasCategories = categories.length > 0;
+    const displayCategories = hasCategories
+        ? categories.slice(0, 4)
+        : PLACEHOLDER_CATEGORIES;
 
     return (
         <section className="relative py-20 overflow-hidden bg-background">
-            {/* Background Grid for AI context */}
             <div className="absolute inset-0 bg-background/5" />
             <GridPattern
                 width={32}
@@ -80,51 +105,65 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                     viewport={{ once: true, margin: "-100px" }}
                     className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
                 >
-                    {categories.slice(0, 4).map((category) => (
-                        <motion.div key={category.id} variants={itemVariants}>
-                            <Link
-                                href={`/collections/${category.slug}`}
-                                className="group relative block aspect-4/5 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-primary/10"
-                            >
-                                <Image
-                                    src={
-                                        category.image_url ||
-                                        CATEGORY_IMAGES[category.slug] ||
-                                        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600"
-                                    }
-                                    alt={category.name}
-                                    fill
-                                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                                />
-                                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
+                    {displayCategories.map((category) => {
+                        const imageUrl =
+                            "image_url" in category
+                                ? (category as Category).image_url ||
+                                  CATEGORY_IMAGES[category.slug] ||
+                                  "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600"
+                                : (
+                                      category as (typeof PLACEHOLDER_CATEGORIES)[0]
+                                  ).image;
+                        const href = hasCategories
+                            ? `/collections/${category.slug}`
+                            : `/collections/${category.slug}`;
+                        const key =
+                            "id" in category
+                                ? (category as Category).id
+                                : category.slug;
 
-                                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mb-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-75 group-hover:scale-100">
-                                        <svg
-                                            className="w-5 h-5 text-white"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M14 5l7 7m0 0l-7 7m7-7H3"
-                                            />
-                                        </svg>
+                        return (
+                            <motion.div key={key} variants={itemVariants}>
+                                <Link
+                                    href={href}
+                                    className="group relative block aspect-4/5 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-primary/10"
+                                >
+                                    <Image
+                                        src={imageUrl}
+                                        alt={category.name}
+                                        fill
+                                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                                    />
+                                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
+
+                                    <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mb-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-75 group-hover:scale-100">
+                                            <svg
+                                                className="w-5 h-5 text-white"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-white mb-1">
+                                            {category.name}
+                                        </h3>
+                                        <p className="text-sm text-white/70">
+                                            Định hình phong cách
+                                        </p>
                                     </div>
-                                    <h3 className="text-2xl font-bold text-white mb-1">
-                                        {category.name}
-                                    </h3>
-                                    <p className="text-sm text-white/70">
-                                        Định hình phong cách
-                                    </p>
-                                </div>
-                            </Link>
-                        </motion.div>
-                    ))}
+                                </Link>
+                            </motion.div>
+                        );
+                    })}
                 </motion.div>
             </div>
         </section>

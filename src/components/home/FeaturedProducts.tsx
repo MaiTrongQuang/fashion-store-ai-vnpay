@@ -11,12 +11,27 @@ interface FeaturedProductsProps {
     products: Product[];
 }
 
+function ProductSkeleton() {
+    return (
+        <div className="rounded-xl border border-border/50 overflow-hidden bg-card animate-pulse">
+            <div className="aspect-3/4 bg-muted" />
+            <div className="p-4 space-y-3">
+                <div className="h-3 bg-muted rounded-full w-1/3" />
+                <div className="h-4 bg-muted rounded-full w-3/4" />
+                <div className="flex gap-2">
+                    <div className="h-5 bg-muted rounded-full w-1/3" />
+                    <div className="h-5 bg-muted rounded-full w-1/4" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function FeaturedProducts({ products }: FeaturedProductsProps) {
-    if (products.length === 0) return null;
+    const hasProducts = products.length > 0;
 
     return (
         <section className="relative py-24 overflow-hidden bg-background">
-            {/* Ambient Background with Dots */}
             <DotPattern
                 width={20}
                 height={20}
@@ -65,17 +80,32 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
-                    {products.map((product, index) => (
-                        <motion.div
-                            key={product.id}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true, margin: "-100px" }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
-                        >
-                            <ProductCard product={product} />
-                        </motion.div>
-                    ))}
+                    {hasProducts
+                        ? products.map((product, index) => (
+                              <motion.div
+                                  key={product.id}
+                                  initial={{ opacity: 0, scale: 0.95 }}
+                                  whileInView={{ opacity: 1, scale: 1 }}
+                                  viewport={{ once: true, margin: "-100px" }}
+                                  transition={{
+                                      duration: 0.5,
+                                      delay: index * 0.1,
+                                  }}
+                              >
+                                  <ProductCard product={product} />
+                              </motion.div>
+                          ))
+                        : Array.from({ length: 4 }).map((_, i) => (
+                              <motion.div
+                                  key={`skeleton-${i}`}
+                                  initial={{ opacity: 0, scale: 0.95 }}
+                                  whileInView={{ opacity: 1, scale: 1 }}
+                                  viewport={{ once: true }}
+                                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                              >
+                                  <ProductSkeleton />
+                              </motion.div>
+                          ))}
                 </div>
             </div>
         </section>
