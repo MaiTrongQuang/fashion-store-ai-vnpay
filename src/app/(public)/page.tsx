@@ -20,66 +20,57 @@ export const metadata: Metadata = {
 export default async function HomePage() {
     const supabase = await createClient();
 
-    const [
-        bannersRes,
-        featuredRes,
-        newRes,
-        categoriesRes,
-        saleRes,
-        bestRes,
-        brandsRes,
-    ] = await Promise.all([
-        supabase
-            .from("banners")
-            .select("*")
-            .eq("is_active", true)
-            .order("sort_order"),
-        supabase
-            .from("products")
-            .select(
-                "*, category:categories(*), brand:brands(*), images:product_images(*)",
-            )
-            .eq("is_active", true)
-            .eq("is_featured", true)
-            .order("created_at", { ascending: false })
-            .limit(8),
-        supabase
-            .from("products")
-            .select(
-                "*, category:categories(*), brand:brands(*), images:product_images(*)",
-            )
-            .eq("is_active", true)
-            .eq("is_new", true)
-            .order("created_at", { ascending: false })
-            .limit(8),
-        supabase
-            .from("categories")
-            .select("*")
-            .eq("is_active", true)
-            .is("parent_id", null)
-            .order("sort_order"),
-        // Sale products: có sale_price
-        supabase
-            .from("products")
-            .select(
-                "*, category:categories(*), brand:brands(*), images:product_images(*)",
-            )
-            .eq("is_active", true)
-            .not("sale_price", "is", null)
-            .order("created_at", { ascending: false })
-            .limit(8),
-        // Best sellers: lấy theo updated_at (giả lập popular)
-        supabase
-            .from("products")
-            .select(
-                "*, category:categories(*), brand:brands(*), images:product_images(*)",
-            )
-            .eq("is_active", true)
-            .order("updated_at", { ascending: false })
-            .limit(8),
-        // Brands
-        supabase.from("brands").select("*").eq("is_active", true).order("name"),
-    ]);
+    const [bannersRes, featuredRes, newRes, categoriesRes, saleRes, bestRes] =
+        await Promise.all([
+            supabase
+                .from("banners")
+                .select("*")
+                .eq("is_active", true)
+                .order("sort_order"),
+            supabase
+                .from("products")
+                .select(
+                    "*, category:categories(*), brand:brands(*), images:product_images(*)",
+                )
+                .eq("is_active", true)
+                .eq("is_featured", true)
+                .order("created_at", { ascending: false })
+                .limit(8),
+            supabase
+                .from("products")
+                .select(
+                    "*, category:categories(*), brand:brands(*), images:product_images(*)",
+                )
+                .eq("is_active", true)
+                .eq("is_new", true)
+                .order("created_at", { ascending: false })
+                .limit(8),
+            supabase
+                .from("categories")
+                .select("*")
+                .eq("is_active", true)
+                .is("parent_id", null)
+                .order("sort_order"),
+            // Sale products: có sale_price
+            supabase
+                .from("products")
+                .select(
+                    "*, category:categories(*), brand:brands(*), images:product_images(*)",
+                )
+                .eq("is_active", true)
+                .not("sale_price", "is", null)
+                .order("created_at", { ascending: false })
+                .limit(8),
+            // Best sellers: lấy theo updated_at (giả lập popular)
+            supabase
+                .from("products")
+                .select(
+                    "*, category:categories(*), brand:brands(*), images:product_images(*)",
+                )
+                .eq("is_active", true)
+                .order("updated_at", { ascending: false })
+                .limit(8),
+        ]);
 
     return (
         <div className="flex flex-col">
@@ -90,7 +81,7 @@ export default async function HomePage() {
             <PromoSection />
             <BestSellers products={bestRes.data || []} />
             <NewArrivals products={newRes.data || []} />
-            <BrandShowcase brands={brandsRes.data || []} />
+            <BrandShowcase />
             <Newsletter />
         </div>
     );
