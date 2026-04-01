@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -13,7 +13,40 @@ import {
     Scissors,
     Glasses,
     Watch,
+    CreditCard,
+    QrCode,
+    Wallet,
+    Gem,
+    Banknote,
+    SmartphoneNfc,
 } from "lucide-react";
+
+const TRAIL_ICONS = [
+    Shirt,
+    ShoppingBag,
+    Wand2,
+    Scissors,
+    Glasses,
+    Watch,
+    CreditCard,
+    QrCode,
+    Wallet,
+    Gem,
+    Sparkles,
+    Banknote,
+    SmartphoneNfc,
+];
+
+type Particle = {
+    id: number;
+    x: number;
+    y: number;
+    driftX: number;
+    fallY: number;
+    rotate: number;
+    Icon: React.ElementType;
+};
+
 import { Button } from "@/components/ui/button";
 import type { Banner } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
@@ -138,17 +171,79 @@ function FloatingIconsOverlay({
     );
 }
 
+function CursorTrailOverlay({ particles }: { particles: Particle[] }) {
+    return (
+        <div className="absolute inset-0 z-40 pointer-events-none overflow-hidden">
+            <AnimatePresence>
+                {particles.map((p) => {
+                    const Icon = p.Icon;
+                    return (
+                        <motion.div
+                            key={p.id}
+                            initial={{
+                                opacity: 0.8,
+                                scale: 0.2,
+                                x: p.x,
+                                y: p.y,
+                                rotate: 0,
+                            }}
+                            animate={{
+                                opacity: 0,
+                                scale: 1.5,
+                                x: p.x + p.driftX,
+                                y: p.y + p.fallY,
+                                rotate: p.rotate,
+                            }}
+                            transition={{ duration: 1.2, ease: "easeOut" }}
+                            className="absolute text-primary filter drop-shadow-[0_0_8px_rgba(var(--primary),0.8)]"
+                            style={{ left: -12, top: -12 }}
+                        >
+                            <Icon size={24} strokeWidth={1.5} />
+                        </motion.div>
+                    );
+                })}
+            </AnimatePresence>
+        </div>
+    );
+}
+
 export default function HeroBanner({ banners }: HeroBannerProps) {
     const [current, setCurrent] = useState(0);
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [isHovered, setIsHovered] = useState(false);
+    const [particles, setParticles] = useState<Particle[]>([]);
+    const particleIdCounter = useRef(0);
+    const lastParticleTime = useRef(0);
 
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
         setMousePos({
-            x: e.clientX - rect.left - rect.width / 2,
-            y: e.clientY - rect.top - rect.height / 2,
+            x: x - rect.width / 2,
+            y: y - rect.height / 2,
         });
+
+        const now = Date.now();
+        if (now - lastParticleTime.current > 50) {
+            lastParticleTime.current = now;
+            const id = particleIdCounter.current++;
+            const Icon =
+                TRAIL_ICONS[Math.floor(Math.random() * TRAIL_ICONS.length)];
+            const driftX = (Math.random() - 0.5) * 150;
+            const fallY = 100 + Math.random() * 200;
+            const rotate = (Math.random() - 0.5) * 360;
+
+            setParticles((prev) => [
+                ...prev.slice(-25),
+                { id, x, y, driftX, fallY, rotate, Icon },
+            ]);
+
+            setTimeout(() => {
+                setParticles((prev) => prev.filter((p) => p.id !== id));
+            }, 1200);
+        }
     }, []);
 
     const next = useCallback(() => {
@@ -181,6 +276,7 @@ export default function HeroBanner({ banners }: HeroBannerProps) {
                     mousePos={mousePos}
                     isHovered={isHovered}
                 />
+                <CursorTrailOverlay particles={particles} />
                 <DotPattern className="absolute inset-0 opacity-50" />
                 <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-background" />
 
@@ -229,6 +325,7 @@ export default function HeroBanner({ banners }: HeroBannerProps) {
             }}
         >
             <FloatingIconsOverlay mousePos={mousePos} isHovered={isHovered} />
+            <CursorTrailOverlay particles={particles} />
             <AnimatePresence mode="sync">
                 {banners.map(
                     (banner, index) =>
