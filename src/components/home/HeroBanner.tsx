@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import type { Banner } from "@/lib/types";
 import { motion } from "framer-motion";
 import { DotPattern } from "@/components/ui/backgrounds";
+import { cn } from "@/lib/utils";
 
 // ── Icon pool ───────────────────────────────────────────────────────────
 const RAIN_ICONS = [
@@ -61,6 +62,8 @@ type RainParticle = {
     rotate: number; // end rotation
     iconIndex: number; // index into RAIN_ICONS
     opacity: number; // starting opacity
+    /** Trail theo chuột: spawn dưới con trỏ + animation chậm/mượt hơn */
+    cursorTrail?: boolean;
 };
 
 interface HeroBannerProps {
@@ -117,7 +120,10 @@ const RainParticleElement = memo(function RainParticleElement({
 
     return (
         <div
-            className="hero-rain-particle absolute text-primary"
+            className={cn(
+                "hero-rain-particle absolute text-primary",
+                particle.cursorTrail && "hero-rain-particle--cursor",
+            )}
             style={
                 {
                     left: particle.leftValue,
@@ -175,17 +181,30 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
         const id = particleIdRef.current++;
         const iconIndex = Math.floor(Math.random() * RAIN_ICONS.length);
 
-        const isMouse = x !== undefined && y !== undefined;
-        // Bắt đầu rơi từ trên cùng (top: -40px) tại toạ độ X của chuột
+        const isMouse =
+            typeof x === "number" &&
+            typeof y === "number";
+        // Chuột: bắt đầu ngay dưới con trỏ (cùng cột X) — trail rơi chậm xuống dưới
         const leftValue = isMouse ? `${x}px` : `${Math.random() * 100}%`;
-        const topValue = `-40px`;
+        const topValue = isMouse
+            ? `${y + 8 + Math.random() * 14}px`
+            : `-40px`;
 
-        const size = 18 + Math.random() * 14; // 18-32px
-        const duration = 2.5 + Math.random() * 3.5; // 2.5-6s fall time
-        const driftX = (Math.random() - 0.5) * 60; // narrower spread when falling
-        const rotate = (Math.random() - 0.5) * 180;
+        const size = isMouse
+            ? 20 + Math.random() * 10
+            : 18 + Math.random() * 14;
+        // Trail chuột: chậm hơn rõ rệt; mưa nền: vừa phải
+        const duration = isMouse
+            ? 6.5 + Math.random() * 4.5
+            : 3.2 + Math.random() * 2.8;
+        const driftX = isMouse
+            ? (Math.random() - 0.5) * 18
+            : (Math.random() - 0.5) * 60;
+        const rotate = isMouse
+            ? (Math.random() - 0.5) * 70
+            : (Math.random() - 0.5) * 180;
         const opacity = isMouse
-            ? 0.3 + Math.random() * 0.4
+            ? 0.38 + Math.random() * 0.22
             : 0.15 + Math.random() * 0.35;
 
         setRainParticles((prev) => {
@@ -203,6 +222,7 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
                     rotate,
                     iconIndex,
                     opacity,
+                    cursorTrail: isMouse,
                 },
             ];
         });
@@ -216,7 +236,7 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
         }
 
         // Then keep spawning background rain at a steady rate
-        spawnIntervalRef.current = setInterval(() => spawnParticle(), 800);
+        spawnIntervalRef.current = setInterval(() => spawnParticle(), 1000);
 
         return () => {
             if (spawnIntervalRef.current)
@@ -248,8 +268,8 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
             );
 
             // Spawn a new particle from mouse if moved enough, or if some time has passed
-            // This creates a nice continuous dropping trail
-            if (dist > 40 || now - lastSpawnTime.current > 150) {
+            // Trail chậm: spawn thưa hơn để không chồng đống
+            if (dist > 24 || now - lastSpawnTime.current > 130) {
                 lastSpawnPos.current = { x: rawX, y: rawY };
                 lastSpawnTime.current = now;
                 spawnParticle(rawX, rawY);

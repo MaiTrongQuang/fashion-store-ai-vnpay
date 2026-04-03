@@ -305,3 +305,37 @@
     pointer-events: none;
     filter: drop-shadow(0 0 4px oklch(0.5 0.1 270 / 0.3));
 }
+
+/* Trail dưới con trỏ: rơi mượt, easing dài, xoay nhẹ */
+@keyframes hero-rain-fall-cursor {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(0.88) rotate(0deg);
+    }
+    6% {
+        opacity: var(--rain-opacity, 0.45);
+        transform: translate3d(calc(var(--rain-drift) * 0.06), 3vh, 0)
+            scale(1) rotate(calc(var(--rain-rotate) * 0.06));
+    }
+    32% {
+        opacity: calc(var(--rain-opacity, 0.45) * 0.95);
+        transform: translate3d(calc(var(--rain-drift) * 0.32), 26vh, 0)
+            scale(1) rotate(calc(var(--rain-rotate) * 0.32));
+    }
+    62% {
+        opacity: calc(var(--rain-opacity, 0.45) * 0.72);
+        transform: translate3d(calc(var(--rain-drift) * 0.62), 52vh, 0)
+            scale(0.97) rotate(calc(var(--rain-rotate) * 0.62));
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--rain-drift), 78vh, 0) scale(0.9)
+            rotate(var(--rain-rotate));
+    }
+}
+
+.hero-rain-particle--cursor {
+    animation: hero-rain-fall-cursor var(--rain-duration, 8s)
+        cubic-bezier(0.22, 0.61, 0.36, 1) var(--rain-delay, 0s) forwards;
+    filter: drop-shadow(0 2px 14px oklch(0.5 0.08 270 / 0.28));
+}
