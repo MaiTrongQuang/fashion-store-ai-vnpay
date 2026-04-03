@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CreditCard, Truck, Tag, Plus } from "lucide-react";
+import {
+    CheckCircle2,
+    CreditCard,
+    MapPin,
+    Plus,
+    Tag,
+    Truck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +41,50 @@ const addressSchema = z.object({
     ward: z.string().min(1, "Vui lòng nhập phường/xã"),
     street: z.string().min(1, "Vui lòng nhập địa chỉ cụ thể"),
 });
+
+function toastAddressSaved(addr: Address) {
+    const fullLine = `${addr.street}, ${addr.ward}, ${addr.district}, ${addr.province}`;
+    toast.custom(
+        () => (
+            <div
+                role="status"
+                aria-live="polite"
+                className="flex w-[min(100vw-2rem,22rem)] gap-3 rounded-xl border border-border/90 bg-card p-4 text-left text-card-foreground shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+            >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/15">
+                    <MapPin className="h-5 w-5 text-primary" aria-hidden />
+                </div>
+                <div className="min-w-0 flex-1 pt-0.5">
+                    <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-semibold leading-snug tracking-tight text-foreground">
+                            Đã lưu địa chỉ giao hàng
+                        </p>
+                        <CheckCircle2
+                            className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                            aria-hidden
+                        />
+                    </div>
+                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground line-clamp-2">
+                        {fullLine}
+                    </p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">
+                            {addr.full_name}
+                        </span>
+                        <span className="text-muted-foreground/60"> · </span>
+                        <span className="tabular-nums">{addr.phone}</span>
+                    </p>
+                    <p className="mt-2 text-[11px] leading-tight text-muted-foreground">
+                        {addr.is_default
+                            ? "Đặt làm địa chỉ mặc định — đã chọn cho đơn này."
+                            : "Đã chọn làm địa chỉ giao hàng cho đơn hiện tại."}
+                    </p>
+                </div>
+            </div>
+        ),
+        { duration: 5200 },
+    );
+}
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -129,7 +180,7 @@ export default function CheckoutPage() {
             setSelectedAddress(addr.id);
             setAddingAddress(false);
             form.reset();
-            toast.success("Đã thêm địa chỉ mới");
+            toastAddressSaved(addr);
         }
     };
 
