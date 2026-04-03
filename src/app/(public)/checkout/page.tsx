@@ -2,9 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
     CheckCircle2,
     CreditCard,
@@ -20,27 +17,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+import { AddAddressDialog } from "@/components/address/AddAddressDialog";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
 import { DEFAULT_SHIPPING_FEE } from "@/lib/constants";
 import { toast } from "sonner";
 import type { Address } from "@/lib/types";
-
-const addressSchema = z.object({
-    full_name: z.string().min(2, "Họ tên tối thiểu 2 ký tự"),
-    phone: z.string().min(10, "SĐT tối thiểu 10 số"),
-    province: z.string().min(1, "Vui lòng nhập tỉnh/thành"),
-    district: z.string().min(1, "Vui lòng nhập quận/huyện"),
-    ward: z.string().min(1, "Vui lòng nhập phường/xã"),
-    street: z.string().min(1, "Vui lòng nhập địa chỉ cụ thể"),
-});
 
 function toastAddressSaved(addr: Address) {
     const fullLine = `${addr.street}, ${addr.ward}, ${addr.district}, ${addr.province}`;
@@ -98,18 +80,6 @@ export default function CheckoutPage() {
     const [addingAddress, setAddingAddress] = useState(false);
     const supabase = createClient();
 
-    const form = useForm({
-        resolver: zodResolver(addressSchema),
-        defaultValues: {
-            full_name: "",
-            phone: "",
-            province: "",
-            district: "",
-            ward: "",
-            street: "",
-        },
-    });
-
     const loadData = useCallback(async () => {
         const {
             data: { user },
@@ -158,31 +128,6 @@ export default function CheckoutPage() {
 
     const shippingFee = subtotal >= 500000 ? 0 : DEFAULT_SHIPPING_FEE;
     const total = subtotal + shippingFee;
-
-    const handleAddAddress = async (data: z.infer<typeof addressSchema>) => {
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { data: addr } = await supabase
-            .from("addresses")
-            .insert({
-                user_id: user.id,
-                ...data,
-                is_default: addresses.length === 0,
-            })
-            .select()
-            .single();
-
-        if (addr) {
-            setAddresses([...addresses, addr]);
-            setSelectedAddress(addr.id);
-            setAddingAddress(false);
-            form.reset();
-            toastAddressSaved(addr);
-        }
-    };
 
     const handleCheckout = async () => {
         if (!selectedAddress) {
@@ -281,89 +226,27 @@ export default function CheckoutPage() {
                                 </p>
                             )}
 
-                            <Dialog
+                            <AddAddressDialog
                                 open={addingAddress}
                                 onOpenChange={setAddingAddress}
-                            >
-                                <DialogTrigger
-                                    render={
-                                        <Button
-                                            variant="outline"
-                                            className="mt-4 w-full"
-                                            size="sm"
-                                        >
-                                            <Plus className="h-4 w-4 mr-2" />
-                                            Thêm địa chỉ mới
-                                        </Button>
-                                    }
-                                />
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>
-                                            Thêm Địa Chỉ Mới
-                                        </DialogTitle>
-                                    </DialogHeader>
-                                    <form
-                                        onSubmit={form.handleSubmit(
-                                            handleAddAddress,
-                                        )}
-                                        className="space-y-4"
+                                isFirstAddress={addresses.length === 0}
+                                onSuccess={(addr) => {
+                                    setAddresses((prev) => [...prev, addr]);
+                                    setSelectedAddress(addr.id);
+                                    toastAddressSaved(addr);
+                                }}
+                                description="Địa chỉ sẽ được dùng cho đơn hàng này và lưu vào sổ địa chỉ của bạn."
+                                trigger={
+                                    <Button
+                                        variant="outline"
+                                        className="mt-4 w-full cursor-pointer"
+                                        size="sm"
                                     >
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <Label>Họ tên</Label>
-                                                <Input
-                                                    {...form.register(
-                                                        "full_name",
-                                                    )}
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Số điện thoại</Label>
-                                                <Input
-                                                    {...form.register("phone")}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-3 gap-4">
-                                            <div>
-                                                <Label>Tỉnh/Thành</Label>
-                                                <Input
-                                                    {...form.register(
-                                                        "province",
-                                                    )}
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Quận/Huyện</Label>
-                                                <Input
-                                                    {...form.register(
-                                                        "district",
-                                                    )}
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Phường/Xã</Label>
-                                                <Input
-                                                    {...form.register("ward")}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <Label>Địa chỉ cụ thể</Label>
-                                            <Input
-                                                {...form.register("street")}
-                                            />
-                                        </div>
-                                        <Button
-                                            type="submit"
-                                            className="w-full"
-                                        >
-                                            Lưu địa chỉ
-                                        </Button>
-                                    </form>
-                                </DialogContent>
-                            </Dialog>
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Thêm địa chỉ mới
+                                    </Button>
+                                }
+                            />
                         </CardContent>
                     </Card>
 

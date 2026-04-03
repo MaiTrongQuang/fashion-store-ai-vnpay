@@ -1,9 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
     CheckCircle2,
     MapPin,
@@ -12,53 +9,18 @@ import {
     Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
+import { AddAddressDialog } from "@/components/address/AddAddressDialog";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import type { Address } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const addressSchema = z.object({
-    full_name: z.string().min(2, "Họ tên tối thiểu 2 ký tự"),
-    phone: z.string().min(10, "SĐT tối thiểu 10 số"),
-    province: z.string().min(1, "Vui lòng nhập tỉnh/thành"),
-    district: z.string().min(1, "Vui lòng nhập quận/huyện"),
-    ward: z.string().min(1, "Vui lòng nhập phường/xã"),
-    street: z.string().min(1, "Vui lòng nhập địa chỉ cụ thể"),
-});
-
-type AddressForm = z.infer<typeof addressSchema>;
-
 export default function AddressesPage() {
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
-    const [saving, setSaving] = useState(false);
     const supabase = createClient();
-
-    const form = useForm<AddressForm>({
-        resolver: zodResolver(addressSchema),
-        defaultValues: {
-            full_name: "",
-            phone: "",
-            province: "",
-            district: "",
-            ward: "",
-            street: "",
-        },
-    });
 
     useEffect(() => {
         let cancelled = false;
@@ -85,32 +47,6 @@ export default function AddressesPage() {
             cancelled = true;
         };
     }, [supabase]);
-
-    const handleAdd = async (data: AddressForm) => {
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) return;
-        setSaving(true);
-        const { data: addr, error } = await supabase
-            .from("addresses")
-            .insert({
-                user_id: user.id,
-                ...data,
-                is_default: addresses.length === 0,
-            })
-            .select()
-            .single();
-        setSaving(false);
-        if (error || !addr) {
-            toast.error("Không thể thêm địa chỉ");
-            return;
-        }
-        setAddresses((prev) => [...prev, addr]);
-        setOpen(false);
-        form.reset();
-        toast.success("Đã thêm địa chỉ");
-    };
 
     const setDefault = async (id: string) => {
         const {
@@ -169,247 +105,21 @@ export default function AddressesPage() {
                 <h2 className="text-base font-semibold text-foreground">
                     Danh sách địa chỉ
                 </h2>
-                <Dialog
+                <AddAddressDialog
                     open={open}
-                    onOpenChange={(next) => {
-                        setOpen(next);
-                        if (!next) {
-                            form.reset();
-                        }
+                    onOpenChange={setOpen}
+                    isFirstAddress={addresses.length === 0}
+                    onSuccess={(addr) => {
+                        setAddresses((prev) => [...prev, addr]);
+                        toast.success("Đã thêm địa chỉ");
                     }}
-                >
-                    <DialogTrigger
-                        render={
-                            <Button
-                                className="min-h-11 w-full cursor-pointer gap-2 sm:w-auto"
-                            >
-                                <Plus className="h-4 w-4" />
-                                Thêm địa chỉ
-                            </Button>
-                        }
-                    />
-                    <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
-                        <div className="border-b border-border/50 bg-muted/30 px-6 py-5">
-                            <DialogHeader className="gap-4 sm:flex-row sm:items-start sm:text-left">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                                    <MapPin className="h-6 w-6" aria-hidden />
-                                </div>
-                                <div className="min-w-0 space-y-1.5">
-                                    <DialogTitle className="text-lg font-semibold tracking-tight">
-                                        Thêm địa chỉ mới
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                        Nhập thông tin người nhận và địa chỉ
-                                        đầy đủ — dùng khi thanh toán và giao
-                                        hàng.
-                                    </DialogDescription>
-                                </div>
-                            </DialogHeader>
-                        </div>
-
-                        <form
-                            onSubmit={form.handleSubmit(handleAdd)}
-                            className="flex flex-col"
-                        >
-                            <div className="max-h-[min(60vh,480px)] space-y-6 overflow-y-auto px-6 py-5">
-                                <fieldset className="space-y-4">
-                                    <legend className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                        Người nhận
-                                    </legend>
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="addr-name">
-                                                Họ và tên
-                                            </Label>
-                                            <Input
-                                                id="addr-name"
-                                                autoComplete="name"
-                                                aria-invalid={
-                                                    !!form.formState.errors
-                                                        .full_name
-                                                }
-                                                className="min-h-11 bg-background"
-                                                {...form.register("full_name")}
-                                            />
-                                            {form.formState.errors
-                                                .full_name && (
-                                                <p
-                                                    className="text-xs text-destructive"
-                                                    role="alert"
-                                                >
-                                                    {
-                                                        form.formState.errors
-                                                            .full_name.message
-                                                    }
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="addr-phone">
-                                                Số điện thoại
-                                            </Label>
-                                            <Input
-                                                id="addr-phone"
-                                                type="tel"
-                                                inputMode="tel"
-                                                autoComplete="tel"
-                                                aria-invalid={
-                                                    !!form.formState.errors.phone
-                                                }
-                                                className="min-h-11 bg-background"
-                                                {...form.register("phone")}
-                                            />
-                                            {form.formState.errors.phone && (
-                                                <p
-                                                    className="text-xs text-destructive"
-                                                    role="alert"
-                                                >
-                                                    {
-                                                        form.formState.errors
-                                                            .phone.message
-                                                    }
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </fieldset>
-
-                                <Separator className="bg-border/60" />
-
-                                <fieldset className="space-y-4">
-                                    <legend className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                        Địa chỉ
-                                    </legend>
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                        <div className="space-y-2 sm:col-span-1">
-                                            <Label htmlFor="province">
-                                                Tỉnh / Thành phố
-                                            </Label>
-                                            <Input
-                                                id="province"
-                                                autoComplete="address-level1"
-                                                aria-invalid={
-                                                    !!form.formState.errors
-                                                        .province
-                                                }
-                                                className="min-h-11 bg-background"
-                                                {...form.register("province")}
-                                            />
-                                            {form.formState.errors
-                                                .province && (
-                                                <p
-                                                    className="text-xs text-destructive"
-                                                    role="alert"
-                                                >
-                                                    {
-                                                        form.formState.errors
-                                                            .province.message
-                                                    }
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="district">
-                                                Quận / Huyện
-                                            </Label>
-                                            <Input
-                                                id="district"
-                                                autoComplete="address-level2"
-                                                aria-invalid={
-                                                    !!form.formState.errors
-                                                        .district
-                                                }
-                                                className="min-h-11 bg-background"
-                                                {...form.register("district")}
-                                            />
-                                            {form.formState.errors
-                                                .district && (
-                                                <p
-                                                    className="text-xs text-destructive"
-                                                    role="alert"
-                                                >
-                                                    {
-                                                        form.formState.errors
-                                                            .district.message
-                                                    }
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="ward">
-                                                Phường / Xã
-                                            </Label>
-                                            <Input
-                                                id="ward"
-                                                autoComplete="address-level3"
-                                                aria-invalid={
-                                                    !!form.formState.errors.ward
-                                                }
-                                                className="min-h-11 bg-background"
-                                                {...form.register("ward")}
-                                            />
-                                            {form.formState.errors.ward && (
-                                                <p
-                                                    className="text-xs text-destructive"
-                                                    role="alert"
-                                                >
-                                                    {
-                                                        form.formState.errors
-                                                            .ward.message
-                                                    }
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="street">
-                                            Địa chỉ cụ thể
-                                        </Label>
-                                        <Input
-                                            id="street"
-                                            autoComplete="street-address"
-                                            aria-invalid={
-                                                !!form.formState.errors.street
-                                            }
-                                            className="min-h-11 bg-background"
-                                            placeholder="Số nhà, tên đường, tòa nhà..."
-                                            {...form.register("street")}
-                                        />
-                                        {form.formState.errors.street && (
-                                            <p
-                                                className="text-xs text-destructive"
-                                                role="alert"
-                                            >
-                                                {
-                                                    form.formState.errors.street
-                                                        .message
-                                                }
-                                            </p>
-                                        )}
-                                    </div>
-                                </fieldset>
-                            </div>
-
-                            <DialogFooter className="-mx-0 -mb-0 gap-2 rounded-none border-t border-border/60 bg-muted/30 px-4 py-4 sm:px-6">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="min-h-11 w-full cursor-pointer sm:w-auto"
-                                    onClick={() => setOpen(false)}
-                                >
-                                    Hủy
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={saving}
-                                    className="min-h-11 w-full cursor-pointer sm:w-auto"
-                                >
-                                    {saving ? "Đang lưu..." : "Lưu địa chỉ"}
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                    trigger={
+                        <Button className="min-h-11 w-full cursor-pointer gap-2 sm:w-auto">
+                            <Plus className="h-4 w-4" />
+                            Thêm địa chỉ
+                        </Button>
+                    }
+                />
             </div>
 
             {addresses.length === 0 ? (
