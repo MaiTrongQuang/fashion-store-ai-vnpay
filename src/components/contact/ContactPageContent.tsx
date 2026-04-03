@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_CONTACT, SITE_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const fadeUp = {
@@ -34,15 +34,15 @@ const contactChannels = [
     {
         icon: MapPin,
         title: "Địa chỉ",
-        detail: "123 Nguyễn Văn Linh, Quận 7, TP.HCM",
-        href: "https://maps.google.com/?q=123+Nguyen+Van+Linh+District+7+HCMC",
+        detail: SITE_CONTACT.address,
+        href: SITE_CONTACT.mapQueryUrl,
         action: "Mở bản đồ",
         external: true,
     },
     {
         icon: Phone,
         title: "Hotline",
-        detail: "1900-xxxx",
+        detail: SITE_CONTACT.hotline,
         href: null,
         action: null,
         external: false,
@@ -50,15 +50,15 @@ const contactChannels = [
     {
         icon: Mail,
         title: "Email",
-        detail: "support@luxefashion.vn",
-        href: "mailto:support@luxefashion.vn",
+        detail: SITE_CONTACT.email,
+        href: `mailto:${SITE_CONTACT.email}`,
         action: "Gửi email",
         external: true,
     },
     {
         icon: Clock,
         title: "Giờ làm việc",
-        detail: "T2 – T7: 8:00 – 21:00 · CN: 9:00 – 18:00",
+        detail: SITE_CONTACT.hours,
         href: null,
         action: null,
         external: false,

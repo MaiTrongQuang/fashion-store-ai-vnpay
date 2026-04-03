@@ -1,16 +1,42 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { MessageCircle, X, Send, Bot, User, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupButton,
+    InputGroupInput,
+} from "@/components/ui/input-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface Message {
     role: "user" | "assistant";
     content: string;
 }
+
+const CHAT_PANEL_ID = "luxe-chat-widget-panel";
+
+type ServerHealthStatus = "ok" | "degraded";
 
 export default function ChatWidget() {
     const [open, setOpen] = useState(false);
@@ -18,23 +44,70 @@ export default function ChatWidget() {
         {
             role: "assistant",
             content:
-                "Xin chào! 👋 Mình là trợ lý mua sắm AI của LUXE Fashion. Bạn cần tư vấn gì về thời trang nhé?",
+                "Xin chào! Mình là trợ lý mua sắm AI của LUXE Fashion. Bạn cần tư vấn gì về thời trang?",
         },
     ]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const [clientOnline, setClientOnline] = useState(true);
+    const [serverHealth, setServerHealth] = useState<ServerHealthStatus | null>(
+        null,
+    );
+    const [healthReasons, setHealthReasons] = useState<string[]>([]);
+    const [healthFetchFailed, setHealthFetchFailed] = useState(false);
+    const bottomRef = useRef<HTMLDivElement>(null);
+
+    const refreshHealth = useCallback(async () => {
+        try {
+            const res = await fetch("/api/chatbot/health");
+            if (!res.ok) throw new Error("health");
+            const data = (await res.json()) as {
+                status: ServerHealthStatus;
+                reasons?: string[];
+            };
+            setServerHealth(data.status);
+            setHealthReasons(data.reasons ?? []);
+            setHealthFetchFailed(false);
+        } catch {
+            setHealthFetchFailed(true);
+            setServerHealth("degraded");
+            setHealthReasons([
+                "Không kiểm tra được máy chủ. Bạn vẫn có thể thử gửi tin nhắn.",
+            ]);
+        }
+    }, []);
 
     useEffect(() => {
-        if (scrollAreaRef.current) {
-            scrollAreaRef.current.scrollTop =
-                scrollAreaRef.current.scrollHeight;
-        }
-    }, [messages]);
+        const sync = () =>
+            setClientOnline(
+                typeof navigator !== "undefined" ? navigator.onLine : true,
+            );
+        sync();
+        window.addEventListener("online", sync);
+        window.addEventListener("offline", sync);
+        return () => {
+            window.removeEventListener("online", sync);
+            window.removeEventListener("offline", sync);
+        };
+    }, []);
+
+    useEffect(() => {
+        void refreshHealth();
+    }, [refreshHealth]);
+
+    useEffect(() => {
+        if (open) void refreshHealth();
+    }, [open, refreshHealth]);
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, [messages, loading, open]);
+
+    const inputDisabled = loading || !clientOnline;
 
     const handleSend = async () => {
-        if (!input.trim() || loading) return;
+        if (!input.trim() || loading || !clientOnline) return;
 
         const userMessage = input.trim();
         setInput("");
@@ -65,6 +138,7 @@ export default function ChatWidget() {
             if (data.conversationId) {
                 setConversationId(data.conversationId);
             }
+            void refreshHealth();
         } catch {
             setMessages((prev) => [
                 ...prev,
@@ -79,126 +153,311 @@ export default function ChatWidget() {
         }
     };
 
+    const badgeMeta = (() => {
+        if (!clientOnline) {
+            return {
+                label: "Ngoại tuyến",
+                dot: "bg-red-500",
+                tooltip: "Mất kết nối mạng. Kiểm tra Wi‑Fi hoặc dữ liệu di động.",
+            };
+        }
+        if (healthFetchFailed) {
+            return {
+                label: "Không xác định",
+                dot: "bg-amber-500",
+                tooltip:
+                    healthReasons[0] ??
+                    "Không kiểm tra được trạng thái máy chủ.",
+            };
+        }
+        if (serverHealth === "ok") {
+            return {
+                label: "Trực tuyến",
+                dot: "bg-emerald-500",
+                tooltip: "AI Gemini sẵn sàng (hoặc cấu hình đầy đủ).",
+            };
+        }
+        return {
+            label: "Hạn chế",
+            dot: "bg-amber-500",
+            tooltip:
+                healthReasons.length > 0
+                    ? healthReasons.join(" ")
+                    : "Chế độ FAQ / trả lời mẫu — có thể chưa cấu hình GEMINI_API_KEY.",
+        };
+    })();
+
     return (
-        <>
-            {/* FAB Button */}
-            <button
-                onClick={() => setOpen(!open)}
-                className={`fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 ${
-                    open
-                        ? "bg-muted text-muted-foreground hover:bg-muted/80 scale-90"
-                        : "bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-110"
-                }`}
-            >
-                {open ? (
-                    <X className="h-6 w-6" />
-                ) : (
-                    <MessageCircle className="h-6 w-6" />
-                )}
-            </button>
+        <TooltipProvider delay={200}>
+            {/* FAB — shadcn Button + Tooltip */}
+            <Tooltip open={open ? false : undefined}>
+                <TooltipTrigger
+                    render={(triggerProps) => (
+                        <Button
+                            {...triggerProps}
+                            type="button"
+                            variant={open ? "secondary" : "default"}
+                            size="icon"
+                            aria-expanded={open}
+                            aria-controls={CHAT_PANEL_ID}
+                            aria-label={
+                                open
+                                    ? "Đóng cửa sổ chat"
+                                    : "Mở trợ lý mua sắm AI"
+                            }
+                            onClick={(e) => {
+                                triggerProps.onClick?.(e);
+                                setOpen(!open);
+                            }}
+                            className={cn(
+                                triggerProps.className,
+                                "fixed bottom-6 right-6 z-50 size-14 min-h-11 min-w-11 rounded-full shadow-lg transition-[transform,box-shadow] duration-200",
+                                "focus-visible:ring-3 focus-visible:ring-ring/50",
+                                !open &&
+                                    "hover:scale-105 hover:shadow-xl active:scale-95",
+                                open && "scale-95 shadow-md",
+                            )}
+                        >
+                            {open ? (
+                                <X className="size-6" aria-hidden />
+                            ) : (
+                                <MessageCircle
+                                    className="size-6"
+                                    aria-hidden
+                                />
+                            )}
+                        </Button>
+                    )}
+                />
+                <TooltipContent side="left" className="max-w-[220px]">
+                    Chat với trợ lý LUXE — gợi ý size, phối đồ, khuyến mãi
+                </TooltipContent>
+            </Tooltip>
 
-            {/* Chat Window */}
+            {/* Panel — shadcn Card */}
             {open && (
-                <div className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] h-[520px] bg-background border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
-                    {/* Header */}
-                    <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary-foreground/20 flex items-center justify-center">
-                            <Bot className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <p className="font-semibold text-sm">
-                                LUXE AI Assistant
-                            </p>
-                            <p className="text-xs opacity-80">
-                                Tư vấn thời trang 24/7
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Messages */}
-                    <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-                        <div className="space-y-4">
-                            {messages.map((msg, index) => (
-                                <div
-                                    key={index}
-                                    className={`flex gap-2 ${
-                                        msg.role === "user"
-                                            ? "justify-end"
-                                            : "justify-start"
-                                    }`}
-                                >
-                                    {msg.role === "assistant" && (
-                                        <Avatar className="h-7 w-7 shrink-0">
-                                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                                                <Bot className="h-3.5 w-3.5" />
-                                            </AvatarFallback>
-                                        </Avatar>
-                                    )}
-                                    <div
-                                        className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                                            msg.role === "user"
-                                                ? "bg-primary text-primary-foreground rounded-br-md"
-                                                : "bg-accent rounded-bl-md"
-                                        }`}
-                                    >
-                                        {msg.content}
-                                    </div>
-                                    {msg.role === "user" && (
-                                        <Avatar className="h-7 w-7 shrink-0">
-                                            <AvatarFallback className="bg-muted text-muted-foreground text-xs">
-                                                <User className="h-3.5 w-3.5" />
-                                            </AvatarFallback>
-                                        </Avatar>
-                                    )}
+                <Card
+                    id={CHAT_PANEL_ID}
+                    role="dialog"
+                    aria-label="Trợ lý mua sắm LUXE"
+                    aria-modal="false"
+                    size="sm"
+                    className={cn(
+                        "fixed bottom-24 right-6 z-50 flex h-[min(520px,calc(100vh-8rem))] w-[min(380px,calc(100vw-3rem))] flex-col gap-0 overflow-hidden py-0",
+                        "rounded-xl shadow-lg ring-1 ring-border/80",
+                        "animate-in slide-in-from-bottom-4 fade-in-0 duration-200 motion-reduce:animate-none motion-reduce:duration-0",
+                    )}
+                >
+                    <CardHeader className="shrink-0 space-y-0 border-b bg-muted/40 px-4 py-3 [.border-b]:pb-3">
+                        <div className="flex items-start gap-3">
+                            <Avatar className="size-10 shrink-0 ring-2 ring-background">
+                                <AvatarFallback className="bg-primary/15 text-primary">
+                                    <Bot className="size-5" aria-hidden />
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1 space-y-0.5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <CardTitle className="text-sm font-semibold tracking-tight">
+                                        LUXE AI Assistant
+                                    </CardTitle>
+                                    <Tooltip>
+                                        <TooltipTrigger
+                                            render={(p) => (
+                                                <Badge
+                                                    {...p}
+                                                    variant="secondary"
+                                                    className="h-5 gap-1 px-2 text-[10px] font-medium uppercase"
+                                                >
+                                                    <span
+                                                        className={cn(
+                                                            "size-1.5 rounded-full",
+                                                            badgeMeta.dot,
+                                                        )}
+                                                        aria-hidden
+                                                    />
+                                                    {badgeMeta.label}
+                                                </Badge>
+                                            )}
+                                        />
+                                        <TooltipContent
+                                            side="bottom"
+                                            className="max-w-[260px] text-xs"
+                                        >
+                                            {badgeMeta.tooltip}
+                                        </TooltipContent>
+                                    </Tooltip>
                                 </div>
-                            ))}
-                            {loading && (
-                                <div className="flex gap-2">
-                                    <Avatar className="h-7 w-7 shrink-0">
-                                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                                            <Bot className="h-3.5 w-3.5" />
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div className="bg-accent px-4 py-3 rounded-2xl rounded-bl-md">
-                                        <div className="flex gap-1">
-                                            <div className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" />
-                                            <div className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce [animation-delay:0.2s]" />
-                                            <div className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                <CardDescription className="flex items-center gap-1.5 text-xs">
+                                    <Sparkles
+                                        className="size-3.5 shrink-0 text-primary/70"
+                                        aria-hidden
+                                    />
+                                    {!clientOnline
+                                        ? "Không có mạng — không thể gửi tin nhắn."
+                                        : "Tư vấn thời trang 24/7"}
+                                </CardDescription>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
+                                className="shrink-0 text-muted-foreground hover:text-foreground"
+                                aria-label="Đóng chat"
+                                onClick={() => setOpen(false)}
+                            >
+                                <X className="size-4" aria-hidden />
+                            </Button>
+                        </div>
+                    </CardHeader>
+
+                    <CardContent className="flex min-h-0 flex-1 flex-col p-0">
+                        <ScrollArea className="min-h-0 flex-1">
+                            <div
+                                className="space-y-4 p-4"
+                                role="log"
+                                aria-live="polite"
+                                aria-relevant="additions"
+                            >
+                                {messages.map((msg, index) => (
+                                    <div
+                                        key={index}
+                                        className={cn(
+                                            "flex gap-2",
+                                            msg.role === "user"
+                                                ? "justify-end"
+                                                : "justify-start",
+                                        )}
+                                    >
+                                        {msg.role === "assistant" && (
+                                            <Avatar className="mt-0.5 size-8 shrink-0">
+                                                <AvatarFallback className="bg-muted text-muted-foreground">
+                                                    <Bot
+                                                        className="size-4"
+                                                        aria-hidden
+                                                    />
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        )}
+                                        <div
+                                            className={cn(
+                                                "max-w-[min(85%,280px)] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm",
+                                                msg.role === "user"
+                                                    ? "rounded-br-md bg-primary text-primary-foreground"
+                                                    : "rounded-bl-md border border-border/60 bg-background text-foreground",
+                                            )}
+                                        >
+                                            {msg.content}
+                                        </div>
+                                        {msg.role === "user" && (
+                                            <Avatar className="mt-0.5 size-8 shrink-0">
+                                                <AvatarFallback className="bg-muted text-muted-foreground">
+                                                    <User
+                                                        className="size-4"
+                                                        aria-hidden
+                                                    />
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        )}
+                                    </div>
+                                ))}
+                                {loading && (
+                                    <div className="flex gap-2">
+                                        <Avatar className="mt-0.5 size-8 shrink-0">
+                                            <AvatarFallback className="bg-muted text-muted-foreground">
+                                                <Bot
+                                                    className="size-4"
+                                                    aria-hidden
+                                                />
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div
+                                            className="flex items-center gap-1 rounded-2xl rounded-bl-md border border-border/60 bg-muted/50 px-4 py-3"
+                                            aria-busy="true"
+                                            aria-label="Đang trả lời"
+                                        >
+                                            <span className="sr-only">
+                                                Đang soạn phản hồi
+                                            </span>
+                                            <span className="flex gap-1">
+                                                <span
+                                                    className="size-2 rounded-full bg-muted-foreground/50 motion-reduce:animate-none animate-bounce"
+                                                    style={{
+                                                        animationDelay: "0ms",
+                                                    }}
+                                                />
+                                                <span
+                                                    className="size-2 rounded-full bg-muted-foreground/50 motion-reduce:animate-none animate-bounce"
+                                                    style={{
+                                                        animationDelay: "150ms",
+                                                    }}
+                                                />
+                                                <span
+                                                    className="size-2 rounded-full bg-muted-foreground/50 motion-reduce:animate-none animate-bounce"
+                                                    style={{
+                                                        animationDelay: "300ms",
+                                                    }}
+                                                />
+                                            </span>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    </ScrollArea>
+                                )}
+                                <div ref={bottomRef} aria-hidden />
+                            </div>
+                        </ScrollArea>
+                    </CardContent>
 
-                    {/* Input */}
-                    <div className="p-3 border-t">
+                    <Separator />
+
+                    <CardFooter className="shrink-0 border-t bg-muted/30 p-3">
                         <form
+                            className="w-full"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 handleSend();
                             }}
-                            className="flex gap-2"
                         >
-                            <Input
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                placeholder="Nhập tin nhắn..."
-                                className="rounded-full bg-accent border-0"
-                                disabled={loading}
-                            />
-                            <Button
-                                type="submit"
-                                size="icon"
-                                className="rounded-full shrink-0"
-                                disabled={loading || !input.trim()}
-                            >
-                                <Send className="h-4 w-4" />
-                            </Button>
+                            <InputGroup className="h-11 rounded-lg bg-background shadow-sm">
+                                <InputGroupInput
+                                    value={input}
+                                    onChange={(e) =>
+                                        setInput(e.target.value)
+                                    }
+                                    placeholder={
+                                        clientOnline
+                                            ? "Nhập tin nhắn…"
+                                            : "Đang mất mạng…"
+                                    }
+                                    disabled={inputDisabled}
+                                    autoComplete="off"
+                                    aria-label="Nội dung tin nhắn"
+                                    onKeyDown={(e) => {
+                                        if (
+                                            e.key === "Enter" &&
+                                            !e.shiftKey
+                                        ) {
+                                            e.preventDefault();
+                                            handleSend();
+                                        }
+                                    }}
+                                />
+                                <InputGroupAddon align="inline-end">
+                                    <InputGroupButton
+                                        type="submit"
+                                        variant="default"
+                                        size="icon-sm"
+                                        disabled={
+                                            inputDisabled || !input.trim()
+                                        }
+                                        aria-label="Gửi tin nhắn"
+                                    >
+                                        <Send className="size-4" />
+                                    </InputGroupButton>
+                                </InputGroupAddon>
+                            </InputGroup>
                         </form>
-                    </div>
-                </div>
+                    </CardFooter>
+                </Card>
             )}
-        </>
+        </TooltipProvider>
     );
 }

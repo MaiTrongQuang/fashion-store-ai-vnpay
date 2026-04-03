@@ -1,142 +1,125 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import {
+    buildDynamicStoreContext,
+    buildFullSystemInstruction,
+    fetchChatbotContextData,
+} from "@/lib/chatbot/build-context";
+import { getFallbackReply } from "@/lib/chatbot/fallback-reply";
+import { generateGeminiReply, type ChatTurn } from "@/lib/chatbot/gemini";
+
+/** Gemini 3.1 Flash Live (preview) — hỗ trợ text qua generateContent; xem ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-live-preview */
+const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-live-preview";
+const MAX_HISTORY_MESSAGES = 20;
+
+export type ChatbotPostSource = "gemini" | "fallback";
+
+async function loadConversationHistory(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    conversationId: string,
+): Promise<ChatTurn[]> {
+    const { data: rows, error } = await supabase
+        .from("chatbot_messages")
+        .select("role, content")
+        .eq("conversation_id", conversationId)
+        .order("created_at", { ascending: false })
+        .limit(MAX_HISTORY_MESSAGES);
+
+    if (error) {
+        console.warn("chatbot_messages history (created_at):", error.message);
+    }
+
+    const list = rows ?? [];
+    const chronological = list
+        .slice()
+        .reverse()
+        .map((r: { role: string; content: string }) => ({
+            role: (r.role === "assistant" ? "assistant" : "user") as
+                | "user"
+                | "assistant",
+            content: r.content,
+        }));
+
+    while (chronological.length && chronological[0].role !== "user") {
+        chronological.shift();
+    }
+
+    return chronological;
+}
 
 export async function POST(request: Request) {
     try {
         const supabase = await createClient();
         const { message, conversationId } = await request.json();
 
-        if (!message) {
+        if (!message || typeof message !== "string") {
             return NextResponse.json(
                 { error: "Message is required" },
                 { status: 400 },
             );
         }
 
-        // Get FAQs for context
-        const { data: faqs } = await supabase
-            .from("chatbot_faqs")
-            .select("question, answer, category")
-            .eq("is_active", true)
-            .order("sort_order");
+        let faqs: Awaited<
+            ReturnType<typeof fetchChatbotContextData>
+        >["faqs"] = [];
+        let categories: Awaited<
+            ReturnType<typeof fetchChatbotContextData>
+        >["categories"] = [];
+        let products: Awaited<
+            ReturnType<typeof fetchChatbotContextData>
+        >["products"] = [];
 
-        // Get some product data for recommendations
-        const { data: products } = await supabase
-            .from("products")
-            .select(
-                "name, slug, base_price, sale_price, description, category:categories(name)",
-            )
-            .eq("is_active", true)
-            .limit(20);
+        try {
+            const data = await fetchChatbotContextData(supabase);
+            faqs = data.faqs;
+            categories = data.categories;
+            products = data.products;
+        } catch (e) {
+            console.error("Chatbot context fetch:", e);
+        }
 
-        // Build context
-        const faqContext = faqs
-            ?.map((f: any) => `Q: ${f.question}\nA: ${f.answer}`)
-            .join("\n\n");
+        const dynamicBlock = buildDynamicStoreContext(
+            faqs,
+            categories,
+            products,
+        );
+        const systemInstruction = buildFullSystemInstruction(dynamicBlock);
 
-        const productContext = products
-            ?.map(
-                (p: any) =>
-                    `- ${p.name} (${(p.category as any)?.name || ""}): ${
-                        p.sale_price
-                            ? `Giá ${p.sale_price.toLocaleString()}đ (giảm từ ${p.base_price.toLocaleString()}đ)`
-                            : `Giá ${p.base_price.toLocaleString()}đ`
-                    }`,
-            )
-            .join("\n");
+        let history: ChatTurn[] = [];
+        if (conversationId && typeof conversationId === "string") {
+            history = await loadConversationHistory(supabase, conversationId);
+        }
 
-        const systemPrompt = `Bạn là trợ lý mua sắm AI của LUXE Fashion - cửa hàng thời trang trực tuyến.
-Nhiệm vụ:
-- Tư vấn sản phẩm thời trang phù hợp nhu cầu khách hàng
-- Trả lời các câu hỏi về chính sách, giao hàng, đổi trả, thanh toán
-- Gợi ý sản phẩm dựa trên sở thích: giới tính, phong cách, màu sắc, giá, size
-- Trả lời bằng tiếng Việt, thân thiện, chuyên nghiệp
-- Nếu không biết câu trả lời, hướng dẫn liên hệ hotline 1900-xxxx
+        const apiKey = process.env.GEMINI_API_KEY?.trim();
+        const modelName =
+            process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
 
-FAQ tham khảo:
-${faqContext}
-
-Danh sách sản phẩm hiện có:
-${productContext}
-
-Hãy trả lời ngắn gọn, hữu ích và thân thiện.`;
-
-        // Try to use OpenAI API if available
         let reply = "";
+        let source: ChatbotPostSource = "fallback";
 
-        if (process.env.OPENAI_API_KEY) {
-            try {
-                const response = await fetch(
-                    "https://api.openai.com/v1/chat/completions",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-                        },
-                        body: JSON.stringify({
-                            model: "gpt-3.5-turbo",
-                            messages: [
-                                { role: "system", content: systemPrompt },
-                                { role: "user", content: message },
-                            ],
-                            max_tokens: 500,
-                            temperature: 0.7,
-                        }),
-                    },
-                );
-
-                const data = await response.json();
-                reply = data.choices?.[0]?.message?.content || "";
-            } catch {
-                // Fallback if API fails
-            }
-        }
-
-        // Fallback: Simple FAQ matching
-        if (!reply) {
-            const lowerMsg = message.toLowerCase();
-            const matchedFaq = faqs?.find(
-                (f: any) =>
-                    f.question.toLowerCase().includes(lowerMsg) ||
-                    lowerMsg.includes(
-                        f.question
-                            .toLowerCase()
-                            .split(" ")
-                            .slice(0, 3)
-                            .join(" "),
-                    ),
+        if (apiKey) {
+            const fallbackModel = process.env.GEMINI_FALLBACK_MODEL?.trim();
+            const geminiText = await generateGeminiReply(
+                apiKey,
+                modelName,
+                systemInstruction,
+                history,
+                message.trim(),
+                fallbackModel,
             );
-
-            if (matchedFaq) {
-                reply = matchedFaq.answer;
-            } else if (lowerMsg.includes("size") || lowerMsg.includes("cỡ")) {
-                reply =
-                    "Bạn có thể tham khảo bảng size tại trang chi tiết sản phẩm. Nếu đang phân vân, hãy chọn size lớn hơn. Liên hệ hotline 1900-xxxx để được tư vấn chi tiết nhé!";
-            } else if (lowerMsg.includes("giao") || lowerMsg.includes("ship")) {
-                reply =
-                    "Giao hàng nội thành HCM/HN mất 1-2 ngày, tỉnh khác 3-5 ngày. Đơn trên 500K được miễn phí ship! 🚚";
-            } else if (
-                lowerMsg.includes("thanh toán") ||
-                lowerMsg.includes("trả")
-            ) {
-                reply =
-                    "LUXE Fashion hỗ trợ thanh toán COD và VNPay. VNPay hỗ trợ ATM, Visa, MasterCard và QR Code. Chính sách đổi trả trong 7 ngày! 💳";
-            } else if (
-                lowerMsg.includes("giảm giá") ||
-                lowerMsg.includes("voucher") ||
-                lowerMsg.includes("mã")
-            ) {
-                reply =
-                    "Bạn có thể kiểm tra mã giảm giá tại trang chủ hoặc nhập mã WELCOME10 để được giảm 10% cho đơn đầu tiên! Nhập mã tại bước thanh toán nhé! 🎉";
-            } else {
-                reply =
-                    "Cảm ơn bạn đã liên hệ LUXE Fashion! Mình có thể giúp bạn tìm sản phẩm phù hợp, tư vấn size, hoặc giải đáp các thắc mắc về đơn hàng. Bạn cần hỗ trợ gì nhé? 😊";
+            if (geminiText) {
+                reply = geminiText;
+                source = "gemini";
             }
         }
 
-        // Save to conversation if user is logged in
-        let convId = conversationId;
+        if (!reply) {
+            reply = getFallbackReply(message, faqs);
+            source = "fallback";
+        }
+
+        let convId: string | undefined =
+            typeof conversationId === "string" ? conversationId : undefined;
         const {
             data: { user },
         } = await supabase.auth.getUser();
@@ -163,6 +146,7 @@ Hãy trả lời ngắn gọn, hữu ích và thân thiện.`;
         return NextResponse.json({
             reply,
             conversationId: convId,
+            source,
         });
     } catch (error) {
         console.error("Chatbot error:", error);

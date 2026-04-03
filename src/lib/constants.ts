@@ -2,6 +2,16 @@ export const SITE_NAME = "LUXE Fashion";
 export const SITE_DESCRIPTION =
     "Hệ thống bán quần áo trực tuyến - Thời trang cao cấp";
 
+/** Single source for chatbot + contact pages (địa chỉ, hotline, email, giờ làm việc). */
+export const SITE_CONTACT = {
+    address: "123 Nguyễn Văn Linh, Quận 7, TP.HCM",
+    mapQueryUrl:
+        "https://maps.google.com/?q=123+Nguyen+Van+Linh+District+7+HCMC",
+    hotline: "1900-xxxx",
+    email: "support@luxefashion.vn",
+    hours: "T2 – T7: 8:00 – 21:00 · CN: 9:00 – 18:00",
+} as const;
+
 export const ORDER_STATUS_MAP: Record<
     string,
     { label: string; color: string }
