@@ -147,32 +147,39 @@ export function AddressAutocomplete({
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger
                     nativeButton={false}
-                    className={cn(
-                        "block w-full min-w-0 cursor-text text-left",
-                        disabled && "pointer-events-none opacity-60",
+                    render={(triggerProps) => (
+                        <div
+                            {...triggerProps}
+                            className={cn(
+                                "block w-full min-w-0 cursor-text text-left outline-none",
+                                disabled && "pointer-events-none opacity-60",
+                                triggerProps.className,
+                            )}
+                        >
+                            <div className="relative">
+                                <Input
+                                    id={id}
+                                    value={query}
+                                    disabled={disabled || picking}
+                                    placeholder="Nhập số nhà, đường, phường…"
+                                    autoComplete="off"
+                                    className="min-h-11 bg-background pr-10"
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    onFocus={() => {
+                                        if (predictions.length > 0)
+                                            setOpen(true);
+                                    }}
+                                />
+                                {(loading || picking) && (
+                                    <Loader2
+                                        className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground"
+                                        aria-hidden
+                                    />
+                                )}
+                            </div>
+                        </div>
                     )}
-                >
-                    <div className="relative">
-                        <Input
-                            id={id}
-                            value={query}
-                            disabled={disabled || picking}
-                            placeholder="Nhập số nhà, đường, phường…"
-                            autoComplete="off"
-                            className="min-h-11 bg-background pr-10"
-                            onChange={(e) => setQuery(e.target.value)}
-                            onFocus={() => {
-                                if (predictions.length > 0) setOpen(true);
-                            }}
-                        />
-                        {(loading || picking) && (
-                            <Loader2
-                                className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground"
-                                aria-hidden
-                            />
-                        )}
-                    </div>
-                </PopoverTrigger>
+                />
                 <PopoverContent
                     className="w-(--anchor-width) min-w-[min(100%,var(--anchor-width))] max-w-[calc(100vw-2rem)] p-0"
                     align="start"
