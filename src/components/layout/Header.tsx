@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import type {
+    AuthChangeEvent,
+    Session,
+    User as SupabaseUser,
+} from "@supabase/supabase-js";
 import {
     Search,
     ShoppingBag,
@@ -24,13 +29,33 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
 
+function profileFromAuthUser(authUser: SupabaseUser): Profile {
+    const meta = authUser.user_metadata ?? {};
+    const fullName =
+        (typeof meta.full_name === "string" && meta.full_name) ||
+        authUser.email?.split("@")[0] ||
+        "Tài khoản";
+    const avatar =
+        typeof meta.avatar_url === "string" ? meta.avatar_url : null;
+    return {
+        id: authUser.id,
+        email: authUser.email || "",
+        full_name: fullName,
+        phone: authUser.phone || null,
+        avatar_url: avatar,
+        role: "customer",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    };
+}
+
 export default function Header() {
     const pathname = usePathname();
+    const router = useRouter();
     const [user, setUser] = useState<Profile | null>(null);
     const [isLoadingUser, setIsLoadingUser] = useState(true);
     const [cartCount, setCartCount] = useState(0);
@@ -45,75 +70,46 @@ export default function Header() {
     }, []);
 
     useEffect(() => {
-        async function getUser() {
+        let cancelled = false;
+
+        async function hydrateProfileFromDb(userId: string) {
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", userId)
+                .maybeSingle();
+            if (cancelled || !profile) return;
+            setUser(profile);
+        }
+
+        async function initSession() {
             try {
                 const {
-                    data: { user: authUser },
-                } = await supabase.auth.getUser();
-                if (authUser) {
-                    const { data: profile } = await supabase
-                        .from("profiles")
-                        .select("*")
-                        .eq("id", authUser.id)
-                        .maybeSingle();
-
-                    if (profile) {
-                        setUser(profile);
-                    } else {
-                        // Fallback in case the DB trigger for profile creation is delayed
-                        setUser({
-                            id: authUser.id,
-                            email: authUser.email || "",
-                            full_name:
-                                authUser.user_metadata?.full_name ||
-                                authUser.email?.split("@")[0] ||
-                                "Tài khoản",
-                            phone: authUser.phone || null,
-                            avatar_url:
-                                authUser.user_metadata?.avatar_url || null,
-                            role: "customer",
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString(),
-                        } as Profile);
-                    }
+                    data: { session },
+                } = await supabase.auth.getSession();
+                if (cancelled) return;
+                if (session?.user) {
+                    setUser(profileFromAuthUser(session.user));
+                    void hydrateProfileFromDb(session.user.id);
+                } else {
+                    setUser(null);
                 }
             } catch (error) {
-                console.error("Error fetching user session:", error);
+                console.error("Error reading session:", error);
             } finally {
-                setIsLoadingUser(false);
+                if (!cancelled) setIsLoadingUser(false);
             }
         }
-        getUser();
+
+        void initSession();
 
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(
-            async (event: string, session: any) => {
+            (event: AuthChangeEvent, session: Session | null) => {
                 if (event === "SIGNED_IN" && session?.user) {
-                    const { data: profile } = await supabase
-                        .from("profiles")
-                        .select("*")
-                        .eq("id", session.user.id)
-                        .maybeSingle();
-
-                    if (profile) {
-                        setUser(profile);
-                    } else {
-                        setUser({
-                            id: session.user.id,
-                            email: session.user.email || "",
-                            full_name:
-                                session.user.user_metadata?.full_name ||
-                                session.user.email?.split("@")[0] ||
-                                "Tài khoản",
-                            phone: session.user.phone || null,
-                            avatar_url:
-                                session.user.user_metadata?.avatar_url || null,
-                            role: "customer",
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString(),
-                        } as Profile);
-                    }
+                    setUser(profileFromAuthUser(session.user));
+                    void hydrateProfileFromDb(session.user.id);
                 } else if (event === "SIGNED_OUT") {
                     setUser(null);
                 }
@@ -121,37 +117,50 @@ export default function Header() {
             },
         );
 
-        return () => subscription.unsubscribe();
+        return () => {
+            cancelled = true;
+            subscription.unsubscribe();
+        };
     }, [supabase]);
 
-    useEffect(() => {
-        async function getCartCount() {
-            const {
-                data: { user: authUser },
-            } = await supabase.auth.getUser();
-            if (authUser) {
-                const { data: cart } = await supabase
-                    .from("carts")
-                    .select("id")
-                    .eq("user_id", authUser.id)
-                    .single();
-                if (cart) {
-                    const { count } = await supabase
-                        .from("cart_items")
-                        .select("*", { count: "exact", head: true })
-                        .eq("cart_id", cart.id);
-                    setCartCount(count || 0);
-                }
-            }
-        }
-        getCartCount();
-    }, [supabase, pathname]);
+    const userId = user?.id;
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
+    useEffect(() => {
+        if (!userId) {
+            setCartCount(0);
+            return;
+        }
+        let cancelled = false;
+        async function getCartCount() {
+            const { data: cart } = await supabase
+                .from("carts")
+                .select("id")
+                .eq("user_id", userId)
+                .maybeSingle();
+            if (cancelled || !cart) {
+                if (!cancelled) setCartCount(0);
+                return;
+            }
+            const { count } = await supabase
+                .from("cart_items")
+                .select("*", { count: "exact", head: true })
+                .eq("cart_id", cart.id);
+            if (!cancelled) setCartCount(count || 0);
+        }
+        void getCartCount();
+        return () => {
+            cancelled = true;
+        };
+    }, [supabase, pathname, userId]);
+
+    const handleLogout = useCallback(() => {
         setUser(null);
-        window.location.href = "/";
-    };
+        setCartCount(0);
+        void supabase.auth.signOut().finally(() => {
+            router.replace("/");
+            router.refresh();
+        });
+    }, [supabase, router]);
 
     return (
         <header
@@ -285,10 +294,10 @@ export default function Header() {
                         </Link>
 
                         {isLoadingUser ? (
-                            <div className="flex items-center gap-2 px-2">
-                                <Skeleton className="h-8 w-8 rounded-full" />
-                                <Skeleton className="h-4 w-20 hidden sm:block" />
-                            </div>
+                            <div
+                                className="flex h-9 min-w-9 items-center justify-center rounded-full bg-muted/40 sm:min-w-34"
+                                aria-hidden
+                            />
                         ) : user ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger

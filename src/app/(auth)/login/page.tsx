@@ -18,8 +18,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import type { LoginSuccessResponse } from "@/lib/auth/api-types";
 import { SITE_NAME } from "@/lib/constants";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { AuthMotionSurface } from "@/components/auth/auth-success-transition";
@@ -43,14 +43,15 @@ function LoginForm() {
     const [loading, setLoading] = useState(false);
     const [successExit, setSuccessExit] = useState(false);
     const pendingHref = useRef<string | null>(null);
-    const supabase = createClient();
 
     const handleExitComplete = useCallback(() => {
         const href = pendingHref.current;
         pendingHref.current = null;
         if (href) {
-            router.push(href);
-            router.refresh();
+            router.replace(href);
+            queueMicrotask(() => {
+                router.refresh();
+            });
         }
     }, [router]);
 
@@ -65,24 +66,33 @@ function LoginForm() {
     const onSubmit = async (data: LoginForm) => {
         setLoading(true);
         try {
-            const { error } = await supabase.auth.signInWithPassword({
-                email: data.email,
-                password: data.password,
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: data.email,
+                    password: data.password,
+                }),
+                credentials: "include",
             });
 
-            if (error) {
+            const json = (await res.json()) as
+                | LoginSuccessResponse
+                | { error: string };
+
+            if (!res.ok) {
                 toast.error(
-                    error.message === "Invalid login credentials"
-                        ? "Email hoặc mật khẩu không đúng"
-                        : error.message,
+                    "error" in json
+                        ? json.error
+                        : "Đăng nhập thất bại.",
                 );
                 return;
             }
 
             toast.success("Đăng nhập thành công!");
             if (reducedMotion) {
-                router.push(redirect);
-                router.refresh();
+                router.replace(redirect);
+                queueMicrotask(() => router.refresh());
                 return;
             }
             pendingHref.current = redirect;

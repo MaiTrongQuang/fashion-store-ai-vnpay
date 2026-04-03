@@ -65,7 +65,7 @@ export function AuthMotionSurface({
                           filter: "blur(0px)",
                       }
             }
-            transition={{ duration: 0.42, ease }}
+            transition={{ duration: 0.16, ease }}
             onAnimationComplete={() => {
                 if (!exit || completedRef.current) return;
                 completedRef.current = true;

@@ -19,8 +19,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import type { RegisterSuccessResponse } from "@/lib/auth/api-types";
 import { SITE_NAME } from "@/lib/constants";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { AuthMotionSurface } from "@/components/auth/auth-success-transition";
@@ -47,13 +47,13 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [successExit, setSuccessExit] = useState(false);
     const pendingHref = useRef<string | null>(null);
-    const supabase = createClient();
 
     const handleExitComplete = useCallback(() => {
         const href = pendingHref.current;
         pendingHref.current = null;
         if (href) {
-            router.push(href);
+            router.replace(href);
+            queueMicrotask(() => router.refresh());
         }
     }, [router]);
 
@@ -68,26 +68,38 @@ export default function RegisterPage() {
     const onSubmit = async (data: RegisterForm) => {
         setLoading(true);
         try {
-            const { error } = await supabase.auth.signUp({
-                email: data.email,
-                password: data.password,
-                options: {
-                    data: {
-                        full_name: data.fullName,
-                    },
-                },
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: data.email,
+                    password: data.password,
+                    fullName: data.fullName,
+                }),
+                credentials: "include",
             });
 
-            if (error) {
-                toast.error(error.message);
+            const json = (await res.json()) as
+                | RegisterSuccessResponse
+                | { error: string };
+
+            if (!res.ok) {
+                toast.error(
+                    "error" in json ? json.error : "Đăng ký thất bại.",
+                );
                 return;
             }
 
+            const ok = json as RegisterSuccessResponse;
+
             toast.success(
-                "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.",
+                ok.needsEmailConfirmation
+                    ? "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản."
+                    : "Đăng ký thành công!",
             );
             if (reducedMotion) {
-                router.push("/login");
+                router.replace("/login");
+                queueMicrotask(() => router.refresh());
                 return;
             }
             pendingHref.current = "/login";
