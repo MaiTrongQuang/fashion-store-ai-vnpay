@@ -21,6 +21,7 @@ import { createClient } from "@/lib/supabase/client";
 import { addressSchema, type AddressFormValues } from "@/lib/address-schema";
 import { toast } from "sonner";
 import type { Address } from "@/lib/types";
+import { AddressAutocomplete } from "@/components/address/AddressAutocomplete";
 
 export interface AddAddressDialogProps {
     open: boolean;
@@ -51,6 +52,7 @@ export function AddAddressDialog({
     const uid = useId();
     const field = (name: string) => `${uid}-${name}`;
     const [saving, setSaving] = useState(false);
+    const [goongSession, setGoongSession] = useState(() => crypto.randomUUID());
     const supabase = createClient();
 
     const form = useForm<AddressFormValues>({
@@ -66,6 +68,9 @@ export function AddAddressDialog({
     });
 
     const handleClose = (next: boolean) => {
+        if (next) {
+            setGoongSession(crypto.randomUUID());
+        }
         onOpenChange(next);
         if (!next) {
             form.reset();
@@ -188,6 +193,25 @@ export function AddAddressDialog({
                             <legend className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                 Địa chỉ
                             </legend>
+                            <AddressAutocomplete
+                                sessionToken={goongSession}
+                                id={field("goong-search")}
+                                disabled={saving}
+                                onResolved={(p) => {
+                                    form.setValue("province", p.province, {
+                                        shouldValidate: true,
+                                    });
+                                    form.setValue("district", p.district, {
+                                        shouldValidate: true,
+                                    });
+                                    form.setValue("ward", p.ward, {
+                                        shouldValidate: true,
+                                    });
+                                    form.setValue("street", p.street, {
+                                        shouldValidate: true,
+                                    });
+                                }}
+                            />
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <div className="space-y-2 sm:col-span-1">
                                     <Label htmlFor={field("province")}>
