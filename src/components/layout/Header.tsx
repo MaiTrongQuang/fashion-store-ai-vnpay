@@ -40,24 +40,25 @@ function desktopNavLinkClass(pathname: string, link: NavLinkItem) {
     const isSale = Boolean(link.highlight);
 
     return cn(
-        "relative cursor-pointer rounded-md px-3 py-2 text-sm font-medium outline-none",
+        "relative inline-flex w-fit max-w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm font-medium outline-none",
         "transition-colors duration-200 ease-out",
         "motion-reduce:transition-none",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        "after:pointer-events-none after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:transition-transform after:duration-200 after:ease-out after:content-['']",
+        /* Gạch dưới trùng vùng chữ (trừ padding ngang); vẽ từ trái sang phải */
+        "after:pointer-events-none after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:transition-transform after:duration-200 after:ease-out after:content-['']",
         "motion-reduce:after:transition-none",
         !isSale && [
             "after:bg-primary",
             isActive && "text-foreground after:scale-x-100",
             !isActive &&
-                "text-muted-foreground hover:text-foreground hover:after:scale-x-60",
+                "text-muted-foreground hover:text-foreground hover:after:scale-x-100",
         ],
         isSale && [
             "after:bg-destructive font-semibold",
             isActive &&
                 "bg-destructive/10 text-destructive after:scale-x-100 hover:bg-destructive/15",
             !isActive &&
-                "text-destructive hover:bg-destructive/5 hover:text-destructive/90 hover:after:scale-x-60",
+                "text-destructive hover:bg-destructive/5 hover:text-destructive/90 hover:after:scale-x-100",
         ],
     );
 }
