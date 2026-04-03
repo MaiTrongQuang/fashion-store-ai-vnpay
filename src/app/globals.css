@@ -306,36 +306,52 @@
     filter: drop-shadow(0 0 4px oklch(0.5 0.1 270 / 0.3));
 }
 
-/* Trail dưới con trỏ: rơi mượt, easing dài, xoay nhẹ */
+/* Trail dưới con trỏ: rơi mượt, gia tốc nhẹ (gravity), lắc ngang ở giữa */
 @keyframes hero-rain-fall-cursor {
     0% {
         opacity: 0;
-        transform: translate3d(0, 0, 0) scale(0.88) rotate(0deg);
+        transform: translate3d(0, 0, 0) scale(0.72) rotate(0deg);
     }
-    6% {
+    5% {
         opacity: var(--rain-opacity, 0.45);
-        transform: translate3d(calc(var(--rain-drift) * 0.06), 3vh, 0)
-            scale(1) rotate(calc(var(--rain-rotate) * 0.06));
+        transform: translate3d(calc(var(--rain-drift) * 0.04), 2.5vh, 0)
+            scale(1.02) rotate(calc(var(--rain-rotate) * 0.05));
     }
-    32% {
-        opacity: calc(var(--rain-opacity, 0.45) * 0.95);
-        transform: translate3d(calc(var(--rain-drift) * 0.32), 26vh, 0)
-            scale(1) rotate(calc(var(--rain-rotate) * 0.32));
+    18% {
+        opacity: calc(var(--rain-opacity, 0.45) * 0.98);
+        transform: translate3d(calc(var(--rain-drift) * 0.22), 14vh, 0)
+            scale(1) rotate(calc(var(--rain-rotate) * 0.2));
     }
-    62% {
-        opacity: calc(var(--rain-opacity, 0.45) * 0.72);
-        transform: translate3d(calc(var(--rain-drift) * 0.62), 52vh, 0)
-            scale(0.97) rotate(calc(var(--rain-rotate) * 0.62));
+    /* Lắc nhẹ sang phía ngược drift — cảm giác “lá rơi” */
+    38% {
+        opacity: calc(var(--rain-opacity, 0.45) * 0.92);
+        transform: translate3d(
+                calc(var(--rain-drift) * 0.38 - var(--rain-drift) * 0.08),
+                30vh,
+                0
+            )
+            scale(0.99) rotate(calc(var(--rain-rotate) * 0.42));
+    }
+    58% {
+        opacity: calc(var(--rain-opacity, 0.45) * 0.78);
+        transform: translate3d(calc(var(--rain-drift) * 0.58), 48vh, 0)
+            scale(0.96) rotate(calc(var(--rain-rotate) * 0.62));
+    }
+    82% {
+        opacity: calc(var(--rain-opacity, 0.45) * 0.35);
+        transform: translate3d(calc(var(--rain-drift) * 0.88), 68vh, 0)
+            scale(0.92) rotate(calc(var(--rain-rotate) * 0.88));
     }
     100% {
         opacity: 0;
-        transform: translate3d(var(--rain-drift), 78vh, 0) scale(0.9)
+        transform: translate3d(var(--rain-drift), 82vh, 0) scale(0.82)
             rotate(var(--rain-rotate));
     }
 }
 
 .hero-rain-particle--cursor {
     animation: hero-rain-fall-cursor var(--rain-duration, 8s)
-        cubic-bezier(0.22, 0.61, 0.36, 1) var(--rain-delay, 0s) forwards;
-    filter: drop-shadow(0 2px 14px oklch(0.5 0.08 270 / 0.28));
+        cubic-bezier(0.28, 0.12, 0.18, 1) var(--rain-delay, 0s) forwards;
+    filter: drop-shadow(0 1px 8px oklch(0.45 0.1 280 / 0.22))
+        drop-shadow(0 4px 20px oklch(0.55 0.06 280 / 0.18));
 }

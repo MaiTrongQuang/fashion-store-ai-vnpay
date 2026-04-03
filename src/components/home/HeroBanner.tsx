@@ -178,14 +178,17 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
         const id = particleIdRef.current++;
         const iconIndex = Math.floor(Math.random() * RAIN_ICONS.length);
 
-        const leftValue = `${x}px`;
-        const topValue = `${y + 8 + Math.random() * 14}px`;
+        // Jitter ngang/dọc nhẹ để các icon không chồng một cột khi di chuột chậm
+        const jitterX = (Math.random() - 0.5) * 28;
+        const jitterY = 6 + Math.random() * 18;
+        const leftValue = `${x + jitterX}px`;
+        const topValue = `${y + jitterY}px`;
 
-        const size = 20 + Math.random() * 10;
-        const duration = 6.5 + Math.random() * 4.5;
-        const driftX = (Math.random() - 0.5) * 18;
-        const rotate = (Math.random() - 0.5) * 70;
-        const opacity = 0.38 + Math.random() * 0.22;
+        const size = 18 + Math.random() * 12;
+        const duration = 7 + Math.random() * 5;
+        const driftX = (Math.random() - 0.5) * 36;
+        const rotate = (Math.random() - 0.5) * 85;
+        const opacity = 0.42 + Math.random() * 0.2;
 
         setRainParticles((prev) => {
             const next = prev.length >= 40 ? prev.slice(-39) : prev;
@@ -241,9 +244,11 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
                 rawY - lastSpawnPos.current.y,
             );
 
-            // Spawn a new particle from mouse if moved enough, or if some time has passed
-            // Trail chậm: spawn thưa hơn để không chồng đống
-            if (dist > 24 || now - lastSpawnTime.current > 130) {
+            // Spawn thưa: cần di chuyển đủ xa (~56px) hoặc đợi lâu hơn khi lướt chậm
+            const movedFar = dist > 56;
+            const slowPulse =
+                now - lastSpawnTime.current > 240 && dist > 14;
+            if (movedFar || slowPulse) {
                 lastSpawnPos.current = { x: rawX, y: rawY };
                 lastSpawnTime.current = now;
                 spawnParticle(rawX, rawY);
