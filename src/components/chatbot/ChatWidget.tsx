@@ -28,6 +28,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { ChatMessageMarkdown } from "@/components/chatbot/ChatMessageMarkdown";
 
 interface Message {
     role: "user" | "assistant";
@@ -340,13 +341,21 @@ export default function ChatWidget() {
                                         )}
                                         <div
                                             className={cn(
-                                                "max-w-[min(85%,280px)] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm",
+                                                "max-w-[min(92%,300px)] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm",
                                                 msg.role === "user"
                                                     ? "rounded-br-md bg-primary text-primary-foreground"
                                                     : "rounded-bl-md border border-border/60 bg-background text-foreground",
                                             )}
                                         >
-                                            {msg.content}
+                                            {msg.role === "assistant" ? (
+                                                <ChatMessageMarkdown
+                                                    content={msg.content}
+                                                />
+                                            ) : (
+                                                <span className="whitespace-pre-wrap wrap-break-word">
+                                                    {msg.content}
+                                                </span>
+                                            )}
                                         </div>
                                         {msg.role === "user" && (
                                             <Avatar className="mt-0.5 size-8 shrink-0">
