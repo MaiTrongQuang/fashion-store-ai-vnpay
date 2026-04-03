@@ -33,6 +33,59 @@ import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
 
+type NavLinkItem = (typeof NAV_LINKS)[number];
+
+function desktopNavLinkClass(pathname: string, link: NavLinkItem) {
+    const isActive = pathname === link.href;
+    const isSale = Boolean(link.highlight);
+
+    return cn(
+        "relative cursor-pointer rounded-md px-3 py-2 text-sm font-medium outline-none",
+        "transition-colors duration-200 ease-out",
+        "motion-reduce:transition-none",
+        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "after:pointer-events-none after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:transition-transform after:duration-200 after:ease-out after:content-['']",
+        "motion-reduce:after:transition-none",
+        !isSale && [
+            "after:bg-primary",
+            isActive && "text-foreground after:scale-x-100",
+            !isActive &&
+                "text-muted-foreground hover:text-foreground hover:after:scale-x-60",
+        ],
+        isSale && [
+            "after:bg-destructive font-semibold",
+            isActive &&
+                "bg-destructive/10 text-destructive after:scale-x-100 hover:bg-destructive/15",
+            !isActive &&
+                "text-destructive hover:bg-destructive/5 hover:text-destructive/90 hover:after:scale-x-60",
+        ],
+    );
+}
+
+function mobileNavLinkClass(pathname: string, link: NavLinkItem) {
+    const isActive = pathname === link.href;
+    const isSale = Boolean(link.highlight);
+
+    return cn(
+        "flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm font-medium outline-none",
+        "transition-[color,background-color,box-shadow] duration-200 ease-out",
+        "motion-reduce:transition-none",
+        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        !isSale && [
+            isActive && "bg-primary text-primary-foreground shadow-sm",
+            !isActive &&
+                "text-muted-foreground hover:bg-accent hover:text-foreground",
+        ],
+        isSale && [
+            "font-semibold",
+            isActive &&
+                "bg-destructive/12 text-destructive shadow-sm ring-1 ring-destructive/25",
+            !isActive &&
+                "text-destructive hover:bg-destructive/8 hover:text-destructive/90",
+        ],
+    );
+}
+
 function profileFromAuthUser(authUser: SupabaseUser): Profile {
     const meta = authUser.user_metadata ?? {};
     const fullName =
@@ -200,17 +253,24 @@ export default function Header() {
                                 >
                                     {SITE_NAME}
                                 </Link>
-                                <nav className="flex flex-col gap-2 mt-4">
+                                <nav
+                                    className="flex flex-col gap-1 mt-4"
+                                    aria-label="Menu chính"
+                                >
                                     {NAV_LINKS.map((link) => (
                                         <Link
                                             key={link.href}
                                             href={link.href}
                                             onClick={() => setMobileOpen(false)}
-                                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                            aria-current={
                                                 pathname === link.href
-                                                    ? "bg-primary text-primary-foreground"
-                                                    : "hover:bg-accent"
-                                            } ${link.highlight ? "text-red-500 font-bold" : ""}`}
+                                                    ? "page"
+                                                    : undefined
+                                            }
+                                            className={mobileNavLinkClass(
+                                                pathname,
+                                                link,
+                                            )}
                                         >
                                             {link.label}
                                         </Link>
@@ -231,16 +291,20 @@ export default function Header() {
                     </Link>
 
                     {/* Desktop Nav */}
-                    <nav className="hidden md:flex items-center gap-1">
+                    <nav
+                        className="hidden md:flex items-center gap-0.5"
+                        aria-label="Menu chính"
+                    >
                         {NAV_LINKS.map((link) => (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                aria-current={
                                     pathname === link.href
-                                        ? "bg-primary text-primary-foreground"
-                                        : "hover:bg-accent text-muted-foreground hover:text-foreground"
-                                } ${link.highlight ? "text-red-500 hover:text-red-600 font-bold" : ""}`}
+                                        ? "page"
+                                        : undefined
+                                }
+                                className={desktopNavLinkClass(pathname, link)}
                             >
                                 {link.label}
                             </Link>
