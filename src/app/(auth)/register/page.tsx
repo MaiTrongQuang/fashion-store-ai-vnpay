@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useReducedMotion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { SITE_NAME } from "@/lib/constants";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthMotionSurface } from "@/components/auth/auth-success-transition";
 import { cn } from "@/lib/utils";
 
 const registerSchema = z
@@ -40,9 +42,20 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
     const router = useRouter();
+    const reducedMotion = useReducedMotion();
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [successExit, setSuccessExit] = useState(false);
+    const pendingHref = useRef<string | null>(null);
     const supabase = createClient();
+
+    const handleExitComplete = useCallback(() => {
+        const href = pendingHref.current;
+        pendingHref.current = null;
+        if (href) {
+            router.push(href);
+        }
+    }, [router]);
 
     const {
         register,
@@ -73,7 +86,12 @@ export default function RegisterPage() {
             toast.success(
                 "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.",
             );
-            router.push("/login");
+            if (reducedMotion) {
+                router.push("/login");
+                return;
+            }
+            pendingHref.current = "/login";
+            setSuccessExit(true);
         } catch {
             toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
         } finally {
@@ -83,169 +101,184 @@ export default function RegisterPage() {
 
     return (
         <AuthShell>
-            <Card className="w-full max-w-md border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
-                <CardHeader className="space-y-1 border-b border-border/60 pb-4 text-center">
-                    <Link
-                        href="/"
-                        className="text-2xl font-bold tracking-tight transition-opacity hover:opacity-80"
-                    >
-                        <span className="bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                            {SITE_NAME}
-                        </span>
-                    </Link>
-                    <CardTitle className="text-lg font-semibold">
-                        Tạo tài khoản
-                    </CardTitle>
-                    <CardDescription>
-                        Đăng ký để lưu đơn hàng và nhận ưu đãi từ LUXE Fashion.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6">
-                    <form
-                        onSubmit={handleSubmit(onSubmit)}
-                        className="space-y-4"
-                    >
-                        <div className="space-y-2">
-                            <Label htmlFor="fullName">Họ và tên</Label>
-                            <div className="relative">
-                                <User
-                                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                                    aria-hidden
-                                />
-                                <Input
-                                    id="fullName"
-                                    autoComplete="name"
-                                    placeholder="Nguyễn Văn A"
-                                    className="pl-10"
-                                    aria-invalid={!!errors.fullName}
-                                    {...register("fullName")}
-                                />
-                            </div>
-                            {errors.fullName && (
-                                <p className="text-xs text-destructive">
-                                    {errors.fullName.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <div className="relative">
-                                <Mail
-                                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                                    aria-hidden
-                                />
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    placeholder="your@email.com"
-                                    className="pl-10"
-                                    aria-invalid={!!errors.email}
-                                    {...register("email")}
-                                />
-                            </div>
-                            {errors.email && (
-                                <p className="text-xs text-destructive">
-                                    {errors.email.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Mật khẩu</Label>
-                            <div className="relative">
-                                <Lock
-                                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                                    aria-hidden
-                                />
-                                <Input
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    autoComplete="new-password"
-                                    placeholder="••••••••"
-                                    className="pl-10 pr-12"
-                                    aria-invalid={!!errors.password}
-                                    {...register("password")}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setShowPassword(!showPassword)
-                                    }
-                                    className={cn(
-                                        "absolute right-1 top-1/2 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md",
-                                        "text-muted-foreground transition-colors hover:text-foreground",
-                                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                                    )}
-                                    aria-label={
-                                        showPassword
-                                            ? "Ẩn mật khẩu"
-                                            : "Hiện mật khẩu"
-                                    }
-                                    aria-pressed={showPassword}
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="size-4" />
-                                    ) : (
-                                        <Eye className="size-4" />
-                                    )}
-                                </button>
-                            </div>
-                            {errors.password && (
-                                <p className="text-xs text-destructive">
-                                    {errors.password.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="confirmPassword">
-                                Nhập lại mật khẩu
-                            </Label>
-                            <div className="relative">
-                                <Lock
-                                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                                    aria-hidden
-                                />
-                                <Input
-                                    id="confirmPassword"
-                                    type={showPassword ? "text" : "password"}
-                                    autoComplete="new-password"
-                                    placeholder="••••••••"
-                                    className="pl-10"
-                                    aria-invalid={!!errors.confirmPassword}
-                                    {...register("confirmPassword")}
-                                />
-                            </div>
-                            {errors.confirmPassword && (
-                                <p className="text-xs text-destructive">
-                                    {errors.confirmPassword.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <Button
-                            type="submit"
-                            className="w-full"
-                            disabled={loading}
-                        >
-                            {loading ? "Đang đăng ký..." : "Đăng ký"}
-                        </Button>
-                    </form>
-                </CardContent>
-                <CardFooter className="flex flex-col gap-1 border-t border-border/60 bg-muted/30 pt-4 text-center text-sm text-muted-foreground">
-                    <span>
-                        Đã có tài khoản?{" "}
+            <AuthMotionSurface
+                exit={successExit}
+                onExitComplete={handleExitComplete}
+            >
+                <Card className="w-full border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
+                    <CardHeader className="space-y-1 border-b border-border/60 pb-4 text-center">
                         <Link
-                            href="/login"
-                            className="font-medium text-primary underline-offset-4 hover:underline"
+                            href="/"
+                            className="text-2xl font-bold tracking-tight transition-opacity hover:opacity-80"
                         >
-                            Đăng nhập
+                            <span className="bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                                {SITE_NAME}
+                            </span>
                         </Link>
-                    </span>
-                </CardFooter>
-            </Card>
+                        <CardTitle className="text-lg font-semibold">
+                            Tạo tài khoản
+                        </CardTitle>
+                        <CardDescription>
+                            Đăng ký để lưu đơn hàng và nhận ưu đãi từ LUXE Fashion.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        <form
+                            onSubmit={handleSubmit(onSubmit)}
+                            className="space-y-4"
+                        >
+                            <div className="space-y-2">
+                                <Label htmlFor="fullName">Họ và tên</Label>
+                                <div className="relative">
+                                    <User
+                                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                                        aria-hidden
+                                    />
+                                    <Input
+                                        id="fullName"
+                                        autoComplete="name"
+                                        placeholder="Nguyễn Văn A"
+                                        className="pl-10"
+                                        aria-invalid={!!errors.fullName}
+                                        {...register("fullName")}
+                                    />
+                                </div>
+                                {errors.fullName && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.fullName.message}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email</Label>
+                                <div className="relative">
+                                    <Mail
+                                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                                        aria-hidden
+                                    />
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        placeholder="your@email.com"
+                                        className="pl-10"
+                                        aria-invalid={!!errors.email}
+                                        {...register("email")}
+                                    />
+                                </div>
+                                {errors.email && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.email.message}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="password">Mật khẩu</Label>
+                                <div className="relative">
+                                    <Lock
+                                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                                        aria-hidden
+                                    />
+                                    <Input
+                                        id="password"
+                                        type={
+                                            showPassword ? "text" : "password"
+                                        }
+                                        autoComplete="new-password"
+                                        placeholder="••••••••"
+                                        className="pl-10 pr-12"
+                                        aria-invalid={!!errors.password}
+                                        {...register("password")}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setShowPassword(!showPassword)
+                                        }
+                                        className={cn(
+                                            "absolute right-1 top-1/2 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md",
+                                            "text-muted-foreground transition-colors hover:text-foreground",
+                                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                                        )}
+                                        aria-label={
+                                            showPassword
+                                                ? "Ẩn mật khẩu"
+                                                : "Hiện mật khẩu"
+                                        }
+                                        aria-pressed={showPassword}
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="size-4" />
+                                        ) : (
+                                            <Eye className="size-4" />
+                                        )}
+                                    </button>
+                                </div>
+                                {errors.password && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.password.message}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="confirmPassword">
+                                    Nhập lại mật khẩu
+                                </Label>
+                                <div className="relative">
+                                    <Lock
+                                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                                        aria-hidden
+                                    />
+                                    <Input
+                                        id="confirmPassword"
+                                        type={
+                                            showPassword ? "text" : "password"
+                                        }
+                                        autoComplete="new-password"
+                                        placeholder="••••••••"
+                                        className="pl-10"
+                                        aria-invalid={
+                                            !!errors.confirmPassword
+                                        }
+                                        {...register("confirmPassword")}
+                                    />
+                                </div>
+                                {errors.confirmPassword && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.confirmPassword.message}
+                                    </p>
+                                )}
+                            </div>
+
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                disabled={loading || successExit}
+                            >
+                                {successExit
+                                    ? "Đang chuyển trang..."
+                                    : loading
+                                      ? "Đang đăng ký..."
+                                      : "Đăng ký"}
+                            </Button>
+                        </form>
+                    </CardContent>
+                    <CardFooter className="flex flex-col gap-1 border-t border-border/60 bg-muted/30 pt-4 text-center text-sm text-muted-foreground">
+                        <span>
+                            Đã có tài khoản?{" "}
+                            <Link
+                                href="/login"
+                                className="font-medium text-primary underline-offset-4 hover:underline"
+                            >
+                                Đăng nhập
+                            </Link>
+                        </span>
+                    </CardFooter>
+                </Card>
+            </AuthMotionSurface>
         </AuthShell>
     );
 }

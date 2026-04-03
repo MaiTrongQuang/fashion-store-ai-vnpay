@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -22,8 +22,10 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { SITE_NAME } from "@/lib/constants";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthMotionSurface } from "@/components/auth/auth-success-transition";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "framer-motion";
 
 const loginSchema = z.object({
     email: z.string().email("Email không hợp lệ"),
@@ -36,9 +38,21 @@ function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get("redirect") || "/";
+    const reducedMotion = useReducedMotion();
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [successExit, setSuccessExit] = useState(false);
+    const pendingHref = useRef<string | null>(null);
     const supabase = createClient();
+
+    const handleExitComplete = useCallback(() => {
+        const href = pendingHref.current;
+        pendingHref.current = null;
+        if (href) {
+            router.push(href);
+            router.refresh();
+        }
+    }, [router]);
 
     const {
         register,
@@ -66,8 +80,13 @@ function LoginForm() {
             }
 
             toast.success("Đăng nhập thành công!");
-            router.push(redirect);
-            router.refresh();
+            if (reducedMotion) {
+                router.push(redirect);
+                router.refresh();
+                return;
+            }
+            pendingHref.current = redirect;
+            setSuccessExit(true);
         } catch {
             toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
         } finally {
@@ -77,7 +96,11 @@ function LoginForm() {
 
     return (
         <AuthShell>
-            <Card className="w-full max-w-md border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
+            <AuthMotionSurface
+                exit={successExit}
+                onExitComplete={handleExitComplete}
+            >
+                <Card className="w-full border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
                 <CardHeader className="space-y-1 border-b border-border/60 pb-4 text-center">
                     <Link
                         href="/"
@@ -181,9 +204,13 @@ function LoginForm() {
                         <Button
                             type="submit"
                             className="w-full"
-                            disabled={loading}
+                            disabled={loading || successExit}
                         >
-                            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+                            {successExit
+                                ? "Đang chuyển trang..."
+                                : loading
+                                  ? "Đang đăng nhập..."
+                                  : "Đăng nhập"}
                         </Button>
                     </form>
                 </CardContent>
@@ -199,6 +226,7 @@ function LoginForm() {
                     </span>
                 </CardFooter>
             </Card>
+            </AuthMotionSurface>
         </AuthShell>
     );
 }
