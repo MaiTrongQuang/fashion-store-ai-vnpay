@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -14,12 +14,16 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { SITE_NAME } from "@/lib/constants";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
     email: z.string().email("Email không hợp lệ"),
@@ -28,7 +32,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get("redirect") || "/";
@@ -72,23 +76,25 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-background to-accent/30">
-            <Card className="w-full max-w-md border-0 shadow-2xl">
-                <CardHeader className="text-center space-y-2">
+        <AuthShell>
+            <Card className="w-full max-w-md border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
+                <CardHeader className="space-y-1 border-b border-border/60 pb-4 text-center">
                     <Link
                         href="/"
-                        className="text-2xl font-bold tracking-tight mx-auto"
+                        className="text-2xl font-bold tracking-tight transition-opacity hover:opacity-80"
                     >
-                        <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                        <span className="bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                             {SITE_NAME}
                         </span>
                     </Link>
-                    <CardTitle className="text-xl">Đăng Nhập</CardTitle>
+                    <CardTitle className="text-lg font-semibold">
+                        Đăng nhập
+                    </CardTitle>
                     <CardDescription>
-                        Chào mừng bạn trở lại! Đăng nhập để tiếp tục mua sắm.
+                        Chào mừng bạn trở lại — đăng nhập để tiếp tục mua sắm.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className="space-y-4"
@@ -96,12 +102,17 @@ export default function LoginPage() {
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Mail
+                                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                                    aria-hidden
+                                />
                                 <Input
                                     id="email"
                                     type="email"
+                                    autoComplete="email"
                                     placeholder="your@email.com"
                                     className="pl-10"
+                                    aria-invalid={!!errors.email}
                                     {...register("email")}
                                 />
                             </div>
@@ -113,22 +124,27 @@ export default function LoginPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between gap-2">
                                 <Label htmlFor="password">Mật khẩu</Label>
                                 <Link
                                     href="/forgot-password"
-                                    className="text-xs text-primary hover:underline"
+                                    className="text-xs font-medium text-primary underline-offset-4 hover:underline"
                                 >
                                     Quên mật khẩu?
                                 </Link>
                             </div>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Lock
+                                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                                    aria-hidden
+                                />
                                 <Input
                                     id="password"
                                     type={showPassword ? "text" : "password"}
+                                    autoComplete="current-password"
                                     placeholder="••••••••"
-                                    className="pl-10 pr-10"
+                                    className="pl-10 pr-12"
+                                    aria-invalid={!!errors.password}
                                     {...register("password")}
                                 />
                                 <button
@@ -136,12 +152,22 @@ export default function LoginPage() {
                                     onClick={() =>
                                         setShowPassword(!showPassword)
                                     }
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    className={cn(
+                                        "absolute right-1 top-1/2 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md",
+                                        "text-muted-foreground transition-colors hover:text-foreground",
+                                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                                    )}
+                                    aria-label={
+                                        showPassword
+                                            ? "Ẩn mật khẩu"
+                                            : "Hiện mật khẩu"
+                                    }
+                                    aria-pressed={showPassword}
                                 >
                                     {showPassword ? (
-                                        <EyeOff className="h-4 w-4" />
+                                        <EyeOff className="size-4" />
                                     ) : (
-                                        <Eye className="h-4 w-4" />
+                                        <Eye className="size-4" />
                                     )}
                                 </button>
                             </div>
@@ -157,21 +183,55 @@ export default function LoginPage() {
                             className="w-full"
                             disabled={loading}
                         >
-                            {loading ? "Đang đăng nhập..." : "Đăng Nhập"}
+                            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
                         </Button>
                     </form>
-
-                    <p className="text-center text-sm text-muted-foreground mt-6">
+                </CardContent>
+                <CardFooter className="flex flex-col gap-1 border-t border-border/60 bg-muted/30 pt-4 text-center text-sm text-muted-foreground">
+                    <span>
                         Chưa có tài khoản?{" "}
                         <Link
                             href="/register"
-                            className="text-primary font-medium hover:underline"
+                            className="font-medium text-primary underline-offset-4 hover:underline"
                         >
                             Đăng ký ngay
                         </Link>
-                    </p>
+                    </span>
+                </CardFooter>
+            </Card>
+        </AuthShell>
+    );
+}
+
+function LoginPageFallback() {
+    return (
+        <AuthShell>
+            <Card className="w-full max-w-md border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
+                <CardHeader className="space-y-3 border-b border-border/60 pb-4 text-center">
+                    <Skeleton className="mx-auto h-8 w-44" />
+                    <Skeleton className="mx-auto h-5 w-32" />
+                    <Skeleton className="mx-auto h-4 w-full max-w-xs" />
+                </CardHeader>
+                <CardContent className="space-y-4 pt-6">
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-14" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <Skeleton className="h-10 w-full" />
                 </CardContent>
             </Card>
-        </div>
+        </AuthShell>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<LoginPageFallback />}>
+            <LoginForm />
+        </Suspense>
     );
 }

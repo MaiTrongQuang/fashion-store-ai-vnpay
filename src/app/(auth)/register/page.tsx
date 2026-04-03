@@ -14,12 +14,15 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { SITE_NAME } from "@/lib/constants";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { cn } from "@/lib/utils";
 
 const registerSchema = z
     .object({
@@ -79,23 +82,25 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-background to-accent/30">
-            <Card className="w-full max-w-md border-0 shadow-2xl">
-                <CardHeader className="text-center space-y-2">
+        <AuthShell>
+            <Card className="w-full max-w-md border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
+                <CardHeader className="space-y-1 border-b border-border/60 pb-4 text-center">
                     <Link
                         href="/"
-                        className="text-2xl font-bold tracking-tight mx-auto"
+                        className="text-2xl font-bold tracking-tight transition-opacity hover:opacity-80"
                     >
-                        <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                        <span className="bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                             {SITE_NAME}
                         </span>
                     </Link>
-                    <CardTitle className="text-xl">Đăng Ký</CardTitle>
+                    <CardTitle className="text-lg font-semibold">
+                        Tạo tài khoản
+                    </CardTitle>
                     <CardDescription>
-                        Tạo tài khoản để bắt đầu mua sắm thời trang.
+                        Đăng ký để lưu đơn hàng và nhận ưu đãi từ LUXE Fashion.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className="space-y-4"
@@ -103,11 +108,16 @@ export default function RegisterPage() {
                         <div className="space-y-2">
                             <Label htmlFor="fullName">Họ và tên</Label>
                             <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <User
+                                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                                    aria-hidden
+                                />
                                 <Input
                                     id="fullName"
+                                    autoComplete="name"
                                     placeholder="Nguyễn Văn A"
                                     className="pl-10"
+                                    aria-invalid={!!errors.fullName}
                                     {...register("fullName")}
                                 />
                             </div>
@@ -121,12 +131,17 @@ export default function RegisterPage() {
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Mail
+                                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                                    aria-hidden
+                                />
                                 <Input
                                     id="email"
                                     type="email"
+                                    autoComplete="email"
                                     placeholder="your@email.com"
                                     className="pl-10"
+                                    aria-invalid={!!errors.email}
                                     {...register("email")}
                                 />
                             </div>
@@ -140,12 +155,17 @@ export default function RegisterPage() {
                         <div className="space-y-2">
                             <Label htmlFor="password">Mật khẩu</Label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Lock
+                                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                                    aria-hidden
+                                />
                                 <Input
                                     id="password"
                                     type={showPassword ? "text" : "password"}
+                                    autoComplete="new-password"
                                     placeholder="••••••••"
-                                    className="pl-10 pr-10"
+                                    className="pl-10 pr-12"
+                                    aria-invalid={!!errors.password}
                                     {...register("password")}
                                 />
                                 <button
@@ -153,12 +173,22 @@ export default function RegisterPage() {
                                     onClick={() =>
                                         setShowPassword(!showPassword)
                                     }
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    className={cn(
+                                        "absolute right-1 top-1/2 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md",
+                                        "text-muted-foreground transition-colors hover:text-foreground",
+                                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                                    )}
+                                    aria-label={
+                                        showPassword
+                                            ? "Ẩn mật khẩu"
+                                            : "Hiện mật khẩu"
+                                    }
+                                    aria-pressed={showPassword}
                                 >
                                     {showPassword ? (
-                                        <EyeOff className="h-4 w-4" />
+                                        <EyeOff className="size-4" />
                                     ) : (
-                                        <Eye className="h-4 w-4" />
+                                        <Eye className="size-4" />
                                     )}
                                 </button>
                             </div>
@@ -174,12 +204,17 @@ export default function RegisterPage() {
                                 Nhập lại mật khẩu
                             </Label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Lock
+                                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                                    aria-hidden
+                                />
                                 <Input
                                     id="confirmPassword"
                                     type={showPassword ? "text" : "password"}
+                                    autoComplete="new-password"
                                     placeholder="••••••••"
                                     className="pl-10"
+                                    aria-invalid={!!errors.confirmPassword}
                                     {...register("confirmPassword")}
                                 />
                             </div>
@@ -195,21 +230,22 @@ export default function RegisterPage() {
                             className="w-full"
                             disabled={loading}
                         >
-                            {loading ? "Đang đăng ký..." : "Đăng Ký"}
+                            {loading ? "Đang đăng ký..." : "Đăng ký"}
                         </Button>
                     </form>
-
-                    <p className="text-center text-sm text-muted-foreground mt-6">
+                </CardContent>
+                <CardFooter className="flex flex-col gap-1 border-t border-border/60 bg-muted/30 pt-4 text-center text-sm text-muted-foreground">
+                    <span>
                         Đã có tài khoản?{" "}
                         <Link
                             href="/login"
-                            className="text-primary font-medium hover:underline"
+                            className="font-medium text-primary underline-offset-4 hover:underline"
                         >
                             Đăng nhập
                         </Link>
-                    </p>
-                </CardContent>
+                    </span>
+                </CardFooter>
             </Card>
-        </div>
+        </AuthShell>
     );
 }
