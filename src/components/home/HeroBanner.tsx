@@ -171,41 +171,21 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
     const [rainParticles, setRainParticles] = useState<RainParticle[]>([]);
 
     const particleIdRef = useRef(0);
-    const spawnIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
-        null,
-    );
     const lastSpawnPos = useRef({ x: -1000, y: -1000 });
     const lastSpawnTime = useRef(0);
 
-    const spawnParticle = useCallback((x?: number, y?: number) => {
+    const spawnParticle = useCallback((x: number, y: number) => {
         const id = particleIdRef.current++;
         const iconIndex = Math.floor(Math.random() * RAIN_ICONS.length);
 
-        const isMouse =
-            typeof x === "number" &&
-            typeof y === "number";
-        // Chuột: bắt đầu ngay dưới con trỏ (cùng cột X) — trail rơi chậm xuống dưới
-        const leftValue = isMouse ? `${x}px` : `${Math.random() * 100}%`;
-        const topValue = isMouse
-            ? `${y + 8 + Math.random() * 14}px`
-            : `-40px`;
+        const leftValue = `${x}px`;
+        const topValue = `${y + 8 + Math.random() * 14}px`;
 
-        const size = isMouse
-            ? 20 + Math.random() * 10
-            : 18 + Math.random() * 14;
-        // Trail chuột: chậm hơn rõ rệt; mưa nền: vừa phải
-        const duration = isMouse
-            ? 6.5 + Math.random() * 4.5
-            : 3.2 + Math.random() * 2.8;
-        const driftX = isMouse
-            ? (Math.random() - 0.5) * 18
-            : (Math.random() - 0.5) * 60;
-        const rotate = isMouse
-            ? (Math.random() - 0.5) * 70
-            : (Math.random() - 0.5) * 180;
-        const opacity = isMouse
-            ? 0.38 + Math.random() * 0.22
-            : 0.15 + Math.random() * 0.35;
+        const size = 20 + Math.random() * 10;
+        const duration = 6.5 + Math.random() * 4.5;
+        const driftX = (Math.random() - 0.5) * 18;
+        const rotate = (Math.random() - 0.5) * 70;
+        const opacity = 0.38 + Math.random() * 0.22;
 
         setRainParticles((prev) => {
             const next = prev.length >= 40 ? prev.slice(-39) : prev;
@@ -222,27 +202,21 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
                     rotate,
                     iconIndex,
                     opacity,
-                    cursorTrail: isMouse,
+                    cursorTrail: true,
                 },
             ];
         });
     }, []);
 
-    // ── Spawn rain particles at regular intervals ───────────────────────
+    // Tránh tồn đọng icon khi chuyển tab / ẩn trang lâu
     useEffect(() => {
-        // Spawn initial batch staggered
-        for (let i = 0; i < 6; i++) {
-            setTimeout(() => spawnParticle(), i * 300);
-        }
-
-        // Then keep spawning background rain at a steady rate
-        spawnIntervalRef.current = setInterval(() => spawnParticle(), 1000);
-
-        return () => {
-            if (spawnIntervalRef.current)
-                clearInterval(spawnIntervalRef.current);
+        const onVisibility = () => {
+            if (document.hidden) setRainParticles([]);
         };
-    }, [spawnParticle]);
+        document.addEventListener("visibilitychange", onVisibility);
+        return () =>
+            document.removeEventListener("visibilitychange", onVisibility);
+    }, []);
 
     const handleParticleDone = useCallback((id: number) => {
         setRainParticles((prev) => prev.filter((p) => p.id !== id));
@@ -286,13 +260,14 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
             onMouseLeave={() => {
                 setIsHovered(false);
                 setMouseOffset({ x: 0, y: 0 });
+                setRainParticles([]);
             }}
         >
             {/* Background should be first to stay behind icons */}
             <DotPattern className="absolute inset-0 opacity-50" />
             <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-background" />
 
-            {/* Auto-rain icons falling from top */}
+            {/* Icon trail theo con trỏ (không mưa nền tự động) */}
             <IconRainOverlay
                 particles={rainParticles}
                 onParticleDone={handleParticleDone}
