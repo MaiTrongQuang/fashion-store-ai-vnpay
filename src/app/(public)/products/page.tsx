@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import ProductCard from "@/components/product/ProductCard";
 import ProductFilters from "@/components/product/ProductFilters";
+import Link from "next/link";
+import { Flame, Star, Sparkles, LayoutGrid } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -18,6 +20,7 @@ interface Props {
         page?: string;
         featured?: string;
         new?: string;
+        sale?: string;
         q?: string;
     }>;
 }
@@ -69,6 +72,9 @@ export default async function ProductsPage({ searchParams }: Props) {
     if (params.new === "true") {
         query = query.eq("is_new", true);
     }
+    if (params.sale === "true") {
+        query = query.not("sale_price", "is", null);
+    }
     if (params.q) {
         query = query.ilike("name", `%${params.q}%`);
     }
@@ -111,9 +117,9 @@ export default async function ProductsPage({ searchParams }: Props) {
         <div className="container mx-auto px-4 py-8">
             {/* Breadcrumb */}
             <nav className="text-sm text-muted-foreground mb-6">
-                <a href="/" className="hover:text-primary">
+                <Link href="/" className="hover:text-primary">
                     Trang chủ
-                </a>
+                </Link>
                 <span className="mx-2">/</span>
                 <span className="text-foreground font-medium">Sản phẩm</span>
             </nav>
@@ -129,6 +135,54 @@ export default async function ProductsPage({ searchParams }: Props) {
 
                 {/* Products Grid */}
                 <div className="flex-1">
+                    {/* Quick Filter Tabs */}
+                    <div className="flex flex-wrap items-center gap-2 mb-6">
+                        <Link
+                            href="/products"
+                            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                !params.sale && !params.featured && !params.new
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "bg-accent hover:bg-accent/80 text-foreground"
+                            }`}
+                        >
+                            <LayoutGrid className="h-3.5 w-3.5" />
+                            Tất cả
+                        </Link>
+                        <Link
+                            href="/products?sale=true"
+                            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                params.sale === "true"
+                                    ? "bg-red-500 text-white shadow-sm"
+                                    : "bg-accent hover:bg-accent/80 text-foreground"
+                            }`}
+                        >
+                            <Flame className="h-3.5 w-3.5" />
+                            Đang giảm giá
+                        </Link>
+                        <Link
+                            href="/products?featured=true"
+                            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                params.featured === "true"
+                                    ? "bg-amber-500 text-white shadow-sm"
+                                    : "bg-accent hover:bg-accent/80 text-foreground"
+                            }`}
+                        >
+                            <Star className="h-3.5 w-3.5" />
+                            Nổi bật
+                        </Link>
+                        <Link
+                            href="/products?new=true"
+                            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                params.new === "true"
+                                    ? "bg-emerald-500 text-white shadow-sm"
+                                    : "bg-accent hover:bg-accent/80 text-foreground"
+                            }`}
+                        >
+                            <Sparkles className="h-3.5 w-3.5" />
+                            Hàng mới
+                        </Link>
+                    </div>
+
                     <div className="flex items-center justify-between mb-6">
                         <p className="text-sm text-muted-foreground">
                             Hiển thị{" "}
