@@ -365,30 +365,28 @@ export default function ProductInfo({
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-3 pt-2">
-                <div className="flex gap-3">
-                    <Button
-                        size="lg"
-                        variant="outline"
-                        className="flex-1 h-12 text-base font-semibold border-primary text-primary hover:bg-primary/5"
-                        onClick={handleAddToCart}
-                        disabled={loading || buyNowLoading}
-                    >
-                        <ShoppingBag className="h-5 w-5 mr-2" />
-                        {loading ? "Đang thêm..." : "Thêm vào giỏ"}
-                    </Button>
-                    <Button variant="outline" size="lg" className="h-12">
-                        <Heart className="h-5 w-5" />
-                    </Button>
-                </div>
+            <div className="flex gap-3 pt-2">
                 <Button
                     size="lg"
-                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary/75 shadow-md hover:shadow-lg transition-all"
+                    variant="outline"
+                    className="flex-1 h-12 text-base font-semibold border-primary text-primary hover:bg-primary/5"
+                    onClick={handleAddToCart}
+                    disabled={loading || buyNowLoading}
+                >
+                    <ShoppingBag className="h-5 w-5 mr-2" />
+                    {loading ? "Đang thêm..." : "Thêm vào giỏ"}
+                </Button>
+                <Button
+                    size="lg"
+                    className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary/75 shadow-md hover:shadow-lg transition-all"
                     onClick={handleBuyNow}
                     disabled={loading || buyNowLoading}
                 >
                     <Zap className="h-5 w-5 mr-2" />
                     {buyNowLoading ? "Đang xử lý..." : "Mua Ngay"}
+                </Button>
+                <Button variant="outline" size="lg" className="h-12">
+                    <Heart className="h-5 w-5" />
                 </Button>
             </div>
 
