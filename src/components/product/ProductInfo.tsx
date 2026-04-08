@@ -11,6 +11,8 @@ import {
     Truck,
     RotateCcw,
     Shield,
+    Zap,
+    Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,90 +64,114 @@ export default function ProductInfo({
             v.size === selectedSize && v.color === selectedColor && v.is_active,
     );
 
-    const currentPrice = selectedVariant
-        ? selectedVariant.price
-        : product.sale_price || product.base_price;
+    // Use stable product-level pricing to avoid price jumps on color/size select
+    const displayPrice = product.sale_price || product.base_price;
+    const currentPrice = displayPrice;
 
     const discount = product.sale_price
         ? getDiscountPercent(product.base_price, product.sale_price)
         : 0;
 
-    const handleAddToCart = async () => {
+    // Shared logic: validate selection & add item to cart, returns true on success
+    const addItemToCart = async (): Promise<boolean> => {
         if (!selectedSize || !selectedColor) {
             toast.error("Vui lòng chọn size và màu sắc");
-            return;
+            return false;
         }
 
         if (!selectedVariant || selectedVariant.stock < quantity) {
             toast.error("Sản phẩm đã hết hàng hoặc không đủ số lượng");
-            return;
+            return false;
         }
 
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+            toast.error("Vui lòng đăng nhập để tiếp tục");
+            router.push("/login");
+            return false;
+        }
+
+        // Get or create cart
+        let { data: cart } = await supabase
+            .from("carts")
+            .select("id")
+            .eq("user_id", user.id)
+            .single();
+
+        if (!cart) {
+            const { data: newCart } = await supabase
+                .from("carts")
+                .insert({ user_id: user.id })
+                .select("id")
+                .single();
+            cart = newCart;
+        }
+
+        if (!cart) {
+            toast.error("Không thể tạo giỏ hàng");
+            return false;
+        }
+
+        // Check existing item
+        const { data: existingItem } = await supabase
+            .from("cart_items")
+            .select("id, quantity")
+            .eq("cart_id", cart.id)
+            .eq("variant_id", selectedVariant.id)
+            .single();
+
+        if (existingItem) {
+            const newQty = existingItem.quantity + quantity;
+            if (newQty > selectedVariant.stock) {
+                toast.error("Không đủ hàng trong kho");
+                return false;
+            }
+            await supabase
+                .from("cart_items")
+                .update({ quantity: newQty })
+                .eq("id", existingItem.id);
+        } else {
+            await supabase.from("cart_items").insert({
+                cart_id: cart.id,
+                variant_id: selectedVariant.id,
+                quantity,
+            });
+        }
+
+        return true;
+    };
+
+    const [buyNowLoading, setBuyNowLoading] = useState(false);
+
+    const handleAddToCart = async () => {
         setLoading(true);
         try {
-            const {
-                data: { user },
-            } = await supabase.auth.getUser();
-
-            if (!user) {
-                toast.error("Vui lòng đăng nhập để thêm vào giỏ hàng");
-                router.push("/login");
-                return;
+            const success = await addItemToCart();
+            if (success) {
+                toast.success("Đã thêm vào giỏ hàng!");
+                router.refresh();
             }
-
-            // Get or create cart
-            let { data: cart } = await supabase
-                .from("carts")
-                .select("id")
-                .eq("user_id", user.id)
-                .single();
-
-            if (!cart) {
-                const { data: newCart } = await supabase
-                    .from("carts")
-                    .insert({ user_id: user.id })
-                    .select("id")
-                    .single();
-                cart = newCart;
-            }
-
-            if (!cart) {
-                toast.error("Không thể tạo giỏ hàng");
-                return;
-            }
-
-            // Check existing item
-            const { data: existingItem } = await supabase
-                .from("cart_items")
-                .select("id, quantity")
-                .eq("cart_id", cart.id)
-                .eq("variant_id", selectedVariant.id)
-                .single();
-
-            if (existingItem) {
-                const newQty = existingItem.quantity + quantity;
-                if (newQty > selectedVariant.stock) {
-                    toast.error("Không đủ hàng trong kho");
-                    return;
-                }
-                await supabase
-                    .from("cart_items")
-                    .update({ quantity: newQty })
-                    .eq("id", existingItem.id);
-            } else {
-                await supabase.from("cart_items").insert({
-                    cart_id: cart.id,
-                    variant_id: selectedVariant.id,
-                    quantity,
-                });
-            }
-
-            toast.success("Đã thêm vào giỏ hàng!");
-            router.refresh();
         } catch {
             toast.error("Có lỗi xảy ra");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleBuyNow = async () => {
+        setBuyNowLoading(true);
+        try {
+            const success = await addItemToCart();
+            if (success) {
+                router.push("/checkout");
+            }
+        } catch {
+            toast.error("Có lỗi xảy ra");
+        } finally {
+            setBuyNowLoading(false);
         }
     };
 
@@ -210,20 +236,42 @@ export default function ProductInfo({
                             {selectedColor || "Chưa chọn"}
                         </span>
                     </Label>
-                    <div className="flex gap-2 flex-wrap">
-                        {colors.map((color) => (
-                            <button
-                                key={color.name}
-                                onClick={() => setSelectedColor(color.name)}
-                                className={`w-10 h-10 rounded-full border-2 transition-all ${
-                                    selectedColor === color.name
-                                        ? "border-primary scale-110 shadow-lg"
-                                        : "border-muted hover:border-primary/50"
-                                }`}
-                                style={{ backgroundColor: color.hex }}
-                                title={color.name}
-                            />
-                        ))}
+                    <div className="flex gap-2.5 flex-wrap">
+                        {colors.map((color) => {
+                            const isSelected = selectedColor === color.name;
+                            const isLightColor =
+                                color.hex.toLowerCase() === "#fff" ||
+                                color.hex.toLowerCase() === "#ffffff" ||
+                                color.hex.toLowerCase() === "#fafafa" ||
+                                color.hex.toLowerCase() === "#f5f5f5";
+                            return (
+                                <button
+                                    key={color.name}
+                                    onClick={() =>
+                                        setSelectedColor(color.name)
+                                    }
+                                    className={`relative w-10 h-10 rounded-full transition-all duration-200 ${
+                                        isSelected
+                                            ? "ring-2 ring-primary ring-offset-2 scale-110 shadow-md"
+                                            : "ring-1 ring-border hover:ring-primary/60 hover:scale-105"
+                                    }`}
+                                    style={{ backgroundColor: color.hex }}
+                                    title={color.name}
+                                    aria-label={`Chọn màu ${color.name}`}
+                                >
+                                    {isSelected && (
+                                        <Check
+                                            className={`absolute inset-0 m-auto h-4 w-4 ${
+                                                isLightColor
+                                                    ? "text-gray-700"
+                                                    : "text-white"
+                                            }`}
+                                            strokeWidth={3}
+                                        />
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             )}
@@ -317,18 +365,30 @@ export default function ProductInfo({
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col gap-3 pt-2">
+                <div className="flex gap-3">
+                    <Button
+                        size="lg"
+                        variant="outline"
+                        className="flex-1 h-12 text-base font-semibold border-primary text-primary hover:bg-primary/5"
+                        onClick={handleAddToCart}
+                        disabled={loading || buyNowLoading}
+                    >
+                        <ShoppingBag className="h-5 w-5 mr-2" />
+                        {loading ? "Đang thêm..." : "Thêm vào giỏ"}
+                    </Button>
+                    <Button variant="outline" size="lg" className="h-12">
+                        <Heart className="h-5 w-5" />
+                    </Button>
+                </div>
                 <Button
                     size="lg"
-                    className="flex-1 h-12 text-base font-semibold"
-                    onClick={handleAddToCart}
-                    disabled={loading}
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary/75 shadow-md hover:shadow-lg transition-all"
+                    onClick={handleBuyNow}
+                    disabled={loading || buyNowLoading}
                 >
-                    <ShoppingBag className="h-5 w-5 mr-2" />
-                    {loading ? "Đang thêm..." : "Thêm vào giỏ hàng"}
-                </Button>
-                <Button variant="outline" size="lg" className="h-12">
-                    <Heart className="h-5 w-5" />
+                    <Zap className="h-5 w-5 mr-2" />
+                    {buyNowLoading ? "Đang xử lý..." : "Mua Ngay"}
                 </Button>
             </div>
 
