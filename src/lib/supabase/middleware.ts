@@ -25,6 +25,21 @@ export async function updateSession(request: NextRequest) {
         return supabaseResponse;
     }
 
+    // Performance optimization: only run auth checks for routes that need them.
+    // Public routes (products, collections, about, contact, etc.) skip getUser()
+    // entirely, saving ~200-500ms per navigation.
+    const pathname = request.nextUrl.pathname;
+    const needsAuth =
+        pathname.startsWith("/account") ||
+        pathname.startsWith("/admin") ||
+        pathname === "/login" ||
+        pathname === "/register" ||
+        pathname.startsWith("/checkout");
+
+    if (!needsAuth) {
+        return supabaseResponse;
+    }
+
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -53,15 +68,15 @@ export async function updateSession(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     // Protect account routes
-    if (!user && request.nextUrl.pathname.startsWith("/account")) {
+    if (!user && pathname.startsWith("/account")) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
-        url.searchParams.set("redirect", request.nextUrl.pathname);
+        url.searchParams.set("redirect", pathname);
         return NextResponse.redirect(url);
     }
 
     // Protect admin routes
-    if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (pathname.startsWith("/admin")) {
         if (!user) {
             const url = request.nextUrl.clone();
             url.pathname = "/login";
@@ -84,8 +99,8 @@ export async function updateSession(request: NextRequest) {
     // Redirect logged-in users away from auth pages
     if (
         user &&
-        (request.nextUrl.pathname === "/login" ||
-            request.nextUrl.pathname === "/register")
+        (pathname === "/login" ||
+            pathname === "/register")
     ) {
         const url = request.nextUrl.clone();
         url.pathname = "/";

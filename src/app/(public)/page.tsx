@@ -20,43 +20,41 @@ export const metadata: Metadata = {
 export default async function HomePage() {
     const supabase = await createClient();
 
+    // Optimized: chỉ select fields cần thiết để giảm data transfer
+    const productSelect =
+        "id, name, slug, base_price, sale_price, is_new, is_featured, tags, category:categories(name, slug), brand:brands(name, slug), images:product_images(url, alt, is_primary, sort_order)";
+
     const [bannersRes, featuredRes, newRes, categoriesRes, saleRes, bestRes] =
         await Promise.all([
             supabase
                 .from("banners")
-                .select("*")
+                .select("id, title, subtitle, image_url, link_url, sort_order")
                 .eq("is_active", true)
                 .order("sort_order"),
             supabase
                 .from("products")
-                .select(
-                    "*, category:categories(*), brand:brands(*), images:product_images(*)",
-                )
+                .select(productSelect)
                 .eq("is_active", true)
                 .eq("is_featured", true)
                 .order("created_at", { ascending: false })
                 .limit(8),
             supabase
                 .from("products")
-                .select(
-                    "*, category:categories(*), brand:brands(*), images:product_images(*)",
-                )
+                .select(productSelect)
                 .eq("is_active", true)
                 .eq("is_new", true)
                 .order("created_at", { ascending: false })
                 .limit(8),
             supabase
                 .from("categories")
-                .select("*")
+                .select("id, name, slug, image_url, sort_order")
                 .eq("is_active", true)
                 .is("parent_id", null)
                 .order("sort_order"),
             // Sale products: có sale_price
             supabase
                 .from("products")
-                .select(
-                    "*, category:categories(*), brand:brands(*), images:product_images(*)",
-                )
+                .select(productSelect)
                 .eq("is_active", true)
                 .not("sale_price", "is", null)
                 .order("created_at", { ascending: false })
@@ -64,9 +62,7 @@ export default async function HomePage() {
             // Best sellers: lấy theo updated_at (giả lập popular)
             supabase
                 .from("products")
-                .select(
-                    "*, category:categories(*), brand:brands(*), images:product_images(*)",
-                )
+                .select(productSelect)
                 .eq("is_active", true)
                 .order("updated_at", { ascending: false })
                 .limit(8),

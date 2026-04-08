@@ -12,6 +12,7 @@ export function DotPattern({
     className,
     ...props
 }: any) {
+    const id = React.useId();
     return (
         <svg
             aria-hidden="true"
@@ -23,7 +24,7 @@ export function DotPattern({
         >
             <defs>
                 <pattern
-                    id="dot-pattern"
+                    id={id}
                     width={width}
                     height={height}
                     patternUnits="userSpaceOnUse"
@@ -31,14 +32,14 @@ export function DotPattern({
                     x={x}
                     y={y}
                 >
-                    <circle id="pattern-circle" cx={cx} cy={cy} r={cr} />
+                    <circle cx={cx} cy={cy} r={cr} />
                 </pattern>
             </defs>
             <rect
                 width="100%"
                 height="100%"
                 strokeWidth={0}
-                fill="url(#dot-pattern)"
+                fill={`url(#${id})`}
             />
         </svg>
     );

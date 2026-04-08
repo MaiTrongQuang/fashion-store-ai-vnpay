@@ -3,21 +3,24 @@ import ProductCard from "@/components/product/ProductCard";
 import ProductFilters from "@/components/product/ProductFilters";
 import Link from "next/link";
 import {
-    Flame,
-    Star,
-    Sparkles,
     LayoutGrid,
     ChevronRight,
     PackageSearch,
+    Heart,
+    Flame,
+    Star,
+    Sparkles,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { DotPattern } from "@/components/ui/backgrounds";
 import { cn } from "@/lib/utils";
+import { SITE_NAME } from "@/lib/constants";
 import type { Brand, Category } from "@/lib/types";
 
 export const metadata: Metadata = {
-    title: "Sản Phẩm",
-    description: "Khám phá bộ sưu tập thời trang đa dạng tại LUXE Fashion",
+    title: `Thời Trang Nữ | ${SITE_NAME}`,
+    description:
+        "Khám phá bộ sưu tập thời trang nữ mới nhất - Thanh lịch, nữ tính, tự tin toả sáng tại LUXE Fashion",
 };
 
 interface Props {
@@ -31,7 +34,6 @@ interface Props {
         featured?: string;
         new?: string;
         sale?: string;
-        q?: string;
     }>;
 }
 
@@ -45,11 +47,11 @@ type SearchParams = {
     featured?: string;
     new?: string;
     sale?: string;
-    q?: string;
 };
 
-/** Build query string; pass `null` in patch to remove a key from base. */
-function buildProductsQuery(
+const BASE_PATH = "/collections/nu";
+
+function buildQuery(
     base: SearchParams,
     patch: Partial<Record<string, string | null | undefined>> = {},
 ): string {
@@ -67,21 +69,11 @@ function buildProductsQuery(
             merged[key] = value;
         }
     }
-    if (merged.page === "1") {
-        delete merged.page;
-    }
+    if (merged.page === "1") delete merged.page;
     const qs = new URLSearchParams(merged).toString();
-    return qs ? `?${qs}` : "";
+    return qs ? `${BASE_PATH}?${qs}` : BASE_PATH;
 }
 
-function hrefProducts(
-    base: SearchParams,
-    patch: Partial<Record<string, string | null | undefined>> = {},
-): string {
-    return `/products${buildProductsQuery(base, patch)}`;
-}
-
-/** Giữ category/brand/sort/giá/tìm kiếm; bỏ lọc nhanh sale/featured/new. */
 function withoutQuickFilters(p: SearchParams): SearchParams {
     const rest: SearchParams = { ...p };
     delete rest.sale;
@@ -90,35 +82,39 @@ function withoutQuickFilters(p: SearchParams): SearchParams {
     return rest;
 }
 
-function getPaginationItems(current: number, total: number): (number | "ellipsis")[] {
-    if (total <= 7) {
-        return Array.from({ length: total }, (_, i) => i + 1);
-    }
+function getPaginationItems(
+    current: number,
+    total: number,
+): (number | "ellipsis")[] {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
     const items: (number | "ellipsis")[] = [];
     const showLeftEllipsis = current > 3;
     const showRightEllipsis = current < total - 2;
-
     items.push(1);
     if (showLeftEllipsis) items.push("ellipsis");
-
     const start = Math.max(2, current - 1);
     const end = Math.min(total - 1, current + 1);
     for (let p = start; p <= end; p++) {
         if (!items.includes(p)) items.push(p);
     }
-
     if (showRightEllipsis) items.push("ellipsis");
     if (total > 1 && !items.includes(total)) items.push(total);
-
     return items;
 }
 
-export default async function ProductsPage({ searchParams }: Props) {
+export default async function WomenCollectionPage({ searchParams }: Props) {
     const params = await searchParams;
     const supabase = await createClient();
     const page = parseInt(params.page || "1", 10);
     const limit = 12;
     const offset = (page - 1) * limit;
+
+    // ── Lọc sản phẩm Nữ: category slug "nu" hoặc tags chứa "nu" ──
+    const { data: genderCategory } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("slug", "nu")
+        .maybeSingle();
 
     // Optimized: chỉ select fields cần thiết
     const productSelect =
@@ -126,10 +122,14 @@ export default async function ProductsPage({ searchParams }: Props) {
 
     let query = supabase
         .from("products")
-        .select(productSelect, {
-            count: "exact",
-        })
+        .select(productSelect, { count: "exact" })
         .eq("is_active", true);
+
+    if (genderCategory) {
+        query = query.eq("category_id", genderCategory.id);
+    } else {
+        query = query.contains("tags", ["nu"]);
+    }
 
     if (params.category) {
         const { data: cat } = await supabase
@@ -139,7 +139,6 @@ export default async function ProductsPage({ searchParams }: Props) {
             .single();
         if (cat) query = query.eq("category_id", cat.id);
     }
-
     if (params.brand) {
         const { data: brand } = await supabase
             .from("brands")
@@ -148,25 +147,14 @@ export default async function ProductsPage({ searchParams }: Props) {
             .single();
         if (brand) query = query.eq("brand_id", brand.id);
     }
-
-    if (params.minPrice) {
+    if (params.minPrice)
         query = query.gte("base_price", parseInt(params.minPrice, 10));
-    }
-    if (params.maxPrice) {
+    if (params.maxPrice)
         query = query.lte("base_price", parseInt(params.maxPrice, 10));
-    }
-    if (params.featured === "true") {
-        query = query.eq("is_featured", true);
-    }
-    if (params.new === "true") {
-        query = query.eq("is_new", true);
-    }
-    if (params.sale === "true") {
+    if (params.featured === "true") query = query.eq("is_featured", true);
+    if (params.new === "true") query = query.eq("is_new", true);
+    if (params.sale === "true")
         query = query.not("sale_price", "is", null);
-    }
-    if (params.q) {
-        query = query.ilike("name", `%${params.q}%`);
-    }
 
     switch (params.sort) {
         case "price_asc":
@@ -174,9 +162,6 @@ export default async function ProductsPage({ searchParams }: Props) {
             break;
         case "price_desc":
             query = query.order("base_price", { ascending: false });
-            break;
-        case "newest":
-            query = query.order("created_at", { ascending: false });
             break;
         case "name_asc":
             query = query.order("name", { ascending: true });
@@ -227,8 +212,8 @@ export default async function ProductsPage({ searchParams }: Props) {
 
     return (
         <div className="relative">
-            {/* Hero — aligned with home sections (FeaturedProducts) */}
-            <section className="relative overflow-hidden border-b border-border/40 bg-muted/30">
+            {/* Hero */}
+            <section className="relative overflow-hidden border-b border-border/40 bg-gradient-to-br from-pink-50/60 via-rose-50/30 to-background dark:from-pink-950/20 dark:via-rose-950/10 dark:to-background">
                 <DotPattern
                     width={20}
                     height={20}
@@ -237,6 +222,9 @@ export default async function ProductsPage({ searchParams }: Props) {
                     cr={1.5}
                     className="absolute inset-0 opacity-40 mask-[radial-gradient(500px_circle_at_center,white,transparent)]"
                 />
+                <div className="absolute -top-32 -right-32 w-80 h-80 bg-pink-500/8 rounded-full blur-3xl" />
+                <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-rose-500/8 rounded-full blur-3xl" />
+
                 <div className="container relative z-10 mx-auto px-4 py-10 md:py-14">
                     <nav
                         aria-label="Breadcrumb"
@@ -253,27 +241,29 @@ export default async function ProductsPage({ searchParams }: Props) {
                             aria-hidden
                         />
                         <span className="font-medium text-foreground">
-                            Sản phẩm
+                            Thời trang Nữ
                         </span>
                     </nav>
 
                     <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                         <div className="max-w-2xl">
-                            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary shadow-sm">
-                                <LayoutGrid className="h-4 w-4" aria-hidden />
-                                <span>Bộ sưu tập</span>
+                            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-pink-500/20 bg-background px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-pink-600 dark:text-pink-400 shadow-sm">
+                                <Heart
+                                    className="h-4 w-4"
+                                    aria-hidden
+                                    fill="currentColor"
+                                />
+                                <span>Bộ sưu tập Nữ</span>
                             </div>
                             <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
-                                {activeCategoryName
-                                    ? activeCategoryName
-                                    : activeBrandName
-                                      ? `Thương hiệu ${activeBrandName}`
-                                      : "Tất cả sản phẩm"}
+                                Thời Trang{" "}
+                                <span className="bg-gradient-to-r from-pink-600 to-rose-500 bg-clip-text text-transparent dark:from-pink-400 dark:to-rose-400">
+                                    Nữ
+                                </span>
                             </h1>
                             <p className="mt-3 text-base text-muted-foreground md:text-lg">
-                                {params.q
-                                    ? `Kết quả cho “${params.q}” — khám phá thêm hoặc tinh chỉnh bộ lọc bên dưới.`
-                                    : "Khám phá thời trang được tuyển chọn, lọc theo danh mục, giá và ưu đãi — giao diện tối ưu cho mọi thiết bị."}
+                                Thanh lịch, nữ tính, tự tin toả sáng — khám phá
+                                phong cách dành riêng cho phái đẹp.
                             </p>
                         </div>
                         <div className="flex shrink-0 flex-wrap gap-2 md:justify-end">
@@ -285,11 +275,16 @@ export default async function ProductsPage({ searchParams }: Props) {
                 </div>
             </section>
 
+            {/* Content */}
             <div className="container mx-auto px-4 py-8 md:py-10 lg:py-12">
                 <div className="flex flex-col gap-8 lg:flex-row lg:gap-10 xl:gap-12">
                     <aside className="w-full shrink-0 lg:w-72 lg:max-w-[20rem]">
                         <div className="rounded-2xl border border-border/60 bg-card/50 p-4 shadow-sm backdrop-blur-sm md:p-5 lg:sticky lg:top-24">
-                            <ProductFilters categories={categories} brands={brands} />
+                            <ProductFilters
+                                categories={categories}
+                                brands={brands}
+                                basePath="/collections/nu"
+                            />
                         </div>
                     </aside>
 
@@ -298,9 +293,10 @@ export default async function ProductsPage({ searchParams }: Props) {
                         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                             <div className="flex flex-wrap gap-2">
                                 <Link
-                                    href={hrefProducts(withoutQuickFilters(params), {
-                                        page: null,
-                                    })}
+                                    href={buildQuery(
+                                        withoutQuickFilters(params),
+                                        { page: null },
+                                    )}
                                     className={cn(
                                         pillBase,
                                         !hasQuickFilter
@@ -312,10 +308,10 @@ export default async function ProductsPage({ searchParams }: Props) {
                                     Tất cả
                                 </Link>
                                 <Link
-                                    href={hrefProducts(withoutQuickFilters(params), {
-                                        sale: "true",
-                                        page: null,
-                                    })}
+                                    href={buildQuery(
+                                        withoutQuickFilters(params),
+                                        { sale: "true", page: null },
+                                    )}
                                     className={cn(
                                         pillBase,
                                         params.sale === "true"
@@ -327,10 +323,10 @@ export default async function ProductsPage({ searchParams }: Props) {
                                     Đang giảm giá
                                 </Link>
                                 <Link
-                                    href={hrefProducts(withoutQuickFilters(params), {
-                                        featured: "true",
-                                        page: null,
-                                    })}
+                                    href={buildQuery(
+                                        withoutQuickFilters(params),
+                                        { featured: "true", page: null },
+                                    )}
                                     className={cn(
                                         pillBase,
                                         params.featured === "true"
@@ -342,10 +338,10 @@ export default async function ProductsPage({ searchParams }: Props) {
                                     Nổi bật
                                 </Link>
                                 <Link
-                                    href={hrefProducts(withoutQuickFilters(params), {
-                                        new: "true",
-                                        page: null,
-                                    })}
+                                    href={buildQuery(
+                                        withoutQuickFilters(params),
+                                        { new: "true", page: null },
+                                    )}
                                     className={cn(
                                         pillBase,
                                         params.new === "true"
@@ -359,7 +355,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                             </div>
                         </div>
 
-                        {/* Active context + count */}
+                        {/* Count bar */}
                         <div className="mb-6 flex flex-col gap-3 border-b border-border/60 pb-6 sm:flex-row sm:items-center sm:justify-between">
                             <p className="text-sm text-muted-foreground">
                                 Hiển thị{" "}
@@ -392,6 +388,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                             </p>
                         </div>
 
+                        {/* Product grid */}
                         {products && products.length > 0 ? (
                             <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
                                 {products.map((product: any) => (
@@ -413,103 +410,106 @@ export default async function ProductsPage({ searchParams }: Props) {
                                     Không tìm thấy sản phẩm
                                 </h2>
                                 <p className="mt-2 max-w-md text-muted-foreground">
-                                    Thử đổi bộ lọc, từ khóa hoặc xóa lọc để xem
-                                    toàn bộ sản phẩm.
+                                    Thử đổi bộ lọc hoặc xóa lọc để xem toàn bộ
+                                    sản phẩm nữ.
                                 </p>
                                 <Link
-                                    href="/products"
+                                    href="/collections/nu"
                                     className="mt-8 inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
-                                    Xem tất cả sản phẩm
+                                    Xem tất cả sản phẩm Nữ
                                 </Link>
                             </div>
                         )}
 
-                        {totalPages > 1 && products && products.length > 0 && (
-                            <nav
-                                aria-label="Phân trang"
-                                className="mt-10 flex flex-wrap items-center justify-center gap-2"
-                            >
-                                <Link
-                                    href={hrefProducts(params, {
-                                        page:
-                                            page <= 1
-                                                ? null
-                                                : page - 1 === 1
-                                                  ? null
-                                                  : String(page - 1),
-                                    })}
-                                    aria-disabled={page <= 1}
-                                    className={cn(
-                                        "inline-flex min-h-11 min-w-[44px] cursor-pointer items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                                        page <= 1 &&
-                                            "pointer-events-none opacity-40",
-                                    )}
+                        {/* Pagination */}
+                        {totalPages > 1 &&
+                            products &&
+                            products.length > 0 && (
+                                <nav
+                                    aria-label="Phân trang"
+                                    className="mt-10 flex flex-wrap items-center justify-center gap-2"
                                 >
-                                    Trước
-                                </Link>
+                                    <Link
+                                        href={buildQuery(params, {
+                                            page:
+                                                page <= 1
+                                                    ? null
+                                                    : page - 1 === 1
+                                                      ? null
+                                                      : String(page - 1),
+                                        })}
+                                        aria-disabled={page <= 1}
+                                        className={cn(
+                                            "inline-flex min-h-11 min-w-[44px] cursor-pointer items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                            page <= 1 &&
+                                                "pointer-events-none opacity-40",
+                                        )}
+                                    >
+                                        Trước
+                                    </Link>
 
-                                {paginationItems.map((item, idx) =>
-                                    item === "ellipsis" ? (
-                                        <span
-                                            key={`e-${idx}`}
-                                            className="px-2 text-muted-foreground"
-                                            aria-hidden
-                                        >
-                                            …
-                                        </span>
-                                    ) : (
-                                        <Link
-                                            key={item}
-                                            href={hrefProducts(params, {
-                                                page:
-                                                    item === 1
-                                                        ? null
-                                                        : String(item),
-                                            })}
-                                            className={cn(
-                                                "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-2xl border text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                                                item === page
-                                                    ? "border-primary bg-primary text-primary-foreground"
-                                                    : "border-border bg-background hover:bg-muted",
-                                            )}
-                                            aria-current={
-                                                item === page
-                                                    ? "page"
-                                                    : undefined
-                                            }
-                                        >
-                                            {item}
-                                        </Link>
-                                    ),
-                                )}
-
-                                <Link
-                                    href={
-                                        page >= totalPages
-                                            ? hrefProducts(params, {
-                                                  page:
-                                                      totalPages <= 1
-                                                          ? null
-                                                          : String(
-                                                                totalPages,
-                                                            ),
-                                              })
-                                            : hrefProducts(params, {
-                                                  page: String(page + 1),
-                                              })
-                                    }
-                                    aria-disabled={page >= totalPages}
-                                    className={cn(
-                                        "inline-flex min-h-11 min-w-[44px] cursor-pointer items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                                        page >= totalPages &&
-                                            "pointer-events-none opacity-40",
+                                    {paginationItems.map((item, idx) =>
+                                        item === "ellipsis" ? (
+                                            <span
+                                                key={`e-${idx}`}
+                                                className="px-2 text-muted-foreground"
+                                                aria-hidden
+                                            >
+                                                …
+                                            </span>
+                                        ) : (
+                                            <Link
+                                                key={item}
+                                                href={buildQuery(params, {
+                                                    page:
+                                                        item === 1
+                                                            ? null
+                                                            : String(item),
+                                                })}
+                                                className={cn(
+                                                    "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-2xl border text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                                    item === page
+                                                        ? "border-primary bg-primary text-primary-foreground"
+                                                        : "border-border bg-background hover:bg-muted",
+                                                )}
+                                                aria-current={
+                                                    item === page
+                                                        ? "page"
+                                                        : undefined
+                                                }
+                                            >
+                                                {item}
+                                            </Link>
+                                        ),
                                     )}
-                                >
-                                    Sau
-                                </Link>
-                            </nav>
-                        )}
+
+                                    <Link
+                                        href={
+                                            page >= totalPages
+                                                ? buildQuery(params, {
+                                                      page:
+                                                          totalPages <= 1
+                                                              ? null
+                                                              : String(
+                                                                    totalPages,
+                                                                ),
+                                                  })
+                                                : buildQuery(params, {
+                                                      page: String(page + 1),
+                                                  })
+                                        }
+                                        aria-disabled={page >= totalPages}
+                                        className={cn(
+                                            "inline-flex min-h-11 min-w-[44px] cursor-pointer items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                            page >= totalPages &&
+                                                "pointer-events-none opacity-40",
+                                        )}
+                                    >
+                                        Sau
+                                    </Link>
+                                </nav>
+                            )}
                     </div>
                 </div>
             </div>

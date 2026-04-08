@@ -4,13 +4,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { SlidersHorizontal, X, ChevronDown, Loader2 } from "lucide-react";
 import type { Category, Brand } from "@/lib/types";
-import { useState } from "react";
+import { useState, useTransition, useCallback } from "react";
+import { cn } from "@/lib/utils";
 
 interface ProductFiltersProps {
     categories: Category[];
     brands: Brand[];
+    /** Base path for filter navigation. Defaults to "/products". */
+    basePath?: string;
 }
 
 const PRICE_RANGES = [
@@ -56,34 +59,56 @@ function FilterSection({
 export default function ProductFilters({
     categories,
     brands,
+    basePath = "/products",
 }: ProductFiltersProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const [isPending, startTransition] = useTransition();
 
-    const updateFilter = (key: string, value: string) => {
-        const params = new URLSearchParams(searchParams.toString());
-        if (value) {
-            params.set(key, value);
-        } else {
-            params.delete(key);
-        }
-        params.delete("page");
-        router.push(`/products?${params.toString()}`);
-    };
+    // Navigate without scrolling to top; wrap in startTransition
+    // so React marks the navigation as non-blocking and lets the
+    // checkbox state update (optimistic) before the server responds.
+    const updateFilter = useCallback(
+        (key: string, value: string) => {
+            const params = new URLSearchParams(searchParams.toString());
+            if (value) {
+                params.set(key, value);
+            } else {
+                params.delete(key);
+            }
+            params.delete("page");
+            startTransition(() => {
+                router.push(`${basePath}?${params.toString()}`, {
+                    scroll: false,
+                });
+            });
+        },
+        [searchParams, basePath, router],
+    );
 
-    const clearFilters = () => {
-        router.push("/products");
-    };
+    const clearFilters = useCallback(() => {
+        startTransition(() => {
+            router.push(basePath, { scroll: false });
+        });
+    }, [basePath, router]);
 
     const hasFilters = searchParams.toString().length > 0;
     const currentSort = searchParams.get("sort") || "newest";
 
     return (
-        <div className="space-y-4">
+        <div
+            className={cn(
+                "space-y-4 transition-opacity duration-200",
+                isPending && "opacity-60 pointer-events-none",
+            )}
+        >
             <div className="flex items-center justify-between">
                 <h3 className="font-semibold flex items-center gap-2">
                     <SlidersHorizontal className="h-4 w-4" />
                     Bộ lọc
+                    {isPending && (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                    )}
                 </h3>
                 {hasFilters && (
                     <Button
@@ -183,29 +208,25 @@ export default function ProductFilters({
                                     searchParams.get("maxPrice") === range.max
                                 }
                                 onCheckedChange={(checked) => {
+                                    const params = new URLSearchParams(
+                                        searchParams.toString(),
+                                    );
                                     if (checked) {
-                                        const params = new URLSearchParams(
-                                            searchParams.toString(),
-                                        );
                                         params.set("minPrice", range.min);
                                         if (range.max)
                                             params.set("maxPrice", range.max);
                                         else params.delete("maxPrice");
-                                        params.delete("page");
-                                        router.push(
-                                            `/products?${params.toString()}`,
-                                        );
                                     } else {
-                                        const params = new URLSearchParams(
-                                            searchParams.toString(),
-                                        );
                                         params.delete("minPrice");
                                         params.delete("maxPrice");
-                                        params.delete("page");
-                                        router.push(
-                                            `/products?${params.toString()}`,
-                                        );
                                     }
+                                    params.delete("page");
+                                    startTransition(() => {
+                                        router.push(
+                                            `${basePath}?${params.toString()}`,
+                                            { scroll: false },
+                                        );
+                                    });
                                 }}
                             />
                             {range.label}
@@ -216,3 +237,4 @@ export default function ProductFilters({
         </div>
     );
 }
+
