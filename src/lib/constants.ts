@@ -7,8 +7,10 @@ export const SITE_CONTACT = {
     address: "123 Nguyễn Văn Linh, Quận 7, TP.HCM",
     mapQueryUrl:
         "https://maps.google.com/?q=123+Nguyen+Van+Linh+District+7+HCMC",
-    hotline: "1900-xxxx",
-    email: "support@luxefashion.vn",
+    hotline: "0896 002 085",
+    zalo: "0896002085",
+    email: "maitrongquang.ptt@gmail.com",
+    facebook: "https://www.facebook.com/profile.php?id=61575360646065",
     hours: "T2 – T7: 8:00 – 21:00 · CN: 9:00 – 18:00",
 } as const;
 
