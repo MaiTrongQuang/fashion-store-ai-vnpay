@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, memo } from "react";
+import { useState, useCallback, useRef, useEffect, memo, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
     Sparkles,
     Shirt,
@@ -16,13 +17,15 @@ import {
     Gem,
     Banknote,
     SmartphoneNfc,
+    ShieldCheck,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import type { Banner } from "@/lib/types";
 import { motion, useReducedMotion } from "framer-motion";
 import { DotPattern } from "@/components/ui/backgrounds";
 import { cn } from "@/lib/utils";
+import { SITE_NAME } from "@/lib/constants";
 
 // ── Icon pool ───────────────────────────────────────────────────────────
 const RAIN_ICONS = [
@@ -209,12 +212,38 @@ function IconRainOverlay({
 }
 
 // ── Main Component ──────────────────────────────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
+const DEFAULT_SUBTITLE =
+    "Khám phá phong cách của riêng bạn cùng trợ lý thời trang AI và thanh toán tiện lợi qua VNPay.";
+
+export default function HeroBanner({ banners }: HeroBannerProps) {
     const reduceMotion = useReducedMotion();
     const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
     const [isHovered, setIsHovered] = useState(false);
     const [rainParticles, setRainParticles] = useState<RainParticle[]>([]);
+
+    const hero = useMemo(() => {
+        const b = banners[0];
+        if (!b) {
+            return {
+                imageUrl: null as string | null,
+                title: null as string | null,
+                subtitle: null as string | null,
+                primaryHref: "/products" as string,
+                imageAlt: "",
+            };
+        }
+        const title = b.title?.trim() || null;
+        const subtitle = b.subtitle?.trim() || null;
+        const link = b.link_url?.trim() || "/products";
+        const imageUrl = b.image_url?.trim() || null;
+        return {
+            imageUrl,
+            title,
+            subtitle,
+            primaryHref: link || "/products",
+            imageAlt: title ? `Banner: ${title}` : `Banner ${SITE_NAME}`,
+        };
+    }, [banners]);
 
     const particleIdRef = useRef(0);
     const lastSpawnPos = useRef({ x: -1000, y: -1000 });
@@ -305,6 +334,7 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
 
     return (
         <section
+            aria-labelledby="hero-heading"
             className="relative h-[80vh] min-h-[32rem] flex items-center justify-center overflow-hidden bg-background"
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setIsHovered(true)}
@@ -314,25 +344,57 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
                 setRainParticles([]);
             }}
         >
-            {/* Chromatic mesh + depth */}
-            <div className="absolute inset-0 bg-brand-mesh-diagonal" aria-hidden />
-            <div
-                className="absolute -top-32 -right-24 h-[28rem] w-[28rem] rounded-full blur-3xl motion-safe:animate-pulse bg-gradient-brand-cta opacity-[0.12] dark:opacity-[0.14]"
-                style={{ animationDuration: "6s" }}
-                aria-hidden
+            {hero.imageUrl ? (
+                <div className="absolute inset-0 z-0">
+                    <Image
+                        src={hero.imageUrl}
+                        alt={hero.imageAlt}
+                        fill
+                        priority
+                        sizes="100vw"
+                        className="object-cover object-center"
+                    />
+                    <div
+                        className="absolute inset-0 bg-linear-to-t from-background via-background/82 to-background/55 dark:from-background dark:via-background/88 dark:to-background/70"
+                        aria-hidden
+                    />
+                    <div
+                        className="absolute inset-0 bg-brand-mesh-diagonal opacity-[0.18] dark:opacity-[0.12] mix-blend-soft-light"
+                        aria-hidden
+                    />
+                </div>
+            ) : (
+                <>
+                    <div
+                        className="absolute inset-0 bg-brand-mesh-diagonal"
+                        aria-hidden
+                    />
+                    <div
+                        className="absolute -top-32 -right-24 h-[28rem] w-[28rem] rounded-full blur-3xl motion-safe:animate-pulse bg-gradient-brand-cta opacity-[0.12] dark:opacity-[0.14]"
+                        style={{ animationDuration: "6s" }}
+                        aria-hidden
+                    />
+                    <div
+                        className="absolute -bottom-40 -left-20 h-[26rem] w-[26rem] rounded-full blur-3xl motion-safe:animate-pulse bg-[color-mix(in_oklch,var(--brand-soft-2)_65%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-1)_22%,transparent)]"
+                        style={{ animationDuration: "8s" }}
+                        aria-hidden
+                    />
+                    <div
+                        className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[4rem] bg-[color-mix(in_oklch,var(--brand-soft-3)_55%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_18%,transparent)]"
+                        aria-hidden
+                    />
+                </>
+            )}
+            <DotPattern
+                className={cn(
+                    "absolute inset-0 z-[1] fill-brand-2/22 dark:fill-brand-2/14",
+                    hero.imageUrl ? "opacity-25 md:opacity-35" : "opacity-40 md:opacity-50",
+                )}
             />
             <div
-                className="absolute -bottom-40 -left-20 h-[26rem] w-[26rem] rounded-full blur-3xl motion-safe:animate-pulse bg-[color-mix(in_oklch,var(--brand-soft-2)_65%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-1)_22%,transparent)]"
-                style={{ animationDuration: "8s" }}
+                className="absolute inset-0 z-[1] bg-linear-to-t from-background via-transparent to-background/80"
                 aria-hidden
             />
-            <div
-                className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[4rem] bg-[color-mix(in_oklch,var(--brand-soft-3)_55%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_18%,transparent)]"
-                aria-hidden
-            />
-            {/* Background should be first to stay behind icons */}
-            <DotPattern className="absolute inset-0 opacity-40 md:opacity-50 fill-brand-2/22 dark:fill-brand-2/14" />
-            <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-background/80" />
 
             {/* Icon trail theo con trỏ (không mưa nền tự động) */}
             {!reduceMotion && (
@@ -354,42 +416,77 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
                 initial={{ opacity: 0, y: reduceMotion ? 0 : 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: reduceMotion ? 0.2 : 0.8 }}
-                className="relative z-10 text-center space-y-6 px-4"
+                className="relative z-30 text-center space-y-6 px-4 max-w-3xl mx-auto"
             >
-                <div className="inline-flex items-center rounded-full border border-brand-2/40 bg-white/75 px-3 py-1 text-sm font-medium text-brand-1 shadow-sm backdrop-blur-md transition-colors hover:bg-white/90 dark:border-brand-2/35 dark:bg-brand-soft-1/55 dark:text-brand-2 dark:hover:bg-brand-soft-1/75">
-                    <Sparkles className="mr-2 h-4 w-4 text-brand-3" />
-                    Trải nghiệm Fashion Store AI VNPay
-                </div>
-                <h1 className="heading-section-vi text-5xl md:text-7xl font-extrabold tracking-normal md:tracking-tight text-balance leading-[1.45] md:leading-[1.35]">
-                    <span className="heading-gradient-vi text-gradient-brand">
-                        Thời trang AI
+                <div className="inline-flex items-center gap-2 rounded-full border border-brand-2/40 bg-white/80 px-4 py-1.5 text-sm font-medium text-brand-1 shadow-sm backdrop-blur-md transition-colors hover:bg-white/92 dark:border-brand-2/40 dark:bg-brand-soft-1/60 dark:text-brand-2 dark:hover:bg-brand-soft-1/78">
+                    <Sparkles
+                        className="h-4 w-4 shrink-0 text-brand-3"
+                        aria-hidden
+                    />
+                    <span>
+                        {SITE_NAME}
+                        <span className="text-muted-foreground font-normal">
+                            {" "}
+                            · AI &amp; VNPay
+                        </span>
                     </span>
-                    <br className="hidden md:block" />
-                    <span className="text-foreground">Đẳng cấp mới</span>
+                </div>
+                <h1
+                    id="hero-heading"
+                    className="heading-section-vi text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-normal md:tracking-tight text-balance leading-[1.45] md:leading-[1.35] text-foreground drop-shadow-[0_1px_12px_color-mix(in_oklch,var(--background)_65%,transparent)]"
+                >
+                    {hero.title ? (
+                        <span className="heading-gradient-vi text-gradient-brand">
+                            {hero.title}
+                        </span>
+                    ) : (
+                        <>
+                            <span className="heading-gradient-vi text-gradient-brand">
+                                Thời trang AI
+                            </span>
+                            <br className="hidden sm:block" />
+                            <span className="text-foreground">Đẳng cấp mới</span>
+                        </>
+                    )}
                 </h1>
-                <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                    Khám phá phong cách của riêng bạn cùng công nghệ trợ lý thời
-                    trang thông minh.
+                <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-[1.65] md:leading-relaxed">
+                    {hero.subtitle ?? DEFAULT_SUBTITLE}
                 </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-4">
-                    <Link href="/products" className="cursor-pointer w-full sm:w-auto">
-                        <Button
-                            size="lg"
-                            className="w-full sm:w-auto rounded-full px-8 h-12 text-md transition-[transform,box-shadow,filter] duration-200 hover:-translate-y-0.5 bg-gradient-brand-cta shadow-brand-cta hover:brightness-110 text-white border-0"
-                        >
-                            Khám Phá Ngay
-                        </Button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 pt-2">
+                    <Link
+                        href={hero.primaryHref}
+                        className={cn(
+                            buttonVariants({ size: "lg" }),
+                            "w-full sm:w-auto rounded-full min-h-12 h-12 text-base transition-[box-shadow,filter] duration-200 bg-gradient-brand-cta shadow-brand-cta hover:shadow-lg hover:brightness-105 focus-visible:ring-2 focus-visible:ring-brand-2/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background text-white border-0 border-transparent cursor-pointer no-underline",
+                        )}
+                    >
+                        Khám phá ngay
                     </Link>
-                    <Link href="/search" className="cursor-pointer w-full sm:w-auto">
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            className="w-full sm:w-auto rounded-full px-8 h-12 text-md border-brand-2/45 bg-white/60 backdrop-blur-sm hover:bg-white/90 dark:border-brand-2/35 dark:bg-background/40 dark:hover:bg-background/70"
-                        >
-                            Tìm Kiếm Thông Minh
-                        </Button>
+                    <Link
+                        href="/search"
+                        className={cn(
+                            buttonVariants({ size: "lg", variant: "outline" }),
+                            "w-full sm:w-auto rounded-full min-h-12 h-12 text-base border-brand-2/45 bg-white/70 backdrop-blur-sm hover:bg-white/92 dark:border-brand-2/40 dark:bg-background/45 dark:hover:bg-background/72 focus-visible:ring-2 focus-visible:ring-brand-2/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer no-underline",
+                        )}
+                    >
+                        Tìm kiếm thông minh
                     </Link>
                 </div>
+                <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-slate-600 dark:text-slate-400 pt-1">
+                    <ShieldCheck
+                        className="h-4 w-4 shrink-0 text-brand-2"
+                        aria-hidden
+                    />
+                    <span>Thanh toán an toàn qua VNPay</span>
+                    <span className="hidden sm:inline text-muted-foreground">
+                        ·
+                    </span>
+                    <span className="inline-flex gap-1 items-center">
+                        <CreditCard className="h-4 w-4 shrink-0" aria-hidden />
+                        <span className="sr-only">Hỗ trợ </span>
+                        QR &amp; ví điện tử
+                    </span>
+                </p>
             </motion.div>
         </section>
     );
