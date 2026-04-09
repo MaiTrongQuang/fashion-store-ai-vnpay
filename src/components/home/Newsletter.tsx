@@ -25,19 +25,19 @@ export default function Newsletter() {
     };
 
     return (
-        <section className="relative py-24 overflow-hidden bg-linear-to-br from-fuchsia-50/70 via-violet-50/50 to-rose-50/60 dark:from-fuchsia-950/25 dark:via-violet-950/20 dark:to-rose-950/20">
+        <section className="relative py-24 overflow-hidden bg-brand-mesh">
             {/* Background pattern */}
             <GridPattern
                 width={30}
                 height={30}
                 x={-1}
                 y={-1}
-                className="absolute inset-0 opacity-30 stroke-violet-300/30 dark:stroke-violet-500/15 mask-[radial-gradient(600px_circle_at_center,white,transparent)]"
+                className="absolute inset-0 opacity-30 stroke-brand-2/28 dark:stroke-brand-2/16 mask-[radial-gradient(600px_circle_at_center,white,transparent)]"
             />
 
             {/* Glow effects */}
-            <div className="absolute top-0 left-1/4 w-72 h-72 bg-fuchsia-300/25 rounded-full blur-3xl dark:bg-fuchsia-600/12" />
-            <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-rose-300/25 rounded-full blur-3xl dark:bg-rose-600/12" />
+            <div className="absolute top-0 left-1/4 w-72 h-72 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-2)_55%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-2)_16%,transparent)]" />
+            <div className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-3)_50%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_14%,transparent)]" />
 
             <div className="container relative mx-auto px-4 z-10">
                 <motion.div
@@ -46,14 +46,14 @@ export default function Newsletter() {
                     viewport={{ once: true }}
                     className="max-w-2xl mx-auto text-center"
                 >
-                    <div className="inline-flex items-center space-x-2 rounded-full border border-violet-300/55 bg-white/90 px-4 py-1.5 text-sm font-medium text-violet-800 uppercase tracking-widest mb-6 shadow-sm dark:border-violet-500/35 dark:bg-violet-950/45 dark:text-violet-200">
-                        <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                    <div className="inline-flex items-center space-x-2 rounded-full border border-brand-2/45 bg-white/90 px-4 py-1.5 text-sm font-medium text-brand-1 uppercase tracking-widest mb-6 shadow-sm dark:border-brand-2/35 dark:bg-brand-soft-1/45 dark:text-brand-2">
+                        <Sparkles className="w-4 h-4 text-brand-3" />
                         <span>Ưu đãi độc quyền</span>
                     </div>
 
                     <h2 className="heading-section-vi text-3xl md:text-5xl font-extrabold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5] mb-4 text-foreground">
                         Đừng Bỏ Lỡ{" "}
-                        <span className="heading-gradient-vi bg-linear-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent dark:from-violet-300 dark:to-fuchsia-300">
+                        <span className="heading-gradient-vi text-gradient-brand">
                             Ưu Đãi Hấp Dẫn
                         </span>
                     </h2>
@@ -81,7 +81,7 @@ export default function Newsletter() {
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="h-12 px-8 rounded-full font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
+                            className="h-12 px-8 rounded-full font-semibold border-0 bg-gradient-brand-cta text-primary-foreground shadow-brand-cta hover:brightness-110 transition-[transform,filter] hover:-translate-y-0.5"
                         >
                             {isSubmitting ? (
                                 <span className="flex items-center gap-2">

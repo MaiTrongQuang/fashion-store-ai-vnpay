@@ -2,22 +2,22 @@ export default function SaleLoading() {
     return (
         <div className="relative animate-pulse">
             {/* Hero Skeleton — gradient đỏ/cam */}
-            <section className="border-b border-border/40 bg-gradient-to-br from-red-50/70 via-orange-50/40 to-background dark:from-red-950/30 dark:via-orange-950/15 dark:to-background">
+            <section className="border-b border-border/40 bg-brand-mesh">
                 <div className="container mx-auto px-4 py-10 md:py-14">
                     <div className="mb-6 flex items-center gap-2">
                         <div className="h-4 w-16 rounded bg-muted/60" />
                         <div className="h-4 w-4 rounded bg-muted/40" />
-                        <div className="h-4 w-12 rounded bg-red-200/60 dark:bg-red-800/40" />
+                        <div className="h-4 w-12 rounded bg-brand-soft-3/50 dark:bg-brand-soft-3/25" />
                     </div>
                     <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                         <div className="max-w-2xl space-y-3">
-                            <div className="h-7 w-28 rounded-full bg-red-500/10" />
+                            <div className="h-7 w-28 rounded-full bg-brand-soft-3/40" />
                             <div className="h-12 w-60 rounded-2xl bg-muted/60" />
                             <div className="h-5 w-96 rounded-full bg-muted/40" />
                         </div>
                         <div className="flex flex-col gap-3 md:items-end">
-                            <div className="h-10 w-52 rounded-full bg-red-100/60 dark:bg-red-900/30" />
-                            <div className="h-10 w-40 rounded-full bg-orange-100/60 dark:bg-orange-900/30" />
+                            <div className="h-10 w-52 rounded-full bg-brand-soft-1/50 dark:bg-brand-soft-1/22" />
+                            <div className="h-10 w-40 rounded-full bg-brand-soft-3/45 dark:bg-brand-soft-3/22" />
                         </div>
                     </div>
                 </div>

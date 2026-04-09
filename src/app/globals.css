@@ -46,6 +46,16 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+
+    --color-brand-1: var(--brand-1);
+    --color-brand-2: var(--brand-2);
+    --color-brand-3: var(--brand-3);
+    --color-brand-cta-1: var(--brand-cta-1);
+    --color-brand-cta-2: var(--brand-cta-2);
+    --color-brand-cta-3: var(--brand-cta-3);
+    --color-brand-soft-1: var(--brand-soft-1);
+    --color-brand-soft-2: var(--brand-soft-2);
+    --color-brand-soft-3: var(--brand-soft-3);
 }
 
 :root {
@@ -81,6 +91,20 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+
+    /*
+     * Dải gradient thương hiệu (thống nhất toàn hệ thống):
+     * indigo/violet (tin cậy thanh toán, số hoá) → magenta (thời trang, cao cấp) → rose (năng lượng CTA, gợi sắc đỏ VNPay).
+     */
+    --brand-1: oklch(0.37 0.12 277);
+    --brand-2: oklch(0.45 0.2 308);
+    --brand-3: oklch(0.52 0.19 22);
+    --brand-cta-1: oklch(0.5 0.18 277);
+    --brand-cta-2: oklch(0.54 0.23 308);
+    --brand-cta-3: oklch(0.58 0.21 22);
+    --brand-soft-1: oklch(0.97 0.028 277);
+    --brand-soft-2: oklch(0.99 0.018 308);
+    --brand-soft-3: oklch(0.98 0.034 22);
 }
 
 .dark {
@@ -115,6 +139,16 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+
+    --brand-1: oklch(0.9 0.055 277);
+    --brand-2: oklch(0.84 0.1 308);
+    --brand-3: oklch(0.89 0.08 22);
+    --brand-cta-1: oklch(0.62 0.16 277);
+    --brand-cta-2: oklch(0.58 0.2 308);
+    --brand-cta-3: oklch(0.63 0.18 22);
+    --brand-soft-1: oklch(0.24 0.045 277);
+    --brand-soft-2: oklch(0.21 0.04 308);
+    --brand-soft-3: oklch(0.26 0.042 22);
 }
 
 @layer base {
@@ -295,6 +329,53 @@
         line-height: inherit;
         -webkit-box-decoration-break: clone;
         box-decoration-break: clone;
+    }
+
+    /* Chữ gradient thương hiệu — dùng cùng h2 + .heading-gradient-vi */
+    .text-gradient-brand {
+        background-image: linear-gradient(
+            105deg,
+            var(--brand-1) 0%,
+            var(--brand-2) 46%,
+            var(--brand-3) 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    /* Nút CTA / thanh màu đặc */
+    .bg-gradient-brand-cta {
+        background-image: linear-gradient(
+            to right,
+            var(--brand-cta-1),
+            var(--brand-cta-2),
+            var(--brand-cta-3)
+        );
+    }
+
+    .shadow-brand-cta {
+        box-shadow: 0 12px 36px -12px
+            color-mix(in oklch, var(--brand-cta-2) 38%, transparent);
+    }
+
+    /* Nền section: wash nhẹ từ dải thương hiệu */
+    .bg-brand-mesh {
+        background: linear-gradient(
+            180deg,
+            color-mix(in oklch, var(--brand-soft-1) 78%, var(--background)) 0%,
+            var(--background) 48%,
+            color-mix(in oklch, var(--brand-soft-3) 72%, var(--background)) 100%
+        );
+    }
+
+    .bg-brand-mesh-diagonal {
+        background: linear-gradient(
+            135deg,
+            color-mix(in oklch, var(--brand-soft-1) 82%, var(--background)) 0%,
+            var(--background) 45%,
+            color-mix(in oklch, var(--brand-soft-2) 55%, var(--background)) 100%
+        );
     }
 }
 

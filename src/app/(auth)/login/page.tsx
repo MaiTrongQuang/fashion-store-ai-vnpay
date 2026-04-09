@@ -116,7 +116,7 @@ function LoginForm() {
                         href="/"
                         className="text-2xl font-bold tracking-tight transition-opacity hover:opacity-80"
                     >
-                        <span className="bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                        <span className="heading-gradient-vi text-gradient-brand">
                             {SITE_NAME}
                         </span>
                     </Link>

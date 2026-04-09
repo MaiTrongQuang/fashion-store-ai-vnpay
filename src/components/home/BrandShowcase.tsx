@@ -737,9 +737,9 @@ function MarqueeRow({
 
 export default function BrandShowcase() {
     return (
-        <section className="relative py-20 overflow-hidden bg-linear-to-b from-slate-100/80 via-violet-50/40 to-slate-50/90 dark:from-slate-900/80 dark:via-violet-950/25 dark:to-background">
+        <section className="relative py-20 overflow-hidden bg-brand-mesh">
             <div
-                className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-violet-300/50 to-transparent dark:via-violet-500/25"
+                className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[color-mix(in_oklch,var(--brand-2)_45%,transparent)] to-transparent dark:via-[color-mix(in_oklch,var(--brand-cta-2)_28%,transparent)]"
                 aria-hidden
             />
             <DotPattern
@@ -748,7 +748,7 @@ export default function BrandShowcase() {
                 cx={1}
                 cy={1}
                 cr={1}
-                className="absolute inset-0 opacity-20 mask-[linear-gradient(to_bottom,transparent,white,transparent)] fill-violet-300/15 dark:fill-violet-400/10"
+                className="absolute inset-0 opacity-20 mask-[linear-gradient(to_bottom,transparent,white,transparent)] fill-brand-2/16 dark:fill-brand-2/10"
             />
 
             <div className="container relative mx-auto px-4 z-10">
@@ -769,7 +769,7 @@ export default function BrandShowcase() {
                         viewport={{ once: true }}
                         className="heading-section-vi text-3xl md:text-5xl font-bold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5]"
                     >
-                        <span className="heading-gradient-vi bg-linear-to-r from-slate-800 via-violet-800 to-slate-900 bg-clip-text text-transparent dark:from-slate-100 dark:via-violet-200 dark:to-slate-100">
+                        <span className="heading-gradient-vi text-gradient-brand">
                             Thương Hiệu Nổi Bật
                         </span>
                     </motion.h2>

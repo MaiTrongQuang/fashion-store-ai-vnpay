@@ -48,7 +48,7 @@ const FLOATING_ICONS_CONFIG = [
         top: "20%",
         left: "12%",
         delay: 0,
-        ring: "border-rose-400/35 text-rose-600 dark:text-rose-300",
+        ring: "border-brand-2/35 text-brand-1 dark:text-brand-2",
     },
     {
         icon: ShoppingBag,
@@ -56,7 +56,7 @@ const FLOATING_ICONS_CONFIG = [
         top: "15%",
         left: "75%",
         delay: 0.1,
-        ring: "border-violet-400/35 text-violet-600 dark:text-violet-300",
+        ring: "border-brand-3/35 text-brand-1 dark:text-brand-3",
     },
     {
         icon: Wand2,
@@ -64,7 +64,7 @@ const FLOATING_ICONS_CONFIG = [
         top: "65%",
         left: "10%",
         delay: 0.2,
-        ring: "border-amber-400/40 text-amber-700 dark:text-amber-300",
+        ring: "border-brand-2/40 text-brand-2",
     },
     {
         icon: Scissors,
@@ -72,7 +72,7 @@ const FLOATING_ICONS_CONFIG = [
         top: "70%",
         left: "82%",
         delay: 0.15,
-        ring: "border-sky-400/35 text-sky-600 dark:text-sky-300",
+        ring: "border-brand-1/35 text-brand-1",
     },
     {
         icon: Glasses,
@@ -80,7 +80,7 @@ const FLOATING_ICONS_CONFIG = [
         top: "45%",
         left: "85%",
         delay: 0.25,
-        ring: "border-fuchsia-400/30 text-fuchsia-600 dark:text-fuchsia-300",
+        ring: "border-brand-2/30 text-brand-3 dark:text-brand-2",
     },
     {
         icon: Watch,
@@ -88,7 +88,7 @@ const FLOATING_ICONS_CONFIG = [
         top: "50%",
         left: "5%",
         delay: 0.05,
-        ring: "border-teal-400/35 text-teal-600 dark:text-teal-300",
+        ring: "border-brand-3/35 text-brand-1 dark:text-brand-3",
     },
 ] as const;
 
@@ -166,7 +166,7 @@ const RainParticleElement = memo(function RainParticleElement({
     return (
         <div
             className={cn(
-                "hero-rain-particle absolute text-violet-600 dark:text-violet-300",
+                "hero-rain-particle absolute text-brand-2",
                 particle.cursorTrail && "hero-rain-particle--cursor",
             )}
             style={
@@ -315,26 +315,23 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
             }}
         >
             {/* Chromatic mesh + depth */}
+            <div className="absolute inset-0 bg-brand-mesh-diagonal" aria-hidden />
             <div
-                className="absolute inset-0 bg-linear-to-br from-rose-50/90 via-background to-violet-100/50 dark:from-rose-950/25 dark:via-background dark:to-violet-950/30"
-                aria-hidden
-            />
-            <div
-                className="absolute -top-32 -right-24 h-[28rem] w-[28rem] rounded-full bg-linear-to-br from-amber-200/50 to-rose-300/35 blur-3xl motion-safe:animate-pulse dark:from-amber-500/15 dark:to-rose-600/10"
+                className="absolute -top-32 -right-24 h-[28rem] w-[28rem] rounded-full blur-3xl motion-safe:animate-pulse bg-gradient-brand-cta opacity-[0.12] dark:opacity-[0.14]"
                 style={{ animationDuration: "6s" }}
                 aria-hidden
             />
             <div
-                className="absolute -bottom-40 -left-20 h-[26rem] w-[26rem] rounded-full bg-linear-to-tr from-violet-200/45 to-sky-200/35 blur-3xl motion-safe:animate-pulse dark:from-violet-600/12 dark:to-sky-500/10"
+                className="absolute -bottom-40 -left-20 h-[26rem] w-[26rem] rounded-full blur-3xl motion-safe:animate-pulse bg-[color-mix(in_oklch,var(--brand-soft-2)_65%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-1)_22%,transparent)]"
                 style={{ animationDuration: "8s" }}
                 aria-hidden
             />
             <div
-                className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-200/20 blur-[4rem] dark:bg-fuchsia-500/10"
+                className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[4rem] bg-[color-mix(in_oklch,var(--brand-soft-3)_55%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_18%,transparent)]"
                 aria-hidden
             />
             {/* Background should be first to stay behind icons */}
-            <DotPattern className="absolute inset-0 opacity-40 md:opacity-50 fill-violet-400/25 dark:fill-violet-400/15" />
+            <DotPattern className="absolute inset-0 opacity-40 md:opacity-50 fill-brand-2/22 dark:fill-brand-2/14" />
             <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-background/80" />
 
             {/* Icon trail theo con trỏ (không mưa nền tự động) */}
@@ -359,12 +356,12 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
                 transition={{ duration: reduceMotion ? 0.2 : 0.8 }}
                 className="relative z-10 text-center space-y-6 px-4"
             >
-                <div className="inline-flex items-center rounded-full border border-violet-300/40 bg-white/70 px-3 py-1 text-sm font-medium text-violet-800 shadow-sm backdrop-blur-md transition-colors hover:bg-white/90 dark:border-violet-500/30 dark:bg-violet-950/40 dark:text-violet-100 dark:hover:bg-violet-950/60">
-                    <Sparkles className="mr-2 h-4 w-4 text-amber-500 dark:text-amber-400" />
+                <div className="inline-flex items-center rounded-full border border-brand-2/40 bg-white/75 px-3 py-1 text-sm font-medium text-brand-1 shadow-sm backdrop-blur-md transition-colors hover:bg-white/90 dark:border-brand-2/35 dark:bg-brand-soft-1/55 dark:text-brand-2 dark:hover:bg-brand-soft-1/75">
+                    <Sparkles className="mr-2 h-4 w-4 text-brand-3" />
                     Trải nghiệm Fashion Store AI VNPay
                 </div>
                 <h1 className="heading-section-vi text-5xl md:text-7xl font-extrabold tracking-normal md:tracking-tight text-balance leading-[1.45] md:leading-[1.35]">
-                    <span className="heading-gradient-vi bg-linear-to-r from-violet-600 via-fuchsia-600 to-rose-600 bg-clip-text text-transparent dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300">
+                    <span className="heading-gradient-vi text-gradient-brand">
                         Thời trang AI
                     </span>
                     <br className="hidden md:block" />
@@ -378,7 +375,7 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
                     <Link href="/products" className="cursor-pointer w-full sm:w-auto">
                         <Button
                             size="lg"
-                            className="w-full sm:w-auto rounded-full px-8 h-12 text-md transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 shadow-lg shadow-violet-500/20 bg-linear-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0"
+                            className="w-full sm:w-auto rounded-full px-8 h-12 text-md transition-[transform,box-shadow,filter] duration-200 hover:-translate-y-0.5 bg-gradient-brand-cta shadow-brand-cta hover:brightness-110 text-white border-0"
                         >
                             Khám Phá Ngay
                         </Button>
@@ -387,7 +384,7 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
                         <Button
                             size="lg"
                             variant="outline"
-                            className="w-full sm:w-auto rounded-full px-8 h-12 text-md border-violet-300/60 bg-white/60 backdrop-blur-sm hover:bg-white/90 dark:border-violet-500/40 dark:bg-background/40 dark:hover:bg-background/70"
+                            className="w-full sm:w-auto rounded-full px-8 h-12 text-md border-brand-2/45 bg-white/60 backdrop-blur-sm hover:bg-white/90 dark:border-brand-2/35 dark:bg-background/40 dark:hover:bg-background/70"
                         >
                             Tìm Kiếm Thông Minh
                         </Button>

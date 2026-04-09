@@ -146,7 +146,7 @@ export default function AboutPageContent() {
                         </div>
                         <h1 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl lg:text-5xl">
                             Về{" "}
-                            <span className="bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                            <span className="heading-gradient-vi text-gradient-brand">
                                 {SITE_NAME}
                             </span>
                         </h1>

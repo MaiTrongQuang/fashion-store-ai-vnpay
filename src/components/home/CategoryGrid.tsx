@@ -68,14 +68,14 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
         : PLACEHOLDER_CATEGORIES;
 
     return (
-        <section className="relative py-20 overflow-hidden bg-linear-to-b from-background via-rose-50/55 to-background dark:via-rose-950/12">
+        <section className="relative py-20 overflow-hidden bg-brand-mesh-diagonal">
             <div className="absolute inset-0 bg-background/5" />
             <div
-                className="absolute top-20 right-0 h-72 w-72 rounded-full bg-rose-200/35 blur-3xl dark:bg-rose-600/10"
+                className="absolute top-20 right-0 h-72 w-72 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-3)_50%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_14%,transparent)]"
                 aria-hidden
             />
             <div
-                className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-amber-100/40 blur-3xl dark:bg-amber-500/8"
+                className="absolute bottom-0 left-0 h-64 w-64 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-1)_45%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-1)_12%,transparent)]"
                 aria-hidden
             />
             <GridPattern
@@ -83,7 +83,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                 height={32}
                 x={-1}
                 y={-1}
-                className="absolute inset-0 h-[200%] rotate-12 scale-150 origin-top-left opacity-25 stroke-rose-300/25 dark:stroke-rose-500/15 mask-[linear-gradient(to_bottom,transparent,white,transparent)]"
+                className="absolute inset-0 h-[200%] rotate-12 scale-150 origin-top-left opacity-25 stroke-brand-2/20 dark:stroke-brand-2/14 mask-[linear-gradient(to_bottom,transparent,white,transparent)]"
             />
 
             <div className="container relative mx-auto px-4 z-10">
@@ -92,7 +92,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                         initial={{ opacity: 0, y: -10 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center rounded-full border border-rose-300/50 bg-rose-50/90 px-3 py-1 text-sm font-medium text-rose-800 uppercase tracking-widest mb-3 dark:border-rose-500/35 dark:bg-rose-950/40 dark:text-rose-200"
+                        className="inline-flex items-center rounded-full border border-brand-2/45 bg-[color-mix(in_oklch,var(--brand-soft-3)_82%,white)] px-3 py-1 text-sm font-medium text-brand-1 uppercase tracking-widest mb-3 dark:border-brand-2/35 dark:bg-brand-soft-3/35 dark:text-brand-2"
                     >
                         Bộ sưu tập AI
                     </motion.p>
@@ -102,7 +102,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                         viewport={{ once: true }}
                         className="heading-section-vi text-3xl md:text-5xl font-bold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5]"
                     >
-                        <span className="heading-gradient-vi bg-linear-to-br from-rose-900 via-foreground to-violet-800 bg-clip-text text-transparent dark:from-rose-100 dark:via-foreground dark:to-violet-200">
+                        <span className="heading-gradient-vi text-gradient-brand">
                             Khám Phá Danh Mục
                         </span>
                     </motion.h2>
@@ -136,7 +136,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                             <motion.div key={key} variants={itemVariants}>
                                 <Link
                                     href={href}
-                                    className="group relative block aspect-4/5 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-rose-200/60 ring-1 ring-transparent hover:ring-rose-300/50 dark:border-white/10 dark:hover:ring-rose-400/20 cursor-pointer"
+                                    className="group relative block aspect-4/5 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-brand-2/25 ring-1 ring-transparent hover:ring-brand-2/40 dark:border-white/10 dark:hover:ring-brand-2/25 cursor-pointer"
                                 >
                                     <Image
                                         src={imageUrl}

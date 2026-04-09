@@ -2,7 +2,7 @@ export default function NuLoading() {
     return (
         <div className="relative animate-pulse">
             {/* Hero Skeleton — gradient hồng */}
-            <section className="border-b border-border/40 bg-gradient-to-br from-pink-50/60 via-rose-50/30 to-background dark:from-pink-950/20 dark:via-rose-950/10 dark:to-background">
+            <section className="border-b border-border/40 bg-brand-mesh">
                 <div className="container mx-auto px-4 py-10 md:py-14">
                     <div className="mb-6 flex items-center gap-2">
                         <div className="h-4 w-16 rounded bg-muted/60" />
@@ -11,7 +11,7 @@ export default function NuLoading() {
                     </div>
                     <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                         <div className="max-w-2xl space-y-3">
-                            <div className="h-7 w-32 rounded-full bg-pink-500/10" />
+                            <div className="h-7 w-32 rounded-full bg-brand-soft-2/40" />
                             <div className="h-12 w-64 rounded-2xl bg-muted/60" />
                             <div className="h-5 w-80 rounded-full bg-muted/40" />
                         </div>

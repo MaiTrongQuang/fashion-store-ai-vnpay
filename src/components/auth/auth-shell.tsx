@@ -21,7 +21,7 @@ export function AuthShell({ children, className }: AuthShellProps) {
                 )}
             />
             <div
-                className="pointer-events-none absolute inset-0 bg-linear-to-br from-primary/4 via-background to-accent/35 dark:from-primary/8 dark:via-background dark:to-accent/25"
+                className="pointer-events-none absolute inset-0 bg-linear-to-br from-[color-mix(in_oklch,var(--brand-soft-1)_92%,transparent)] via-background to-[color-mix(in_oklch,var(--brand-soft-3)_88%,transparent)] dark:from-[color-mix(in_oklch,var(--brand-cta-1)_12%,transparent)] dark:via-background dark:to-[color-mix(in_oklch,var(--brand-cta-3)_10%,transparent)]"
                 aria-hidden
             />
             <div

@@ -31,9 +31,9 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
     const hasProducts = products.length > 0;
 
     return (
-        <section className="relative py-24 overflow-hidden bg-linear-to-b from-background via-violet-50/60 to-background dark:via-violet-950/20">
+        <section className="relative py-24 overflow-hidden bg-brand-mesh">
             <div
-                className="absolute top-1/2 left-0 h-96 w-96 -translate-y-1/2 rounded-full bg-violet-200/30 blur-3xl dark:bg-violet-600/12"
+                className="absolute top-1/2 left-0 h-96 w-96 -translate-y-1/2 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-2)_55%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-2)_16%,transparent)]"
                 aria-hidden
             />
             <DotPattern
@@ -42,7 +42,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                 cx={1}
                 cy={1}
                 cr={1.5}
-                className="absolute inset-0 opacity-40 mask-[radial-gradient(400px_circle_at_center,white,transparent)] fill-violet-300/20 dark:fill-violet-400/10"
+                className="absolute inset-0 opacity-40 mask-[radial-gradient(400px_circle_at_center,white,transparent)] fill-brand-2/18 dark:fill-brand-2/12"
             />
 
             <div className="container relative mx-auto px-4 z-10">
@@ -52,12 +52,12 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
-                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-violet-800 uppercase tracking-widest mb-3 border border-violet-300/55 rounded-full px-4 py-1.5 bg-violet-50/95 shadow-sm dark:border-violet-500/35 dark:bg-violet-950/45 dark:text-violet-200">
-                            <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-brand-1 uppercase tracking-widest mb-3 border border-brand-2/45 rounded-full px-4 py-1.5 bg-[color-mix(in_oklch,var(--brand-soft-1)_88%,white)] shadow-sm dark:border-brand-2/35 dark:bg-brand-soft-1/50 dark:text-brand-2">
+                            <Sparkles className="w-4 h-4 text-brand-3" />
                             <span>Được Yêu Thích Bằng AI</span>
                         </div>
                         <h2 className="heading-section-vi text-4xl md:text-5xl font-extrabold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5]">
-                            <span className="heading-gradient-vi bg-linear-to-r from-violet-800 via-fuchsia-700 to-violet-900 bg-clip-text text-transparent dark:from-violet-200 dark:via-fuchsia-200 dark:to-violet-100">
+                            <span className="heading-gradient-vi text-gradient-brand">
                                 Sản Phẩm Nổi Bật
                             </span>
                         </h2>
@@ -75,7 +75,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                     >
                         <Link
                             href="/products?featured=true"
-                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full cursor-pointer transition-colors bg-white/70 hover:bg-violet-50/90 outline outline-violet-200/80 hover:outline-violet-400/60 dark:bg-background/50 dark:hover:bg-violet-950/30 dark:outline-violet-500/25"
+                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full cursor-pointer transition-colors bg-white/70 hover:bg-[color-mix(in_oklch,var(--brand-soft-1)_75%,white)] outline outline-brand-2/35 hover:outline-brand-2/55 dark:bg-background/50 dark:hover:bg-brand-soft-1/35 dark:outline-brand-2/25"
                         >
                             <span className="font-semibold">
                                 Xem Gợi Ý Khác

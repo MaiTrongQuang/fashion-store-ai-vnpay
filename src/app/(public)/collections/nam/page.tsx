@@ -215,18 +215,18 @@ export default async function MenCollectionPage({ searchParams }: Props) {
     return (
         <div className="relative">
             {/* Hero */}
-            <section className="relative overflow-hidden border-b border-border/40 bg-gradient-to-br from-blue-50/60 via-slate-50/40 to-background dark:from-blue-950/20 dark:via-slate-950/10 dark:to-background">
+            <section className="relative overflow-hidden border-b border-border/40 bg-brand-mesh-diagonal">
                 <DotPattern
                     width={20}
                     height={20}
                     cx={1}
                     cy={1}
                     cr={1.5}
-                    className="absolute inset-0 opacity-40 mask-[radial-gradient(500px_circle_at_center,white,transparent)]"
+                    className="absolute inset-0 opacity-40 mask-[radial-gradient(500px_circle_at_center,white,transparent)] fill-brand-2/14 dark:fill-brand-2/10"
                 />
                 {/* Decorative blobs */}
-                <div className="absolute -top-32 -right-32 w-80 h-80 bg-blue-500/8 rounded-full blur-3xl" />
-                <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-indigo-500/8 rounded-full blur-3xl" />
+                <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-1)_52%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-1)_12%,transparent)]" />
+                <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-2)_45%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-2)_12%,transparent)]" />
 
                 <div className="container relative z-10 mx-auto px-4 py-10 md:py-14">
                     <nav
@@ -250,13 +250,13 @@ export default async function MenCollectionPage({ searchParams }: Props) {
 
                     <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                         <div className="max-w-2xl">
-                            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-background px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 shadow-sm">
+                            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-2/35 bg-background px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-brand-1 dark:text-brand-2 shadow-sm">
                                 <Shirt className="h-4 w-4" aria-hidden />
                                 <span>Bộ sưu tập Nam</span>
                             </div>
                             <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
                                 Thời Trang{" "}
-                                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">
+                                <span className="heading-gradient-vi text-gradient-brand">
                                     Nam
                                 </span>
                             </h1>

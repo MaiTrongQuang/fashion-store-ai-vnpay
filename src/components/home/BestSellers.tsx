@@ -13,21 +13,23 @@ interface BestSellersProps {
 
 const RANK_STYLES = [
     {
-        bg: "bg-linear-to-br from-amber-400 to-yellow-500",
-        text: "text-amber-950",
-        shadow: "shadow-amber-400/40",
+        bg: "bg-gradient-brand-cta",
+        text: "text-white",
+        shadow: "shadow-brand-cta",
         icon: Trophy,
     },
     {
-        bg: "bg-linear-to-br from-slate-300 to-slate-400",
-        text: "text-slate-800",
-        shadow: "shadow-slate-400/40",
+        bg: "bg-linear-to-br from-brand-1 to-brand-2",
+        text: "text-white",
+        shadow:
+            "shadow-[0_10px_28px_-10px_color-mix(in_oklch,var(--brand-2)_38%,transparent)]",
         icon: Medal,
     },
     {
-        bg: "bg-linear-to-br from-orange-400 to-amber-600",
-        text: "text-orange-950",
-        shadow: "shadow-orange-400/40",
+        bg: "bg-linear-to-br from-brand-2 to-brand-3",
+        text: "text-white",
+        shadow:
+            "shadow-[0_10px_28px_-10px_color-mix(in_oklch,var(--brand-3)_38%,transparent)]",
         icon: Medal,
     },
 ];
@@ -52,9 +54,9 @@ export default function BestSellers({ products }: BestSellersProps) {
     const hasProducts = products.length > 0;
 
     return (
-        <section className="relative py-24 overflow-hidden bg-linear-to-b from-amber-50/50 via-background to-background dark:from-amber-950/15 dark:via-background">
+        <section className="relative py-24 overflow-hidden bg-brand-mesh">
             <div
-                className="absolute right-10 top-20 h-80 w-80 rounded-full bg-amber-200/25 blur-3xl dark:bg-amber-500/10"
+                className="absolute right-10 top-20 h-80 w-80 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-3)_48%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_14%,transparent)]"
                 aria-hidden
             />
             <GridPattern
@@ -62,7 +64,7 @@ export default function BestSellers({ products }: BestSellersProps) {
                 height={24}
                 x={-1}
                 y={-1}
-                className="absolute inset-0 opacity-20 stroke-amber-400/25 dark:stroke-amber-500/15 mask-[radial-gradient(500px_circle_at_center,white,transparent)]"
+                className="absolute inset-0 opacity-20 stroke-brand-2/22 dark:stroke-brand-2/14 mask-[radial-gradient(500px_circle_at_center,white,transparent)]"
             />
 
             <div className="container relative mx-auto px-4 z-10">
@@ -72,12 +74,12 @@ export default function BestSellers({ products }: BestSellersProps) {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
-                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-3 border border-amber-500/20 rounded-full px-4 py-1.5 bg-amber-500/10 shadow-sm">
-                            <Trophy className="w-4 h-4" />
+                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-brand-1 uppercase tracking-widest mb-3 border border-brand-3/35 rounded-full px-4 py-1.5 bg-[color-mix(in_oklch,var(--brand-soft-3)_85%,white)] shadow-sm dark:border-brand-3/30 dark:bg-brand-soft-3/35 dark:text-brand-2">
+                            <Trophy className="w-4 h-4 text-brand-3" />
                             <span>Được Chọn Nhiều Nhất</span>
                         </div>
                         <h2 className="heading-section-vi text-4xl md:text-5xl font-extrabold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5]">
-                            <span className="heading-gradient-vi bg-linear-to-r from-amber-800 via-foreground to-amber-900 bg-clip-text text-transparent dark:from-amber-200 dark:via-foreground dark:to-amber-100">
+                            <span className="heading-gradient-vi text-gradient-brand">
                                 Bán Chạy Nhất
                             </span>
                         </h2>
@@ -95,7 +97,7 @@ export default function BestSellers({ products }: BestSellersProps) {
                     >
                         <Link
                             href="/products?sort=best-selling"
-                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full cursor-pointer transition-colors bg-white/70 hover:bg-amber-50/90 outline outline-amber-200/70 hover:outline-amber-400/50 dark:bg-background/50 dark:hover:bg-amber-950/25 dark:outline-amber-500/25"
+                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full cursor-pointer transition-colors bg-white/70 hover:bg-[color-mix(in_oklch,var(--brand-soft-2)_78%,white)] outline outline-brand-2/35 hover:outline-brand-2/55 dark:bg-background/50 dark:hover:bg-brand-soft-2/30 dark:outline-brand-2/25"
                         >
                             <span className="font-semibold">Xem Thêm</span>
                             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

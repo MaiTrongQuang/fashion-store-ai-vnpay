@@ -378,7 +378,7 @@ export default function ProductInfo({
                 </Button>
                 <Button
                     size="lg"
-                    className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary/75 shadow-md hover:shadow-lg transition-all"
+                    className="flex-1 h-12 text-base font-semibold border-0 bg-gradient-brand-cta text-primary-foreground shadow-brand-cta hover:brightness-110 transition-[filter,transform]"
                     onClick={handleBuyNow}
                     disabled={loading || buyNowLoading}
                 >

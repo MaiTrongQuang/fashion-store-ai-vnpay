@@ -56,7 +56,7 @@ export default function AdminLayout({
             <aside className="w-64 border-r bg-card hidden md:flex flex-col">
                 <div className="p-4 border-b">
                     <Link href="/admin" className="flex items-center gap-2">
-                        <span className="text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                        <span className="text-lg font-bold heading-gradient-vi text-gradient-brand">
                             {SITE_NAME}
                         </span>
                     </Link>

@@ -93,7 +93,7 @@ export default function FlashSale({ products }: FlashSaleProps) {
     const hasProducts = products.length > 0;
 
     return (
-        <section className="relative py-24 overflow-hidden bg-linear-to-b from-orange-50/70 via-background to-rose-50/40 dark:from-orange-950/20 dark:via-background dark:to-rose-950/15">
+        <section className="relative py-24 overflow-hidden bg-brand-mesh">
             {/* Ambient dots */}
             <DotPattern
                 width={16}
@@ -101,12 +101,12 @@ export default function FlashSale({ products }: FlashSaleProps) {
                 cx={1}
                 cy={1}
                 cr={1}
-                className="absolute inset-0 opacity-30 mask-[radial-gradient(500px_circle_at_center,white,transparent)] fill-orange-400/15 dark:fill-orange-400/10"
+                className="absolute inset-0 opacity-30 mask-[radial-gradient(500px_circle_at_center,white,transparent)] fill-brand-3/18 dark:fill-brand-3/12"
             />
 
             {/* Decorative gradient blobs */}
-            <div className="absolute -top-40 -right-40 w-96 h-96 bg-red-400/15 rounded-full blur-3xl dark:bg-red-500/12" />
-            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-orange-400/15 rounded-full blur-3xl dark:bg-orange-500/12" />
+            <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-cta-3)_28%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_18%,transparent)]" />
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-2)_55%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-2)_14%,transparent)]" />
 
             <div className="container relative mx-auto px-4 z-10">
                 <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 gap-6">
@@ -115,13 +115,13 @@ export default function FlashSale({ products }: FlashSaleProps) {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
-                        <div className="inline-flex items-center space-x-2 text-sm font-bold uppercase tracking-widest mb-3 border border-red-500/30 rounded-full px-4 py-1.5 bg-red-500/10 text-red-600 dark:text-red-400 shadow-sm">
+                        <div className="inline-flex items-center space-x-2 text-sm font-bold uppercase tracking-widest mb-3 border border-brand-3/40 rounded-full px-4 py-1.5 bg-[color-mix(in_oklch,var(--brand-soft-3)_90%,white)] text-brand-3 dark:border-brand-3/35 dark:bg-brand-soft-3/40 dark:text-brand-3 shadow-sm">
                             <Flame className="w-4 h-4" />
                             <span>Flash Sale</span>
                         </div>
                         <h2 className="heading-section-vi text-4xl md:text-5xl font-extrabold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5] text-foreground">
                             Đang Giảm Giá{" "}
-                            <span className="heading-gradient-vi bg-linear-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
+                            <span className="heading-gradient-vi text-gradient-brand">
                                 Sốc
                             </span>
                         </h2>
@@ -185,7 +185,7 @@ export default function FlashSale({ products }: FlashSaleProps) {
                 >
                     <Link
                         href="/products?sale=true"
-                        className="inline-flex items-center gap-2 group px-8 py-3.5 rounded-full cursor-pointer bg-linear-to-r from-red-600 to-orange-500 text-white font-semibold shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-orange-500/25 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5"
+                        className="inline-flex items-center gap-2 group px-8 py-3.5 rounded-full cursor-pointer bg-gradient-brand-cta text-white font-semibold shadow-brand-cta hover:brightness-110 transition-[transform,filter] duration-200 hover:-translate-y-0.5"
                     >
                         <span>Xem Toàn Bộ Sale</span>
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
