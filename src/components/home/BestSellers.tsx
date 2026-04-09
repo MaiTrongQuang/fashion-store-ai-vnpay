@@ -52,13 +52,17 @@ export default function BestSellers({ products }: BestSellersProps) {
     const hasProducts = products.length > 0;
 
     return (
-        <section className="relative py-24 overflow-hidden bg-background">
+        <section className="relative py-24 overflow-hidden bg-linear-to-b from-amber-50/50 via-background to-background dark:from-amber-950/15 dark:via-background">
+            <div
+                className="absolute right-10 top-20 h-80 w-80 rounded-full bg-amber-200/25 blur-3xl dark:bg-amber-500/10"
+                aria-hidden
+            />
             <GridPattern
                 width={24}
                 height={24}
                 x={-1}
                 y={-1}
-                className="absolute inset-0 opacity-20 stroke-primary/20 mask-[radial-gradient(500px_circle_at_center,white,transparent)]"
+                className="absolute inset-0 opacity-20 stroke-amber-400/25 dark:stroke-amber-500/15 mask-[radial-gradient(500px_circle_at_center,white,transparent)]"
             />
 
             <div className="container relative mx-auto px-4 z-10">
@@ -72,7 +76,7 @@ export default function BestSellers({ products }: BestSellersProps) {
                             <Trophy className="w-4 h-4" />
                             <span>Được Chọn Nhiều Nhất</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-linear-to-r from-amber-800 via-foreground to-amber-900 bg-clip-text text-transparent dark:from-amber-200 dark:via-foreground dark:to-amber-100">
                             Bán Chạy Nhất
                         </h2>
                         <p className="mt-3 text-muted-foreground text-lg max-w-xl">
@@ -89,7 +93,7 @@ export default function BestSellers({ products }: BestSellersProps) {
                     >
                         <Link
                             href="/products?sort=best-selling"
-                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full hover:bg-primary/5 transition-all outline outline-border hover:outline-primary/50"
+                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full cursor-pointer transition-colors bg-white/70 hover:bg-amber-50/90 outline outline-amber-200/70 hover:outline-amber-400/50 dark:bg-background/50 dark:hover:bg-amber-950/25 dark:outline-amber-500/25"
                         >
                             <span className="font-semibold">Xem Thêm</span>
                             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

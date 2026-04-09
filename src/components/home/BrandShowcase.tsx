@@ -683,9 +683,9 @@ const ROW_2_BRANDS: FashionBrand[] = [
 
 function BrandCard({ brand }: { brand: FashionBrand }) {
     return (
-        <div className="group shrink-0 flex items-center gap-4 px-5 py-4 mx-2 bg-background/80 backdrop-blur-sm rounded-xl border border-border/40 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-0.5 select-none cursor-pointer min-w-44">
+        <div className="group shrink-0 flex items-center gap-4 px-5 py-4 mx-2 bg-white/85 dark:bg-card/70 backdrop-blur-sm rounded-xl border border-violet-200/35 hover:border-violet-400/45 hover:shadow-lg hover:shadow-violet-500/10 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 select-none cursor-pointer min-w-44 dark:border-white/10">
             {/* Logo container */}
-            <div className="shrink-0 w-12 h-12 rounded-lg bg-foreground/[0.04] border border-border/30 flex items-center justify-center overflow-hidden group-hover:scale-105 group-hover:bg-foreground/[0.07] group-hover:border-primary/20 transition-all duration-500 text-foreground/75 group-hover:text-primary">
+            <div className="shrink-0 w-12 h-12 rounded-lg bg-violet-50/90 border border-violet-200/40 flex items-center justify-center overflow-hidden motion-safe:group-hover:scale-105 group-hover:bg-violet-100/95 group-hover:border-violet-300/55 transition-all duration-300 text-violet-900/80 group-hover:text-violet-950 dark:bg-violet-950/40 dark:border-violet-500/25 dark:text-violet-100 dark:group-hover:bg-violet-900/50">
                 {brand.logo}
             </div>
             {/* Brand name */}
@@ -737,14 +737,18 @@ function MarqueeRow({
 
 export default function BrandShowcase() {
     return (
-        <section className="relative py-20 overflow-hidden bg-muted/30">
+        <section className="relative py-20 overflow-hidden bg-linear-to-b from-slate-100/80 via-violet-50/40 to-slate-50/90 dark:from-slate-900/80 dark:via-violet-950/25 dark:to-background">
+            <div
+                className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-violet-300/50 to-transparent dark:via-violet-500/25"
+                aria-hidden
+            />
             <DotPattern
                 width={24}
                 height={24}
                 cx={1}
                 cy={1}
                 cr={1}
-                className="absolute inset-0 opacity-20 mask-[linear-gradient(to_bottom,transparent,white,transparent)]"
+                className="absolute inset-0 opacity-20 mask-[linear-gradient(to_bottom,transparent,white,transparent)] fill-violet-300/15 dark:fill-violet-400/10"
             />
 
             <div className="container relative mx-auto px-4 z-10">
@@ -763,7 +767,7 @@ export default function BrandShowcase() {
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-3xl md:text-5xl font-bold tracking-tight"
+                        className="text-3xl md:text-5xl font-bold tracking-tight bg-linear-to-r from-slate-800 via-violet-800 to-slate-900 bg-clip-text text-transparent dark:from-slate-100 dark:via-violet-200 dark:to-slate-100"
                     >
                         Thương Hiệu Nổi Bật
                     </motion.h2>

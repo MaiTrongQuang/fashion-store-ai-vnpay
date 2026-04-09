@@ -20,7 +20,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import type { Banner } from "@/lib/types";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { DotPattern } from "@/components/ui/backgrounds";
 import { cn } from "@/lib/utils";
 
@@ -42,13 +42,55 @@ const RAIN_ICONS = [
 ];
 
 const FLOATING_ICONS_CONFIG = [
-    { icon: Shirt, size: 32, top: "20%", left: "12%", delay: 0 },
-    { icon: ShoppingBag, size: 40, top: "15%", left: "75%", delay: 0.1 },
-    { icon: Wand2, size: 36, top: "65%", left: "10%", delay: 0.2 },
-    { icon: Scissors, size: 28, top: "70%", left: "82%", delay: 0.15 },
-    { icon: Glasses, size: 44, top: "45%", left: "85%", delay: 0.25 },
-    { icon: Watch, size: 30, top: "50%", left: "5%", delay: 0.05 },
-];
+    {
+        icon: Shirt,
+        size: 32,
+        top: "20%",
+        left: "12%",
+        delay: 0,
+        ring: "border-rose-400/35 text-rose-600 dark:text-rose-300",
+    },
+    {
+        icon: ShoppingBag,
+        size: 40,
+        top: "15%",
+        left: "75%",
+        delay: 0.1,
+        ring: "border-violet-400/35 text-violet-600 dark:text-violet-300",
+    },
+    {
+        icon: Wand2,
+        size: 36,
+        top: "65%",
+        left: "10%",
+        delay: 0.2,
+        ring: "border-amber-400/40 text-amber-700 dark:text-amber-300",
+    },
+    {
+        icon: Scissors,
+        size: 28,
+        top: "70%",
+        left: "82%",
+        delay: 0.15,
+        ring: "border-sky-400/35 text-sky-600 dark:text-sky-300",
+    },
+    {
+        icon: Glasses,
+        size: 44,
+        top: "45%",
+        left: "85%",
+        delay: 0.25,
+        ring: "border-fuchsia-400/30 text-fuchsia-600 dark:text-fuchsia-300",
+    },
+    {
+        icon: Watch,
+        size: 30,
+        top: "50%",
+        left: "5%",
+        delay: 0.05,
+        ring: "border-teal-400/35 text-teal-600 dark:text-teal-300",
+    },
+] as const;
 
 // ── Rain particle type ──────────────────────────────────────────────────
 type RainParticle = {
@@ -90,7 +132,10 @@ const FloatingIconsOverlay = memo(function FloatingIconsOverlay({
                 return (
                     <div
                         key={idx}
-                        className="absolute flex items-center justify-center bg-background/40 backdrop-blur-xl p-4 rounded-3xl border border-primary/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(255,255,255,0.05)] text-primary"
+                        className={cn(
+                            "absolute flex items-center justify-center bg-background/70 dark:bg-background/50 backdrop-blur-xl p-4 rounded-3xl border shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgba(255,255,255,0.06)]",
+                            item.ring,
+                        )}
                         style={{
                             top: item.top,
                             left: item.left,
@@ -121,7 +166,7 @@ const RainParticleElement = memo(function RainParticleElement({
     return (
         <div
             className={cn(
-                "hero-rain-particle absolute text-primary",
+                "hero-rain-particle absolute text-violet-600 dark:text-violet-300",
                 particle.cursorTrail && "hero-rain-particle--cursor",
             )}
             style={
@@ -166,6 +211,7 @@ function IconRainOverlay({
 // ── Main Component ──────────────────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
+    const reduceMotion = useReducedMotion();
     const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
     const [isHovered, setIsHovered] = useState(false);
     const [rainParticles, setRainParticles] = useState<RainParticle[]>([]);
@@ -248,18 +294,18 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
             const movedFar = dist > 56;
             const slowPulse =
                 now - lastSpawnTime.current > 240 && dist > 14;
-            if (movedFar || slowPulse) {
+            if (!reduceMotion && (movedFar || slowPulse)) {
                 lastSpawnPos.current = { x: rawX, y: rawY };
                 lastSpawnTime.current = now;
                 spawnParticle(rawX, rawY);
             }
         },
-        [spawnParticle],
+        [spawnParticle, reduceMotion],
     );
 
     return (
         <section
-            className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-background"
+            className="relative h-[80vh] min-h-[32rem] flex items-center justify-center overflow-hidden bg-background"
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => {
@@ -268,53 +314,85 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
                 setRainParticles([]);
             }}
         >
+            {/* Chromatic mesh + depth */}
+            <div
+                className="absolute inset-0 bg-linear-to-br from-rose-50/90 via-background to-violet-100/50 dark:from-rose-950/25 dark:via-background dark:to-violet-950/30"
+                aria-hidden
+            />
+            <div
+                className="absolute -top-32 -right-24 h-[28rem] w-[28rem] rounded-full bg-linear-to-br from-amber-200/50 to-rose-300/35 blur-3xl motion-safe:animate-pulse dark:from-amber-500/15 dark:to-rose-600/10"
+                style={{ animationDuration: "6s" }}
+                aria-hidden
+            />
+            <div
+                className="absolute -bottom-40 -left-20 h-[26rem] w-[26rem] rounded-full bg-linear-to-tr from-violet-200/45 to-sky-200/35 blur-3xl motion-safe:animate-pulse dark:from-violet-600/12 dark:to-sky-500/10"
+                style={{ animationDuration: "8s" }}
+                aria-hidden
+            />
+            <div
+                className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-200/20 blur-[4rem] dark:bg-fuchsia-500/10"
+                aria-hidden
+            />
             {/* Background should be first to stay behind icons */}
-            <DotPattern className="absolute inset-0 opacity-50" />
-            <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-background" />
+            <DotPattern className="absolute inset-0 opacity-40 md:opacity-50 fill-violet-400/25 dark:fill-violet-400/15" />
+            <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-background/80" />
 
             {/* Icon trail theo con trỏ (không mưa nền tự động) */}
-            <IconRainOverlay
-                particles={rainParticles}
-                onParticleDone={handleParticleDone}
-            />
+            {!reduceMotion && (
+                <IconRainOverlay
+                    particles={rainParticles}
+                    onParticleDone={handleParticleDone}
+                />
+            )}
 
             {/* Floating icons with cursor parallax */}
             <FloatingIconsOverlay
-                offsetX={mouseOffset.x}
-                offsetY={mouseOffset.y}
-                visible={isHovered}
+                offsetX={reduceMotion ? 0 : mouseOffset.x}
+                offsetY={reduceMotion ? 0 : mouseOffset.y}
+                visible={reduceMotion ? true : isHovered}
             />
 
             {/* ── Centered Hero Content ─────────────────────────────────── */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: reduceMotion ? 0 : 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
+                transition={{ duration: reduceMotion ? 0.2 : 0.8 }}
                 className="relative z-10 text-center space-y-6 px-4"
             >
-                <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-4 backdrop-blur-sm shadow-sm transition-colors hover:bg-primary/10">
-                    <Sparkles className="mr-2 h-4 w-4" />
+                <div className="inline-flex items-center rounded-full border border-violet-300/40 bg-white/70 px-3 py-1 text-sm font-medium text-violet-800 shadow-sm backdrop-blur-md transition-colors hover:bg-white/90 dark:border-violet-500/30 dark:bg-violet-950/40 dark:text-violet-100 dark:hover:bg-violet-950/60">
+                    <Sparkles className="mr-2 h-4 w-4 text-amber-500 dark:text-amber-400" />
                     Trải nghiệm Fashion Store AI VNPay
                 </div>
-                <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
-                    <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-balance">
+                    <span className="bg-linear-to-r from-violet-600 via-fuchsia-600 to-rose-600 bg-clip-text text-transparent dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300">
                         Thời trang AI
                     </span>
                     <br className="hidden md:block" />
                     <span className="text-foreground">Đẳng cấp mới</span>
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
                     Khám phá phong cách của riêng bạn cùng công nghệ trợ lý thời
                     trang thông minh.
                 </p>
-                <Link href="/products">
-                    <Button
-                        size="lg"
-                        className="mt-4 rounded-full px-8 h-12 text-md transition-all hover:scale-105 shadow-lg hover:shadow-primary/25"
-                    >
-                        Khám Phá Ngay
-                    </Button>
-                </Link>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-4">
+                    <Link href="/products" className="cursor-pointer w-full sm:w-auto">
+                        <Button
+                            size="lg"
+                            className="w-full sm:w-auto rounded-full px-8 h-12 text-md transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 shadow-lg shadow-violet-500/20 bg-linear-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0"
+                        >
+                            Khám Phá Ngay
+                        </Button>
+                    </Link>
+                    <Link href="/search" className="cursor-pointer w-full sm:w-auto">
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            className="w-full sm:w-auto rounded-full px-8 h-12 text-md border-violet-300/60 bg-white/60 backdrop-blur-sm hover:bg-white/90 dark:border-violet-500/40 dark:bg-background/40 dark:hover:bg-background/70"
+                        >
+                            Tìm Kiếm Thông Minh
+                        </Button>
+                    </Link>
+                </div>
             </motion.div>
         </section>
     );

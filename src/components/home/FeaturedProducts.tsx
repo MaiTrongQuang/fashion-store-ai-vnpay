@@ -31,14 +31,18 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
     const hasProducts = products.length > 0;
 
     return (
-        <section className="relative py-24 overflow-hidden bg-background">
+        <section className="relative py-24 overflow-hidden bg-linear-to-b from-background via-violet-50/60 to-background dark:via-violet-950/20">
+            <div
+                className="absolute top-1/2 left-0 h-96 w-96 -translate-y-1/2 rounded-full bg-violet-200/30 blur-3xl dark:bg-violet-600/12"
+                aria-hidden
+            />
             <DotPattern
                 width={20}
                 height={20}
                 cx={1}
                 cy={1}
                 cr={1.5}
-                className="absolute inset-0 opacity-40 mask-[radial-gradient(400px_circle_at_center,white,transparent)]"
+                className="absolute inset-0 opacity-40 mask-[radial-gradient(400px_circle_at_center,white,transparent)] fill-violet-300/20 dark:fill-violet-400/10"
             />
 
             <div className="container relative mx-auto px-4 z-10">
@@ -48,11 +52,11 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
-                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-primary uppercase tracking-widest mb-3 border border-primary/20 rounded-full px-4 py-1.5 bg-background shadow-sm">
-                            <Sparkles className="w-4 h-4" />
+                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-violet-800 uppercase tracking-widest mb-3 border border-violet-300/55 rounded-full px-4 py-1.5 bg-violet-50/95 shadow-sm dark:border-violet-500/35 dark:bg-violet-950/45 dark:text-violet-200">
+                            <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                             <span>Được Yêu Thích Bằng AI</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-linear-to-r from-violet-800 via-fuchsia-700 to-violet-900 bg-clip-text text-transparent dark:from-violet-200 dark:via-fuchsia-200 dark:to-violet-100">
                             Sản Phẩm Nổi Bật
                         </h2>
                         <p className="mt-3 text-muted-foreground text-lg max-w-xl">
@@ -69,7 +73,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                     >
                         <Link
                             href="/products?featured=true"
-                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full hover:bg-primary/5 transition-all outline outline-border hover:outline-primary/50"
+                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full cursor-pointer transition-colors bg-white/70 hover:bg-violet-50/90 outline outline-violet-200/80 hover:outline-violet-400/60 dark:bg-background/50 dark:hover:bg-violet-950/30 dark:outline-violet-500/25"
                         >
                             <span className="font-semibold">
                                 Xem Gợi Ý Khác

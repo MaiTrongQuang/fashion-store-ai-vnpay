@@ -31,14 +31,18 @@ export default function NewArrivals({ products }: NewArrivalsProps) {
     const hasProducts = products.length > 0;
 
     return (
-        <section className="relative py-24 bg-background overflow-hidden">
+        <section className="relative py-24 overflow-hidden bg-linear-to-b from-teal-50/45 via-background to-cyan-50/30 dark:from-teal-950/18 dark:via-background dark:to-cyan-950/12">
             <div className="absolute inset-0 bg-background/5" />
+            <div
+                className="absolute left-1/4 bottom-0 h-72 w-72 rounded-full bg-teal-200/30 blur-3xl dark:bg-teal-500/10"
+                aria-hidden
+            />
             <GridPattern
                 width={40}
                 height={40}
                 x={-1}
                 y={-1}
-                className="absolute inset-0 opacity-20 stroke-primary/30 mask-[linear-gradient(to_bottom,white,transparent)]"
+                className="absolute inset-0 opacity-20 stroke-teal-400/30 dark:stroke-teal-500/15 mask-[linear-gradient(to_bottom,white,transparent)]"
             />
 
             <div className="container relative mx-auto px-4 z-10">
@@ -48,11 +52,11 @@ export default function NewArrivals({ products }: NewArrivalsProps) {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
-                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-primary uppercase tracking-widest mb-3 border border-primary/20 rounded-full px-4 py-1.5 bg-background shadow-sm">
-                            <Zap className="w-4 h-4" />
+                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-teal-800 uppercase tracking-widest mb-3 border border-teal-300/55 rounded-full px-4 py-1.5 bg-teal-50/95 shadow-sm dark:border-teal-500/35 dark:bg-teal-950/45 dark:text-teal-200">
+                            <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                             <span>Vừa cập nhật AI</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                        <h2 className="font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight md:text-5xl md:font-medium bg-linear-to-r from-teal-800 via-cyan-700 to-teal-900 bg-clip-text text-transparent dark:from-teal-200 dark:via-cyan-200 dark:to-teal-100">
                             Hàng Mới Về
                         </h2>
                         <p className="mt-3 text-muted-foreground text-lg max-w-xl">
@@ -69,7 +73,7 @@ export default function NewArrivals({ products }: NewArrivalsProps) {
                     >
                         <Link
                             href="/products?new=true"
-                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full hover:bg-primary/5 transition-all outline outline-border hover:outline-primary/50"
+                            className="inline-flex items-center gap-2 group px-6 py-3 rounded-full cursor-pointer transition-colors bg-white/70 hover:bg-teal-50/90 outline outline-teal-200/80 hover:outline-teal-400/55 dark:bg-background/50 dark:hover:bg-teal-950/30 dark:outline-teal-500/25"
                         >
                             <span className="font-semibold">Xem Tất Cả</span>
                             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

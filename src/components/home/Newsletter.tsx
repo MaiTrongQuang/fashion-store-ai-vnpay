@@ -25,19 +25,19 @@ export default function Newsletter() {
     };
 
     return (
-        <section className="relative py-24 overflow-hidden bg-primary/5">
+        <section className="relative py-24 overflow-hidden bg-linear-to-br from-fuchsia-50/70 via-violet-50/50 to-rose-50/60 dark:from-fuchsia-950/25 dark:via-violet-950/20 dark:to-rose-950/20">
             {/* Background pattern */}
             <GridPattern
                 width={30}
                 height={30}
                 x={-1}
                 y={-1}
-                className="absolute inset-0 opacity-30 stroke-primary/15 mask-[radial-gradient(600px_circle_at_center,white,transparent)]"
+                className="absolute inset-0 opacity-30 stroke-violet-300/30 dark:stroke-violet-500/15 mask-[radial-gradient(600px_circle_at_center,white,transparent)]"
             />
 
             {/* Glow effects */}
-            <div className="absolute top-0 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+            <div className="absolute top-0 left-1/4 w-72 h-72 bg-fuchsia-300/25 rounded-full blur-3xl dark:bg-fuchsia-600/12" />
+            <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-rose-300/25 rounded-full blur-3xl dark:bg-rose-600/12" />
 
             <div className="container relative mx-auto px-4 z-10">
                 <motion.div

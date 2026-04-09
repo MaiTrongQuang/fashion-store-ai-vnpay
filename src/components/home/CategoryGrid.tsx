@@ -68,14 +68,22 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
         : PLACEHOLDER_CATEGORIES;
 
     return (
-        <section className="relative py-20 overflow-hidden bg-background">
+        <section className="relative py-20 overflow-hidden bg-linear-to-b from-background via-rose-50/55 to-background dark:via-rose-950/12">
             <div className="absolute inset-0 bg-background/5" />
+            <div
+                className="absolute top-20 right-0 h-72 w-72 rounded-full bg-rose-200/35 blur-3xl dark:bg-rose-600/10"
+                aria-hidden
+            />
+            <div
+                className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-amber-100/40 blur-3xl dark:bg-amber-500/8"
+                aria-hidden
+            />
             <GridPattern
                 width={32}
                 height={32}
                 x={-1}
                 y={-1}
-                className="absolute inset-0 h-[200%] rotate-12 scale-150 origin-top-left opacity-30 stroke-primary/10 mask-[linear-gradient(to_bottom,transparent,white,transparent)]"
+                className="absolute inset-0 h-[200%] rotate-12 scale-150 origin-top-left opacity-25 stroke-rose-300/25 dark:stroke-rose-500/15 mask-[linear-gradient(to_bottom,transparent,white,transparent)]"
             />
 
             <div className="container relative mx-auto px-4 z-10">
@@ -84,7 +92,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                         initial={{ opacity: 0, y: -10 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary uppercase tracking-widest mb-3"
+                        className="inline-flex items-center rounded-full border border-rose-300/50 bg-rose-50/90 px-3 py-1 text-sm font-medium text-rose-800 uppercase tracking-widest mb-3 dark:border-rose-500/35 dark:bg-rose-950/40 dark:text-rose-200"
                     >
                         Bộ sưu tập AI
                     </motion.p>
@@ -92,7 +100,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-3xl md:text-5xl font-bold tracking-tight bg-linear-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
+                        className="text-3xl md:text-5xl font-bold tracking-tight bg-linear-to-br from-rose-900 via-foreground to-violet-800 bg-clip-text text-transparent dark:from-rose-100 dark:via-foreground dark:to-violet-200"
                     >
                         Khám Phá Danh Mục
                     </motion.h2>
@@ -126,7 +134,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                             <motion.div key={key} variants={itemVariants}>
                                 <Link
                                     href={href}
-                                    className="group relative block aspect-4/5 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-primary/10"
+                                    className="group relative block aspect-4/5 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-rose-200/60 ring-1 ring-transparent hover:ring-rose-300/50 dark:border-white/10 dark:hover:ring-rose-400/20 cursor-pointer"
                                 >
                                     <Image
                                         src={imageUrl}

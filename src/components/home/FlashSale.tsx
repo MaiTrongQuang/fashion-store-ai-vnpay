@@ -93,7 +93,7 @@ export default function FlashSale({ products }: FlashSaleProps) {
     const hasProducts = products.length > 0;
 
     return (
-        <section className="relative py-24 overflow-hidden bg-background">
+        <section className="relative py-24 overflow-hidden bg-linear-to-b from-orange-50/70 via-background to-rose-50/40 dark:from-orange-950/20 dark:via-background dark:to-rose-950/15">
             {/* Ambient dots */}
             <DotPattern
                 width={16}
@@ -101,12 +101,12 @@ export default function FlashSale({ products }: FlashSaleProps) {
                 cx={1}
                 cy={1}
                 cr={1}
-                className="absolute inset-0 opacity-30 mask-[radial-gradient(500px_circle_at_center,white,transparent)]"
+                className="absolute inset-0 opacity-30 mask-[radial-gradient(500px_circle_at_center,white,transparent)] fill-orange-400/15 dark:fill-orange-400/10"
             />
 
             {/* Decorative gradient blobs */}
-            <div className="absolute -top-40 -right-40 w-96 h-96 bg-red-500/10 rounded-full blur-3xl" />
-            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-red-400/15 rounded-full blur-3xl dark:bg-red-500/12" />
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-orange-400/15 rounded-full blur-3xl dark:bg-orange-500/12" />
 
             <div className="container relative mx-auto px-4 z-10">
                 <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 gap-6">
@@ -185,7 +185,7 @@ export default function FlashSale({ products }: FlashSaleProps) {
                 >
                     <Link
                         href="/products?sale=true"
-                        className="inline-flex items-center gap-2 group px-8 py-3.5 rounded-full bg-linear-to-r from-red-500 to-orange-500 text-white font-semibold shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/30 transition-all hover:-translate-y-0.5"
+                        className="inline-flex items-center gap-2 group px-8 py-3.5 rounded-full cursor-pointer bg-linear-to-r from-red-600 to-orange-500 text-white font-semibold shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-orange-500/25 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5"
                     >
                         <span>Xem Toàn Bộ Sale</span>
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
