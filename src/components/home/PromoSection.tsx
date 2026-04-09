@@ -45,33 +45,39 @@ export default function PromoSection() {
 
             <div className="container relative mx-auto px-4 z-10">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-                    {features.map((feature, index) => (
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: index * 0.15 }}
-                            key={index}
-                            className={cn(
-                                "relative flex flex-col items-center p-8 bg-white/75 hover:bg-white/95 dark:bg-card/60 dark:hover:bg-card/85 backdrop-blur-xl border rounded-3xl transition-[transform,box-shadow,border-color] duration-300 shadow-lg group hover:-translate-y-1 cursor-pointer",
-                                featureRing,
-                            )}
-                        >
-                            <div
+                    {features.map((feature, index) => {
+                        const Icon = feature.icon;
+                        return (
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{
+                                    duration: 0.6,
+                                    delay: index * 0.15,
+                                }}
+                                key={index}
                                 className={cn(
-                                    "w-16 h-16 rounded-full flex items-center justify-center mb-6 bg-gradient-brand-cta shadow-brand-cta text-white group-hover:brightness-110 transition-[filter,transform] duration-300 motion-safe:group-hover:scale-105",
+                                    "relative flex flex-col items-center p-8 bg-white/75 hover:bg-white/95 dark:bg-card/60 dark:hover:bg-card/85 backdrop-blur-xl border rounded-3xl transition-[transform,box-shadow,border-color] duration-300 shadow-lg group hover:-translate-y-1 cursor-pointer",
+                                    featureRing,
                                 )}
                             >
-                                <feature.icon className="h-8 w-8" />
-                            </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2 text-center">
-                                {feature.title}
-                            </h3>
-                            <p className="text-sm text-foreground/70 text-center font-medium">
-                                {feature.description}
-                            </p>
-                        </motion.div>
-                    ))}
+                                <div
+                                    className={cn(
+                                        "w-16 h-16 rounded-full flex items-center justify-center mb-6 bg-gradient-brand-cta shadow-brand-cta text-white group-hover:brightness-110 transition-[filter,transform] duration-300 motion-safe:group-hover:scale-105",
+                                    )}
+                                >
+                                    <Icon className="h-8 w-8" aria-hidden />
+                                </div>
+                                <h3 className="text-xl font-bold text-foreground mb-2 text-center">
+                                    {feature.title}
+                                </h3>
+                                <p className="text-sm text-foreground/70 text-center font-medium">
+                                    {feature.description}
+                                </p>
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </div>
         </section>

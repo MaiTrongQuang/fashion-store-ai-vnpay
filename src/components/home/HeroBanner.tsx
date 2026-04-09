@@ -21,6 +21,10 @@ import {
 } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
+
+/** CTA hero: không dùng buttonVariants default (bg-primary + [a]:hover) để tránh trùng/chìm với bg-gradient-brand-cta và color: inherit trên thẻ <a>. */
+const heroPrimaryCtaClassName =
+    "inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-full border-0 px-8 text-base font-medium whitespace-nowrap no-underline outline-none select-none transition-[box-shadow,filter] duration-200 sm:w-auto min-h-12 h-12 cursor-pointer bg-gradient-brand-cta !text-white shadow-brand-cta hover:shadow-lg hover:brightness-105 focus-visible:ring-2 focus-visible:ring-brand-2/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-px";
 import type { Banner } from "@/lib/types";
 import { motion, useReducedMotion } from "framer-motion";
 import { DotPattern } from "@/components/ui/backgrounds";
@@ -335,7 +339,7 @@ export default function HeroBanner({ banners }: HeroBannerProps) {
     return (
         <section
             aria-labelledby="hero-heading"
-            className="relative h-[80vh] min-h-[32rem] flex items-center justify-center overflow-hidden bg-background"
+            className="relative flex min-h-[max(80vh,32rem)] items-center justify-center overflow-x-hidden bg-background py-10 sm:py-12 md:py-14"
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => {
@@ -455,10 +459,7 @@ export default function HeroBanner({ banners }: HeroBannerProps) {
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 pt-2">
                     <Link
                         href={hero.primaryHref}
-                        className={cn(
-                            buttonVariants({ size: "lg" }),
-                            "w-full sm:w-auto rounded-full min-h-12 h-12 text-base transition-[box-shadow,filter] duration-200 bg-gradient-brand-cta shadow-brand-cta hover:shadow-lg hover:brightness-105 focus-visible:ring-2 focus-visible:ring-brand-2/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background text-white border-0 border-transparent cursor-pointer no-underline",
-                        )}
+                        className={heroPrimaryCtaClassName}
                     >
                         Khám phá ngay
                     </Link>
