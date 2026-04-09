@@ -758,7 +758,7 @@ export default function BrandShowcase() {
                         initial={{ opacity: 0, y: -10 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center space-x-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary uppercase tracking-widest mb-3"
+                        className="inline-flex items-center space-x-2 rounded-full border border-violet-300/50 bg-violet-50/90 px-4 py-1.5 text-sm font-medium text-violet-800 uppercase tracking-widest mb-3 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-200"
                     >
                         <Crown className="w-4 h-4" />
                         <span>Đối Tác Uy Tín</span>
@@ -767,9 +767,11 @@ export default function BrandShowcase() {
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-3xl md:text-5xl font-bold tracking-tight bg-linear-to-r from-slate-800 via-violet-800 to-slate-900 bg-clip-text text-transparent dark:from-slate-100 dark:via-violet-200 dark:to-slate-100"
+                        className="heading-section-vi text-3xl md:text-5xl font-bold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5]"
                     >
-                        Thương Hiệu Nổi Bật
+                        <span className="heading-gradient-vi bg-linear-to-r from-slate-800 via-violet-800 to-slate-900 bg-clip-text text-transparent dark:from-slate-100 dark:via-violet-200 dark:to-slate-100">
+                            Thương Hiệu Nổi Bật
+                        </span>
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0, y: 10 }}

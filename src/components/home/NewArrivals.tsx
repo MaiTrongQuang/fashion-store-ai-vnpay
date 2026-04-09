@@ -52,12 +52,14 @@ export default function NewArrivals({ products }: NewArrivalsProps) {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
-                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-teal-800 uppercase tracking-widest mb-3 border border-teal-300/55 rounded-full px-4 py-1.5 bg-teal-50/95 shadow-sm dark:border-teal-500/35 dark:bg-teal-950/45 dark:text-teal-200">
+                        <div className="inline-flex items-center space-x-2 text-sm font-bold text-teal-800 uppercase tracking-widest mb-4 border border-teal-300/55 rounded-full px-4 py-1.5 bg-teal-50/95 shadow-sm dark:border-teal-500/35 dark:bg-teal-950/45 dark:text-teal-200">
                             <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                             <span>Vừa cập nhật AI</span>
                         </div>
-                        <h2 className="font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight md:text-5xl md:font-medium bg-linear-to-r from-teal-800 via-cyan-700 to-teal-900 bg-clip-text text-transparent dark:from-teal-200 dark:via-cyan-200 dark:to-teal-100">
-                            Hàng Mới Về
+                        <h2 className="heading-section-vi font-sans text-4xl font-semibold tracking-normal md:tracking-tight md:text-5xl md:font-medium leading-[1.55] md:leading-[1.5]">
+                            <span className="heading-gradient-vi bg-linear-to-r from-teal-800 via-cyan-700 to-teal-900 bg-clip-text text-transparent dark:from-teal-200 dark:via-cyan-200 dark:to-teal-100">
+                                Hàng Mới Về
+                            </span>
                         </h2>
                         <p className="mt-3 text-muted-foreground text-lg max-w-xl">
                             Khám phá các bộ sưu tập mới nhất vừa được hệ thống

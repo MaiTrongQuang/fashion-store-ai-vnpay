@@ -119,9 +119,9 @@ export default function FlashSale({ products }: FlashSaleProps) {
                             <Flame className="w-4 h-4" />
                             <span>Flash Sale</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                        <h2 className="heading-section-vi text-4xl md:text-5xl font-extrabold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5] text-foreground">
                             Đang Giảm Giá{" "}
-                            <span className="bg-linear-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+                            <span className="heading-gradient-vi bg-linear-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
                                 Sốc
                             </span>
                         </h2>

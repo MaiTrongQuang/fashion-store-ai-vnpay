@@ -100,9 +100,11 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-3xl md:text-5xl font-bold tracking-tight bg-linear-to-br from-rose-900 via-foreground to-violet-800 bg-clip-text text-transparent dark:from-rose-100 dark:via-foreground dark:to-violet-200"
+                        className="heading-section-vi text-3xl md:text-5xl font-bold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5]"
                     >
-                        Khám Phá Danh Mục
+                        <span className="heading-gradient-vi bg-linear-to-br from-rose-900 via-foreground to-violet-800 bg-clip-text text-transparent dark:from-rose-100 dark:via-foreground dark:to-violet-200">
+                            Khám Phá Danh Mục
+                        </span>
                     </motion.h2>
                 </div>
 

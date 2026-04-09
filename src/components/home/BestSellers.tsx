@@ -76,8 +76,10 @@ export default function BestSellers({ products }: BestSellersProps) {
                             <Trophy className="w-4 h-4" />
                             <span>Được Chọn Nhiều Nhất</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-linear-to-r from-amber-800 via-foreground to-amber-900 bg-clip-text text-transparent dark:from-amber-200 dark:via-foreground dark:to-amber-100">
-                            Bán Chạy Nhất
+                        <h2 className="heading-section-vi text-4xl md:text-5xl font-extrabold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5]">
+                            <span className="heading-gradient-vi bg-linear-to-r from-amber-800 via-foreground to-amber-900 bg-clip-text text-transparent dark:from-amber-200 dark:via-foreground dark:to-amber-100">
+                                Bán Chạy Nhất
+                            </span>
                         </h2>
                         <p className="mt-3 text-muted-foreground text-lg max-w-xl">
                             Top sản phẩm được khách hàng tin tưởng và lựa chọn,

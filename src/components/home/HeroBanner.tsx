@@ -363,8 +363,8 @@ export default function HeroBanner({ banners: _banners }: HeroBannerProps) {
                     <Sparkles className="mr-2 h-4 w-4 text-amber-500 dark:text-amber-400" />
                     Trải nghiệm Fashion Store AI VNPay
                 </div>
-                <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-balance">
-                    <span className="bg-linear-to-r from-violet-600 via-fuchsia-600 to-rose-600 bg-clip-text text-transparent dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300">
+                <h1 className="heading-section-vi text-5xl md:text-7xl font-extrabold tracking-normal md:tracking-tight text-balance leading-[1.45] md:leading-[1.35]">
+                    <span className="heading-gradient-vi bg-linear-to-r from-violet-600 via-fuchsia-600 to-rose-600 bg-clip-text text-transparent dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300">
                         Thời trang AI
                     </span>
                     <br className="hidden md:block" />

@@ -46,14 +46,14 @@ export default function Newsletter() {
                     viewport={{ once: true }}
                     className="max-w-2xl mx-auto text-center"
                 >
-                    <div className="inline-flex items-center space-x-2 rounded-full border border-primary/20 bg-background px-4 py-1.5 text-sm font-medium text-primary uppercase tracking-widest mb-6 shadow-sm">
-                        <Sparkles className="w-4 h-4" />
+                    <div className="inline-flex items-center space-x-2 rounded-full border border-violet-300/55 bg-white/90 px-4 py-1.5 text-sm font-medium text-violet-800 uppercase tracking-widest mb-6 shadow-sm dark:border-violet-500/35 dark:bg-violet-950/45 dark:text-violet-200">
+                        <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                         <span>Ưu đãi độc quyền</span>
                     </div>
 
-                    <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">
+                    <h2 className="heading-section-vi text-3xl md:text-5xl font-extrabold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5] mb-4 text-foreground">
                         Đừng Bỏ Lỡ{" "}
-                        <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                        <span className="heading-gradient-vi bg-linear-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent dark:from-violet-300 dark:to-fuchsia-300">
                             Ưu Đãi Hấp Dẫn
                         </span>
                     </h2>

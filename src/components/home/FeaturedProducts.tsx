@@ -56,8 +56,10 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                             <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                             <span>Được Yêu Thích Bằng AI</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-linear-to-r from-violet-800 via-fuchsia-700 to-violet-900 bg-clip-text text-transparent dark:from-violet-200 dark:via-fuchsia-200 dark:to-violet-100">
-                            Sản Phẩm Nổi Bật
+                        <h2 className="heading-section-vi text-4xl md:text-5xl font-extrabold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5]">
+                            <span className="heading-gradient-vi bg-linear-to-r from-violet-800 via-fuchsia-700 to-violet-900 bg-clip-text text-transparent dark:from-violet-200 dark:via-fuchsia-200 dark:to-violet-100">
+                                Sản Phẩm Nổi Bật
+                            </span>
                         </h2>
                         <p className="mt-3 text-muted-foreground text-lg max-w-xl">
                             Các xu hướng thời trang được hệ thống AI gợi ý và

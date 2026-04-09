@@ -275,6 +275,29 @@
     }
 }
 
+@layer utilities {
+    /*
+     * Tiêu đề section (VI): line-height cao hơn preset text-4xl/5xl của Tailwind
+     * (preset thường ~1.2–1.25 → cắt dấu). Padding-block chừa phần ascender + dấu.
+     */
+    .heading-section-vi {
+        line-height: 1.55;
+        padding-block: 0.35em 0.4em;
+        text-wrap: balance;
+        overflow: visible;
+    }
+
+    /* Gradient chữ: clip trên span inline-block + clone giảm lỗi cắt dấu WebKit */
+    .heading-gradient-vi {
+        display: inline-block;
+        max-width: 100%;
+        padding-block: 0.08em 0.12em;
+        line-height: inherit;
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+    }
+}
+
 /* ── Hero Banner: GPU-composited rain-fall icon animation ────────────── */
 @keyframes hero-rain-fall {
     0% {
