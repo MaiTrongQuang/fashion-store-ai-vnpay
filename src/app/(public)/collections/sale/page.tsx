@@ -300,7 +300,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                     className={cn(
                                         pillBase,
                                         !hasQuickFilter
-                                            ? "bg-gradient-brand-cta text-primary-foreground shadow-brand-cta"
+                                            ? "bg-gradient-sale-cta text-white shadow-sale-cta"
                                             : "bg-muted/80 text-foreground hover:bg-muted",
                                     )}
                                 >
@@ -315,7 +315,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                     className={cn(
                                         pillBase,
                                         params.featured === "true"
-                                            ? "bg-gradient-brand-cta text-primary-foreground shadow-brand-cta hover:brightness-110"
+                                            ? "bg-gradient-sale-cta text-white shadow-sale-cta hover:brightness-110"
                                             : "bg-muted/80 text-foreground hover:bg-muted",
                                     )}
                                 >
@@ -330,7 +330,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                     className={cn(
                                         pillBase,
                                         params.new === "true"
-                                            ? "bg-gradient-brand-cta text-primary-foreground shadow-brand-cta hover:brightness-110"
+                                            ? "bg-gradient-sale-cta text-white shadow-sale-cta hover:brightness-110"
                                             : "bg-muted/80 text-foreground hover:bg-muted",
                                     )}
                                 >
@@ -387,7 +387,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-muted/20 px-6 py-16 text-center md:py-24">
                                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand-soft-2/50 dark:bg-brand-soft-1/25">
                                     <Percent
-                                        className="h-8 w-8 text-brand-2"
+                                        className="h-8 w-8 text-sale-1 dark:text-sale-2"
                                         aria-hidden
                                     />
                                 </div>
@@ -401,7 +401,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                 </p>
                                 <Link
                                     href="/products"
-                                    className="mt-8 inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-brand-cta px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-brand-cta transition-[transform,filter] hover:brightness-110 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    className="mt-8 inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-sale-cta px-5 py-2.5 text-sm font-semibold text-white shadow-sale-cta transition-[transform,filter] hover:brightness-110 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     Khám phá sản phẩm
                                 </Link>
@@ -456,7 +456,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                                 className={cn(
                                                     "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-2xl border text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                                                     item === page
-                                                        ? "border-red-600 bg-red-600 text-white"
+                                                        ? "border-sale-1 bg-gradient-sale-cta text-white"
                                                         : "border-border bg-background hover:bg-muted",
                                                 )}
                                                 aria-current={
