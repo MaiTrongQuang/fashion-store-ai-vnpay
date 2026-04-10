@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { verifyReturnUrl } from "@/lib/vnpay";
-import { revalidatePath } from "next/cache";
+
 
 /**
  * VNPay IPN (Instant Payment Notification) — server-to-server.
@@ -97,8 +97,7 @@ export async function GET(request: NextRequest) {
             console.info(
                 `[VNPay IPN] Payment SUCCESS for order ${orderNumber}, txn=${transactionNo}`,
             );
-            revalidatePath("/account/orders");
-            revalidatePath(`/account/orders/${order.id}`);
+
         } else {
             // Payment failed
             await supabase
@@ -133,8 +132,7 @@ export async function GET(request: NextRequest) {
             console.info(
                 `[VNPay IPN] Payment FAILED for order ${orderNumber}, code=${responseCode}`,
             );
-            revalidatePath("/account/orders");
-            revalidatePath(`/account/orders/${order.id}`);
+
         }
 
         return NextResponse.json(

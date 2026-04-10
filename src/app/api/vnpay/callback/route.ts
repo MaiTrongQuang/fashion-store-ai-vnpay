@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyReturnUrl, VNPAY_RESPONSE_CODES } from "@/lib/vnpay";
+import { verifyReturnUrl } from "@/lib/vnpay";
 import { createAdminClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
 
 /**
  * VNPay Return URL — client redirect after payment.
  *
- * Per VNPay documentation:
- *   - This URL only verifies checksum and displays result to the customer.
- *   - Do NOT update payment status here — that's handled by the IPN URL.
- *
- * We verify the hash, then redirect to /checkout/result with appropriate status params.
+ * For sandbox mode (no IPN configuration available), this handler also
+ * updates payment/order status in the database with idempotency checks.
+ * If the IPN handler has already processed this order, the DB updates
+ * are safely skipped.
  */
 export async function GET(request: NextRequest) {
     try {
@@ -26,17 +24,15 @@ export async function GET(request: NextRequest) {
         const bankCode = searchParams["vnp_BankCode"] || "";
 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        const url = new URL("/checkout/result", appUrl);
 
         if (!isValid) {
-            const url = new URL("/checkout/result", appUrl);
             url.searchParams.set("status", "invalid");
             return NextResponse.redirect(url);
         }
 
+        // Update payment status in DB (idempotent — safe if IPN already processed)
         const supabase = await createAdminClient();
-        const url = new URL("/checkout/result", appUrl);
-
-        // Fetch order to verify idempotency (don't update if already processed by IPN)
         const { data: order } = await supabase
             .from("orders")
             .select("id, status")
@@ -44,9 +40,9 @@ export async function GET(request: NextRequest) {
             .single();
 
         if (responseCode === "00" && transactionStatus === "00") {
-            // Payment success
             url.searchParams.set("status", "success");
 
+            // Only update if not already processed by IPN
             if (order && order.status === "awaiting_payment") {
                 await supabase
                     .from("orders")
@@ -64,14 +60,15 @@ export async function GET(request: NextRequest) {
                     })
                     .eq("order_id", order.id);
 
-                revalidatePath("/account/orders");
-                revalidatePath(`/account/orders/${order.id}`);
+                console.info(
+                    `[VNPay Callback] Payment SUCCESS for order ${orderNumber}`,
+                );
             }
         } else {
-            // Payment failed
             url.searchParams.set("status", "failed");
             url.searchParams.set("code", responseCode);
 
+            // Only update if not already processed by IPN
             if (order && order.status === "awaiting_payment") {
                 await supabase
                     .from("orders")
@@ -102,8 +99,9 @@ export async function GET(request: NextRequest) {
                     }
                 }
 
-                revalidatePath("/account/orders");
-                revalidatePath(`/account/orders/${order.id}`);
+                console.info(
+                    `[VNPay Callback] Payment FAILED for order ${orderNumber}, code=${responseCode}`,
+                );
             }
         }
 

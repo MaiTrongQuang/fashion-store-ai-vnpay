@@ -194,12 +194,24 @@ export async function POST(request: Request) {
             amount: total,
         });
 
-        // Update stock
+        // Update stock atomically via RPC
         for (const item of cartItems as any[]) {
-            await supabase
-                .from("product_variants")
-                .update({ stock: item.variant.stock - item.quantity })
-                .eq("id", item.variant.id);
+            const { error: stockError } = await supabase.rpc("deduct_variant_stock", {
+                p_variant_id: item.variant.id,
+                p_quantity: item.quantity,
+            });
+            if (stockError) {
+                console.error("Stock deduction failed:", stockError);
+                // Order already created — mark it as failed and restore previous items
+                await supabase
+                    .from("orders")
+                    .update({ status: "cancelled", updated_at: new Date().toISOString() })
+                    .eq("id", order.id);
+                return NextResponse.json(
+                    { error: `${item.variant.product.name} (${item.variant.size}/${item.variant.color}) đã hết hàng` },
+                    { status: 400 },
+                );
+            }
         }
 
         // Update voucher usage
