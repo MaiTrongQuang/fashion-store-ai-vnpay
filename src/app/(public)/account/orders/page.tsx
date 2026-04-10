@@ -9,6 +9,8 @@ import { ORDER_STATUS_MAP } from "@/lib/constants";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Đơn hàng của tôi" };
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 export default async function UserOrdersPage() {
     const supabase = await createClient();

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyReturnUrl, VNPAY_RESPONSE_CODES } from "@/lib/vnpay";
+import { createAdminClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 
 /**
  * VNPay Return URL — client redirect after payment.
@@ -31,13 +33,78 @@ export async function GET(request: NextRequest) {
             return NextResponse.redirect(url);
         }
 
+        const supabase = await createAdminClient();
         const url = new URL("/checkout/result", appUrl);
 
+        // Fetch order to verify idempotency (don't update if already processed by IPN)
+        const { data: order } = await supabase
+            .from("orders")
+            .select("id, status")
+            .eq("order_number", orderNumber)
+            .single();
+
         if (responseCode === "00" && transactionStatus === "00") {
+            // Payment success
             url.searchParams.set("status", "success");
+
+            if (order && order.status === "awaiting_payment") {
+                await supabase
+                    .from("orders")
+                    .update({ status: "paid", updated_at: new Date().toISOString() })
+                    .eq("id", order.id);
+
+                await supabase
+                    .from("payments")
+                    .update({
+                        status: "paid",
+                        vnpay_transaction_no: transactionNo,
+                        vnpay_response_code: responseCode,
+                        vnpay_txn_ref: orderNumber,
+                        paid_at: new Date().toISOString(),
+                    })
+                    .eq("order_id", order.id);
+
+                revalidatePath("/account/orders");
+                revalidatePath(`/account/orders/${order.id}`);
+            }
         } else {
+            // Payment failed
             url.searchParams.set("status", "failed");
             url.searchParams.set("code", responseCode);
+
+            if (order && order.status === "awaiting_payment") {
+                await supabase
+                    .from("orders")
+                    .update({ status: "payment_failed", updated_at: new Date().toISOString() })
+                    .eq("id", order.id);
+
+                await supabase
+                    .from("payments")
+                    .update({
+                        status: "failed",
+                        vnpay_response_code: responseCode,
+                        vnpay_txn_ref: orderNumber,
+                    })
+                    .eq("order_id", order.id);
+
+                // Restore stock
+                const { data: orderItems } = await supabase
+                    .from("order_items")
+                    .select("variant_id, quantity")
+                    .eq("order_id", order.id);
+
+                if (orderItems) {
+                    for (const item of orderItems) {
+                        await supabase.rpc("restore_variant_stock", {
+                            p_variant_id: item.variant_id,
+                            p_quantity: item.quantity,
+                        });
+                    }
+                }
+
+                revalidatePath("/account/orders");
+                revalidatePath(`/account/orders/${order.id}`);
+            }
         }
 
         url.searchParams.set("order", orderNumber);

@@ -24,6 +24,9 @@ interface Props {
     params: Promise<{ id: string }>;
 }
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { id } = await params;
     const supabase = await createClient();

@@ -105,20 +105,15 @@ export async function createAdminClient() {
         return createStubClient();
     }
 
-    const cookieStore = await cookies();
-
-    return createServerClient(url!, key!, {
-        cookies: {
-            getAll() {
-                return cookieStore.getAll();
-            },
-            setAll(cookiesToSet) {
-                try {
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        cookieStore.set(name, value, options),
-                    );
-                } catch {}
-            },
-        },
+    // Must use raw supabase-js client to prevent @supabase/ssr from
+    // automatically attaching the current user's session from cookies,
+    // which would override the Service Role and enforce RLS policies.
+    const { createClient: createRawClient } = await import('@supabase/supabase-js');
+    
+    return createRawClient(url!, key!, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+        }
     });
 }
