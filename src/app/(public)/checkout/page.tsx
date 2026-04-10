@@ -112,12 +112,16 @@ export default function CheckoutPage() {
         if (cart) {
             const { data: items } = await supabase
                 .from("cart_items")
-                .select("quantity, variant:product_variants(price)")
+                .select("quantity, variant:product_variants(price, product:products(sale_price))")
                 .eq("cart_id", cart.id);
 
             if (items) {
                 const total = (items as any[]).reduce(
-                    (sum, item) => sum + item.variant.price * item.quantity,
+                    (sum: number, item: any) => {
+                        const effectivePrice =
+                            item.variant.product?.sale_price ?? item.variant.price;
+                        return sum + effectivePrice * item.quantity;
+                    },
                     0,
                 );
                 setSubtotal(total);

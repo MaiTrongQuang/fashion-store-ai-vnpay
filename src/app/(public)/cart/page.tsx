@@ -25,6 +25,8 @@ interface CartItemFull {
             id: string;
             name: string;
             slug: string;
+            base_price: number;
+            sale_price: number | null;
             images: { url: string; is_primary: boolean }[];
         };
     };
@@ -64,7 +66,7 @@ export default function CartPage() {
         id, quantity,
         variant:product_variants(
           id, size, color, price, stock,
-          product:products(id, name, slug, images:product_images(url, is_primary))
+          product:products(id, name, slug, base_price, sale_price, images:product_images(url, is_primary))
         )
       `,
             )
@@ -106,8 +108,12 @@ export default function CartPage() {
         router.refresh();
     };
 
+    // Use sale_price from product level if available, otherwise variant price
+    const getEffectivePrice = (item: CartItemFull) =>
+        item.variant.product.sale_price ?? item.variant.price;
+
     const subtotal = items.reduce(
-        (sum, item) => sum + item.variant.price * item.quantity,
+        (sum, item) => sum + getEffectivePrice(item) * item.quantity,
         0,
     );
 
@@ -142,6 +148,10 @@ export default function CartPage() {
                             const primaryImage =
                                 product.images?.find((img) => img.is_primary) ||
                                 product.images?.[0];
+                            const effectivePrice = getEffectivePrice(item);
+                            const hasDiscount =
+                                product.sale_price != null &&
+                                product.sale_price < item.variant.price;
 
                             return (
                                 <Card key={item.id} className="overflow-hidden">
@@ -174,11 +184,16 @@ export default function CartPage() {
                                                     {item.variant.color} /{" "}
                                                     {item.variant.size}
                                                 </p>
-                                                <p className="font-semibold mt-2">
-                                                    {formatPrice(
-                                                        item.variant.price,
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <p className="font-semibold text-primary">
+                                                        {formatPrice(effectivePrice)}
+                                                    </p>
+                                                    {hasDiscount && (
+                                                        <p className="text-sm text-muted-foreground line-through">
+                                                            {formatPrice(item.variant.price)}
+                                                        </p>
                                                     )}
-                                                </p>
+                                                </div>
 
                                                 <div className="flex items-center justify-between mt-3">
                                                     <div className="flex items-center gap-2">

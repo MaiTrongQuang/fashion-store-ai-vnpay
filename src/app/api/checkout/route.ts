@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         id, quantity,
         variant:product_variants(
           id, size, color, price, stock,
-          product:products(id, name, images:product_images(url, is_primary))
+          product:products(id, name, base_price, sale_price, images:product_images(url, is_primary))
         )
       `,
             )
@@ -83,10 +83,13 @@ export async function POST(request: Request) {
             );
         }
 
-        // Calculate totals
+        // Calculate totals — use product-level sale_price when available
+        const getEffectivePrice = (item: any): number =>
+            item.variant.product?.sale_price ?? item.variant.price;
+
         const subtotal = (cartItems as any[]).reduce(
             (sum: number, item: any) =>
-                sum + item.variant.price * item.quantity,
+                sum + getEffectivePrice(item) * item.quantity,
             0,
         );
 
@@ -176,7 +179,7 @@ export async function POST(request: Request) {
                 product_image: primaryImage?.url || null,
                 size: item.variant.size,
                 color: item.variant.color,
-                price: item.variant.price,
+                price: getEffectivePrice(item),
                 quantity: item.quantity,
             };
         });
