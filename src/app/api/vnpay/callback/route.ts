@@ -1,118 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
-import { verifyReturnUrl } from "@/lib/vnpay";
+import { verifyReturnUrl, VNPAY_RESPONSE_CODES } from "@/lib/vnpay";
 
+/**
+ * VNPay Return URL — client redirect after payment.
+ *
+ * Per VNPay documentation:
+ *   - This URL only verifies checksum and displays result to the customer.
+ *   - Do NOT update payment status here — that's handled by the IPN URL.
+ *
+ * We verify the hash, then redirect to /checkout/result with appropriate status params.
+ */
 export async function GET(request: NextRequest) {
     try {
         const searchParams = Object.fromEntries(request.nextUrl.searchParams);
-        const { isValid, responseCode } = verifyReturnUrl(searchParams);
+        const { isValid, responseCode, transactionStatus } =
+            verifyReturnUrl(searchParams);
+
+        const orderNumber = searchParams["vnp_TxnRef"] || "";
+        const transactionNo = searchParams["vnp_TransactionNo"] || "";
+        const vnpAmount = searchParams["vnp_Amount"]
+            ? (parseInt(searchParams["vnp_Amount"]) / 100).toString()
+            : "0";
+        const bankCode = searchParams["vnp_BankCode"] || "";
+
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
         if (!isValid) {
-            return NextResponse.redirect(
-                new URL("/checkout/result?status=invalid", request.url),
-            );
+            const url = new URL("/checkout/result", appUrl);
+            url.searchParams.set("status", "invalid");
+            return NextResponse.redirect(url);
         }
 
-        const orderNumber = searchParams["vnp_TxnRef"];
-        const transactionNo = searchParams["vnp_TransactionNo"];
-        const supabase = await createAdminClient();
+        const url = new URL("/checkout/result", appUrl);
 
-        // Get order
-        const { data: order } = await supabase
-            .from("orders")
-            .select("id, status")
-            .eq("order_number", orderNumber)
-            .single();
-
-        if (!order) {
-            return NextResponse.redirect(
-                new URL("/checkout/result?status=not_found", request.url),
-            );
-        }
-
-        // Prevent duplicate updates
-        if (order.status !== "awaiting_payment") {
-            return NextResponse.redirect(
-                new URL(
-                    `/checkout/result?status=already_processed&order=${orderNumber}`,
-                    request.url,
-                ),
-            );
-        }
-
-        if (responseCode === "00") {
-            // Payment successful
-            await supabase
-                .from("orders")
-                .update({ status: "paid" })
-                .eq("id", order.id);
-
-            await supabase
-                .from("payments")
-                .update({
-                    status: "paid",
-                    vnpay_transaction_no: transactionNo,
-                    vnpay_response_code: responseCode,
-                    vnpay_txn_ref: orderNumber,
-                    paid_at: new Date().toISOString(),
-                })
-                .eq("order_id", order.id);
-
-            return NextResponse.redirect(
-                new URL(
-                    `/checkout/result?status=success&order=${orderNumber}`,
-                    request.url,
-                ),
-            );
+        if (responseCode === "00" && transactionStatus === "00") {
+            url.searchParams.set("status", "success");
         } else {
-            // Payment failed
-            await supabase
-                .from("orders")
-                .update({ status: "payment_failed" })
-                .eq("id", order.id);
-
-            await supabase
-                .from("payments")
-                .update({
-                    status: "failed",
-                    vnpay_response_code: responseCode,
-                    vnpay_txn_ref: orderNumber,
-                })
-                .eq("order_id", order.id);
-
-            // Restore stock
-            const { data: orderItems } = await supabase
-                .from("order_items")
-                .select("variant_id, quantity")
-                .eq("order_id", order.id);
-
-            if (orderItems) {
-                for (const item of orderItems) {
-                    const { data: variant } = await supabase
-                        .from("product_variants")
-                        .select("stock")
-                        .eq("id", item.variant_id)
-                        .single();
-                    if (variant) {
-                        await supabase
-                            .from("product_variants")
-                            .update({ stock: variant.stock + item.quantity })
-                            .eq("id", item.variant_id);
-                    }
-                }
-            }
-
-            return NextResponse.redirect(
-                new URL(
-                    `/checkout/result?status=failed&order=${orderNumber}`,
-                    request.url,
-                ),
-            );
+            url.searchParams.set("status", "failed");
+            url.searchParams.set("code", responseCode);
         }
+
+        url.searchParams.set("order", orderNumber);
+        url.searchParams.set("txn", transactionNo);
+        url.searchParams.set("amount", vnpAmount);
+        url.searchParams.set("bank", bankCode);
+
+        return NextResponse.redirect(url);
     } catch (error) {
         console.error("VNPay callback error:", error);
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
         return NextResponse.redirect(
-            new URL("/checkout/result?status=error", request.url),
+            new URL("/checkout/result?status=error", appUrl),
         );
     }
 }

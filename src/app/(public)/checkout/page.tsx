@@ -76,8 +76,11 @@ export default function CheckoutPage() {
     const [voucherCode, setVoucherCode] = useState("");
     const [note, setNote] = useState("");
     const [subtotal, setSubtotal] = useState(0);
+    const [discount, setDiscount] = useState(0);
+    const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [addingAddress, setAddingAddress] = useState(false);
+    const [applyingVoucher, setApplyingVoucher] = useState(false);
     const supabase = createClient();
 
     const loadData = useCallback(async () => {
@@ -127,7 +130,76 @@ export default function CheckoutPage() {
     }, [loadData]);
 
     const shippingFee = subtotal >= 500000 ? 0 : DEFAULT_SHIPPING_FEE;
-    const total = subtotal + shippingFee;
+    const total = subtotal - discount + shippingFee;
+
+    const handleApplyVoucher = async () => {
+        if (!voucherCode.trim()) {
+            setAppliedVoucher(null);
+            setDiscount(0);
+            return;
+        }
+
+        setApplyingVoucher(true);
+        try {
+            const { data: voucher, error } = await supabase
+                .from("vouchers")
+                .select("*")
+                .eq("code", voucherCode)
+                .eq("is_active", true)
+                .single();
+
+            if (error || !voucher) {
+                toast.error("Mã giảm giá không hợp lệ hoặc đã hết hạn");
+                setAppliedVoucher(null);
+                setDiscount(0);
+                return;
+            }
+
+            const now = new Date();
+            const start = new Date(voucher.starts_at);
+            const end = new Date(voucher.expires_at);
+
+            if (now < start || now > end) {
+                toast.error("Mã giảm giá chưa bắt đầu hoặc đã hết hạn");
+                setAppliedVoucher(null);
+                setDiscount(0);
+                return;
+            }
+
+            if (voucher.used_count >= voucher.usage_limit) {
+                toast.error("Mã giảm giá đã hết lượt sử dụng");
+                setAppliedVoucher(null);
+                setDiscount(0);
+                return;
+            }
+
+            if (subtotal < voucher.min_order) {
+                toast.error(`Đơn hàng tối thiểu ${formatPrice(voucher.min_order)} để áp dụng mã này`);
+                setAppliedVoucher(null);
+                setDiscount(0);
+                return;
+            }
+
+            // Calculate discount
+            let calculatedDiscount = 0;
+            if (voucher.type === "percentage") {
+                calculatedDiscount = Math.floor(subtotal * (voucher.value / 100));
+                if (voucher.max_discount && calculatedDiscount > voucher.max_discount) {
+                    calculatedDiscount = voucher.max_discount;
+                }
+            } else {
+                calculatedDiscount = voucher.value;
+            }
+
+            setDiscount(calculatedDiscount);
+            setAppliedVoucher(voucher);
+            toast.success("Áp dụng mã giảm giá thành công");
+        } catch (err) {
+             toast.error("Lỗi khi áp dụng mã giảm giá");
+        } finally {
+            setApplyingVoucher(false);
+        }
+    };
 
     const handleCheckout = async () => {
         if (!selectedAddress) {
@@ -339,10 +411,21 @@ export default function CheckoutPage() {
                                         className="pl-10"
                                     />
                                 </div>
-                                <Button variant="outline" size="sm">
-                                    Áp dụng
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={handleApplyVoucher}
+                                    disabled={applyingVoucher || subtotal === 0}
+                                >
+                                    {applyingVoucher ? "Đang xử lý..." : "Áp dụng"}
                                 </Button>
                             </div>
+
+                            {appliedVoucher && (
+                                <div className="text-sm text-primary font-medium px-2">
+                                    Đã áp dụng mã: {appliedVoucher.code} (-{formatPrice(discount)})
+                                </div>
+                            )}
 
                             <Separator />
 
@@ -353,6 +436,16 @@ export default function CheckoutPage() {
                                     </span>
                                     <span>{formatPrice(subtotal)}</span>
                                 </div>
+                                {discount > 0 && (
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">
+                                            Giảm giá
+                                        </span>
+                                        <span className="text-primary">
+                                            -{formatPrice(discount)}
+                                        </span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">
                                         Phí vận chuyển
