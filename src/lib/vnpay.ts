@@ -9,7 +9,7 @@ export interface VNPayConfig {
 }
 
 function getConfig(): VNPayConfig {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "");
     return {
         tmnCode: process.env.VNPAY_TMN_CODE!,
         hashSecret: process.env.VNPAY_HASH_SECRET!,
