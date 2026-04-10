@@ -65,7 +65,7 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.47 0.17 350);
+    --primary: oklch(0.205 0.006 56);
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -85,7 +85,7 @@
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.47 0.17 350);
+    --sidebar-primary: oklch(0.205 0.006 56);
     --sidebar-primary-foreground: oklch(0.985 0 0);
     --sidebar-accent: oklch(0.97 0 0);
     --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -93,18 +93,18 @@
     --sidebar-ring: oklch(0.708 0 0);
 
     /*
-     * Dải gradient thương hiệu Rose Gold Premium:
-     * rose (thời trang, nữ tính, cao cấp) → rose-mid (chuyển tiếp) → gold (luxury CTA, gợi sắc đỏ VNPay + sang trọng).
+     * Thương hiệu Monochrome Warm (đen ấm + trắng):
+     * Gradient cực tinh tế giữa các sắc độ đen ấm — gần như solid, tối giản kiểu high fashion.
      */
-    --brand-1: oklch(0.47 0.17 350);
-    --brand-2: oklch(0.65 0.16 350);
-    --brand-3: oklch(0.55 0.14 85);
-    --brand-cta-1: oklch(0.52 0.18 350);
-    --brand-cta-2: oklch(0.58 0.16 350);
-    --brand-cta-3: oklch(0.60 0.14 85);
-    --brand-soft-1: oklch(0.97 0.025 350);
-    --brand-soft-2: oklch(0.98 0.020 350);
-    --brand-soft-3: oklch(0.97 0.028 85);
+    --brand-1: oklch(0.22 0.006 56);
+    --brand-2: oklch(0.32 0.008 56);
+    --brand-3: oklch(0.26 0.006 56);
+    --brand-cta-1: oklch(0.25 0.006 56);
+    --brand-cta-2: oklch(0.30 0.008 56);
+    --brand-cta-3: oklch(0.22 0.006 56);
+    --brand-soft-1: oklch(0.975 0.003 56);
+    --brand-soft-2: oklch(0.98 0.002 56);
+    --brand-soft-3: oklch(0.965 0.004 56);
 }
 
 .dark {
@@ -114,8 +114,8 @@
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.78 0.12 350);
-    --primary-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.93 0.003 56);
+    --primary-foreground: oklch(0.16 0.004 56);
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
@@ -133,22 +133,22 @@
     --chart-5: oklch(0.269 0 0);
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.78 0.12 350);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.93 0.003 56);
+    --sidebar-primary-foreground: oklch(0.16 0.004 56);
     --sidebar-accent: oklch(0.269 0 0);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
 
-    --brand-1: oklch(0.85 0.08 350);
-    --brand-2: oklch(0.78 0.10 350);
-    --brand-3: oklch(0.82 0.08 85);
-    --brand-cta-1: oklch(0.62 0.14 350);
-    --brand-cta-2: oklch(0.58 0.12 350);
-    --brand-cta-3: oklch(0.65 0.12 85);
-    --brand-soft-1: oklch(0.24 0.04 350);
-    --brand-soft-2: oklch(0.22 0.035 350);
-    --brand-soft-3: oklch(0.26 0.038 85);
+    --brand-1: oklch(0.92 0.004 56);
+    --brand-2: oklch(0.80 0.006 56);
+    --brand-3: oklch(0.88 0.004 56);
+    --brand-cta-1: oklch(0.90 0.004 56);
+    --brand-cta-2: oklch(0.85 0.005 56);
+    --brand-cta-3: oklch(0.92 0.003 56);
+    --brand-soft-1: oklch(0.22 0.004 56);
+    --brand-soft-2: oklch(0.20 0.003 56);
+    --brand-soft-3: oklch(0.24 0.004 56);
 }
 
 @layer base {
@@ -407,7 +407,7 @@
         cubic-bezier(0.25, 0.46, 0.45, 0.94) var(--rain-delay, 0s) forwards;
     will-change: transform, opacity;
     pointer-events: none;
-    filter: drop-shadow(0 0 4px oklch(0.5 0.1 350 / 0.3));
+    filter: drop-shadow(0 0 4px oklch(0.3 0 0 / 0.25));
 }
 
 /* Trail dưới con trỏ: rơi mượt, gia tốc nhẹ (gravity), lắc ngang ở giữa */
@@ -456,8 +456,8 @@
 .hero-rain-particle--cursor {
     animation: hero-rain-fall-cursor var(--rain-duration, 8s)
         cubic-bezier(0.28, 0.12, 0.18, 1) var(--rain-delay, 0s) forwards;
-    filter: drop-shadow(0 1px 8px oklch(0.45 0.1 350 / 0.22))
-        drop-shadow(0 4px 20px oklch(0.55 0.06 350 / 0.18));
+    filter: drop-shadow(0 1px 8px oklch(0.25 0 0 / 0.18))
+        drop-shadow(0 4px 20px oklch(0.3 0 0 / 0.14));
 }
 
 @media (prefers-reduced-motion: reduce) {
