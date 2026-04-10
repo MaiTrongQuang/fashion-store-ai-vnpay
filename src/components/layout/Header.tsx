@@ -9,7 +9,6 @@ import type {
     User as SupabaseUser,
 } from "@supabase/supabase-js";
 import {
-    Search,
     ShoppingBag,
     Heart,
     User,
@@ -32,6 +31,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
+import SearchDialog from "@/components/layout/SearchDialog";
 
 type NavLinkItem = (typeof NAV_LINKS)[number];
 
@@ -323,18 +323,7 @@ export default function Header() {
 
                     {/* Right Actions */}
                     <div className="flex items-center gap-1">
-                        <Link
-                            href="/search"
-                            className={cn(
-                                buttonVariants({
-                                    variant: "ghost",
-                                    size: "icon",
-                                }),
-                                "hidden sm:inline-flex",
-                            )}
-                        >
-                            <Search className="h-4 w-4" />
-                        </Link>
+                        <SearchDialog />
 
                         <Link
                             href="/account/wishlist"
