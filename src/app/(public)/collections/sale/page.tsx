@@ -206,19 +206,19 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
     return (
         <div className="relative">
             {/* Hero — gradient đỏ/cam nổi bật cho Sale */}
-            <section className="relative overflow-hidden border-b border-border/40 bg-brand-mesh">
+            <section className="relative overflow-hidden border-b border-border/40 bg-sale-mesh">
                 <DotPattern
                     width={16}
                     height={16}
                     cx={1}
                     cy={1}
                     cr={1}
-                    className="absolute inset-0 opacity-30 mask-[radial-gradient(500px_circle_at_center,white,transparent)] fill-brand-3/16 dark:fill-brand-3/10"
+                    className="absolute inset-0 opacity-30 mask-[radial-gradient(500px_circle_at_center,white,transparent)] fill-sale-1/16 dark:fill-sale-1/10"
                 />
                 {/* Decorative blobs */}
-                <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-cta-3)_22%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_16%,transparent)]" />
-                <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-2)_48%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-2)_12%,transparent)]" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-1)_35%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-1)_8%,transparent)]" />
+                <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--sale-1)_16%,transparent)] dark:bg-[color-mix(in_oklch,var(--sale-1)_12%,transparent)]" />
+                <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--sale-2)_14%,transparent)] dark:bg-[color-mix(in_oklch,var(--sale-2)_10%,transparent)]" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl bg-[color-mix(in_oklch,var(--sale-3)_8%,transparent)] dark:bg-[color-mix(in_oklch,var(--sale-3)_6%,transparent)]" />
 
                 <div className="container relative z-10 mx-auto px-4 py-10 md:py-14">
                     <nav
@@ -242,7 +242,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
 
                     <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                         <div className="max-w-2xl">
-                            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-3/40 bg-[color-mix(in_oklch,var(--brand-soft-3)_88%,white)] px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-brand-3 dark:border-brand-3/35 dark:bg-brand-soft-3/35 dark:text-brand-3 shadow-sm">
+                            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-sale-1/40 bg-[color-mix(in_oklch,var(--sale-2)_12%,white)] px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sale-1 dark:border-sale-1/35 dark:bg-[color-mix(in_oklch,var(--sale-1)_15%,transparent)] dark:text-sale-2 shadow-sm">
                                 <Flame
                                     className="h-4 w-4"
                                     aria-hidden
@@ -251,7 +251,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                             </div>
                             <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
                                 Giảm Giá{" "}
-                                <span className="heading-gradient-vi text-gradient-brand">
+                                <span className="heading-gradient-vi text-gradient-sale">
                                     Sốc
                                 </span>
                             </h1>
@@ -262,11 +262,11 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                             </p>
                         </div>
                         <div className="flex shrink-0 flex-wrap gap-3 md:flex-col md:items-end">
-                            <span className="inline-flex items-center gap-2 rounded-full border border-brand-2/30 bg-[color-mix(in_oklch,var(--brand-soft-1)_92%,white)] dark:border-brand-2/25 dark:bg-brand-soft-1/30 px-4 py-2 text-sm font-bold tabular-nums text-brand-1 dark:text-brand-2 shadow-sm">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-sale-1/30 bg-[color-mix(in_oklch,var(--sale-2)_10%,white)] dark:border-sale-1/25 dark:bg-[color-mix(in_oklch,var(--sale-1)_12%,transparent)] px-4 py-2 text-sm font-bold tabular-nums text-sale-1 dark:text-sale-2 shadow-sm">
                                 <BadgePercent className="h-4 w-4" />
                                 {totalSaleProducts} sản phẩm giảm giá
                             </span>
-                            <span className="inline-flex items-center gap-2 rounded-full border border-brand-3/30 bg-[color-mix(in_oklch,var(--brand-soft-3)_90%,white)] dark:border-brand-3/25 dark:bg-brand-soft-3/28 px-4 py-2 text-sm font-semibold text-brand-1 dark:text-brand-2 shadow-sm">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-sale-3/30 bg-[color-mix(in_oklch,var(--sale-3)_10%,white)] dark:border-sale-3/25 dark:bg-[color-mix(in_oklch,var(--sale-3)_10%,transparent)] px-4 py-2 text-sm font-semibold text-sale-1 dark:text-sale-2 shadow-sm">
                                 <Timer className="h-4 w-4" />
                                 Ưu đãi có hạn
                             </span>

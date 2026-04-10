@@ -63,7 +63,7 @@ function CountdownTimer() {
                         </span>
                     </div>
                     {i < 2 && (
-                        <span className="text-2xl font-bold text-primary mb-4 animate-pulse">
+                        <span className="text-2xl font-bold text-sale-1 dark:text-sale-2 mb-4 animate-pulse">
                             :
                         </span>
                     )}
@@ -93,7 +93,7 @@ export default function FlashSale({ products }: FlashSaleProps) {
     const hasProducts = products.length > 0;
 
     return (
-        <section className="relative py-24 overflow-hidden bg-brand-mesh">
+        <section className="relative py-24 overflow-hidden bg-sale-mesh">
             {/* Ambient dots */}
             <DotPattern
                 width={16}
@@ -101,12 +101,12 @@ export default function FlashSale({ products }: FlashSaleProps) {
                 cx={1}
                 cy={1}
                 cr={1}
-                className="absolute inset-0 opacity-30 mask-[radial-gradient(500px_circle_at_center,white,transparent)] fill-brand-3/18 dark:fill-brand-3/12"
+                className="absolute inset-0 opacity-30 mask-[radial-gradient(500px_circle_at_center,white,transparent)] fill-sale-1/18 dark:fill-sale-1/12"
             />
 
             {/* Decorative gradient blobs */}
-            <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-cta-3)_28%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_18%,transparent)]" />
-            <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-2)_55%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-2)_14%,transparent)]" />
+            <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--sale-1)_18%,transparent)] dark:bg-[color-mix(in_oklch,var(--sale-1)_12%,transparent)]" />
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--sale-2)_15%,transparent)] dark:bg-[color-mix(in_oklch,var(--sale-2)_10%,transparent)]" />
 
             <div className="container relative mx-auto px-4 z-10">
                 <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 gap-6">
@@ -115,13 +115,13 @@ export default function FlashSale({ products }: FlashSaleProps) {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
-                        <div className="inline-flex items-center space-x-2 text-sm font-bold uppercase tracking-widest mb-3 border border-brand-3/40 rounded-full px-4 py-1.5 bg-[color-mix(in_oklch,var(--brand-soft-3)_90%,white)] text-brand-3 dark:border-brand-3/35 dark:bg-brand-soft-3/40 dark:text-brand-3 shadow-sm">
+                        <div className="inline-flex items-center space-x-2 text-sm font-bold uppercase tracking-widest mb-3 border border-sale-1/40 rounded-full px-4 py-1.5 bg-[color-mix(in_oklch,var(--sale-2)_12%,white)] text-sale-1 dark:border-sale-1/35 dark:bg-[color-mix(in_oklch,var(--sale-1)_15%,transparent)] dark:text-sale-2 shadow-sm">
                             <Flame className="w-4 h-4" />
                             <span>Flash Sale</span>
                         </div>
                         <h2 className="heading-section-vi text-4xl md:text-5xl font-extrabold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5] text-foreground">
                             Đang Giảm Giá{" "}
-                            <span className="heading-gradient-vi text-gradient-brand">
+                            <span className="heading-gradient-vi text-gradient-sale">
                                 Sốc
                             </span>
                         </h2>
@@ -185,7 +185,7 @@ export default function FlashSale({ products }: FlashSaleProps) {
                 >
                     <Link
                         href="/products?sale=true"
-                        className="inline-flex items-center gap-2 group px-8 py-3.5 rounded-full cursor-pointer bg-gradient-brand-cta text-white font-semibold shadow-brand-cta hover:brightness-110 transition-[transform,filter] duration-200 hover:-translate-y-0.5"
+                        className="inline-flex items-center gap-2 group px-8 py-3.5 rounded-full cursor-pointer bg-gradient-sale-cta text-white font-semibold shadow-sale-cta hover:brightness-110 transition-[transform,filter] duration-200 hover:-translate-y-0.5"
                     >
                         <span>Xem Toàn Bộ Sale</span>
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
