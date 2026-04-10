@@ -14,6 +14,7 @@ export function formatPrice(price: number): string {
 
 export function formatDate(dateStr: string): string {
     return new Intl.DateTimeFormat("vi-VN", {
+        timeZone: "Asia/Ho_Chi_Minh",
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -25,7 +26,13 @@ export function formatDate(dateStr: string): string {
 export function generateOrderNumber(): string {
     const now = new Date();
     const prefix = "LX";
-    const date = now.toISOString().slice(2, 10).replace(/-/g, "");
+    const vnParts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Ho_Chi_Minh",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).format(now); // "2026-04-11"
+    const date = vnParts.slice(2).replace(/-/g, ""); // "260411"
     const random = Math.random().toString(36).substring(2, 8).toUpperCase();
     return `${prefix}${date}${random}`;
 }
