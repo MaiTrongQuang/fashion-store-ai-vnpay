@@ -279,7 +279,7 @@ export default function ChatWidget() {
     return (
         <TooltipProvider delay={200}>
             {/* FAB — shadcn Button + Tooltip */}
-            <Tooltip open={open ? false : undefined}>
+            <Tooltip>
                 <TooltipTrigger
                     render={(triggerProps) => (
                         <Button
@@ -318,9 +318,11 @@ export default function ChatWidget() {
                         </Button>
                     )}
                 />
-                <TooltipContent side="left" className="max-w-[220px]">
-                    Chat với trợ lý LUXE — gợi ý size, phối đồ, khuyến mãi
-                </TooltipContent>
+                {!open && (
+                    <TooltipContent side="left" className="max-w-[220px]">
+                        Chat với trợ lý LUXE — gợi ý size, phối đồ, khuyến mãi
+                    </TooltipContent>
+                )}
             </Tooltip>
 
             {/* Panel — shadcn Card */}
@@ -332,9 +334,9 @@ export default function ChatWidget() {
                     aria-modal="false"
                     size="sm"
                     className={cn(
-                        "fixed bottom-24 right-6 z-50 flex h-[min(520px,calc(100vh-8rem))] w-[min(380px,calc(100vw-3rem))] flex-col gap-0 overflow-hidden py-0",
-                        "rounded-xl shadow-lg ring-1 ring-border/80",
-                        "animate-in slide-in-from-bottom-4 fade-in-0 duration-200 motion-reduce:animate-none motion-reduce:duration-0",
+                        "fixed bottom-20 right-4 z-50 flex h-[calc(100vh-6rem)] min-h-[450px] max-h-[680px] w-[calc(100vw-2rem)] flex-col gap-0 overflow-hidden py-0 sm:bottom-24 sm:right-6 sm:w-[400px]",
+                        "rounded-xl shadow-2xl ring-1 ring-border/80 transition-shadow hover:shadow-3xl",
+                        "animate-in fade-in-0 slide-in-from-bottom-4 duration-200 motion-reduce:animate-none motion-reduce:duration-0",
                     )}
                 >
                     <CardHeader className="shrink-0 space-y-0 border-b bg-muted/40 px-4 py-3 [.border-b]:pb-3">
@@ -408,53 +410,76 @@ export default function ChatWidget() {
                                 aria-relevant="additions"
                             >
                                 {messages.map((msg, index) => (
-                                    <div
-                                        key={index}
-                                        className={cn(
-                                            "flex gap-2",
-                                            msg.role === "user"
-                                                ? "justify-end"
-                                                : "justify-start",
-                                        )}
-                                    >
-                                        {msg.role === "assistant" && (
-                                            <Avatar className="mt-0.5 size-8 shrink-0">
-                                                <AvatarFallback className="bg-muted text-muted-foreground">
-                                                    <Bot
-                                                        className="size-4"
-                                                        aria-hidden
-                                                    />
-                                                </AvatarFallback>
-                                            </Avatar>
-                                        )}
+                                    <div key={index} className="flex flex-col gap-3">
                                         <div
                                             className={cn(
-                                                "max-w-[min(92%,300px)] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm",
+                                                "flex gap-2",
                                                 msg.role === "user"
-                                                    ? "rounded-br-md bg-primary text-primary-foreground"
-                                                    : "rounded-bl-md border border-border/60 bg-background text-foreground",
+                                                    ? "justify-end"
+                                                    : "justify-start",
                                             )}
                                         >
-                                            {msg.role === "assistant" ? (
-                                                <ChatMessageMarkdown
-                                                    content={msg.content}
-                                                    productCards={msg.productCards}
-                                                />
-                                            ) : (
-                                                <span className="whitespace-pre-wrap wrap-break-word">
-                                                    {msg.content}
-                                                </span>
+                                            {msg.role === "assistant" && (
+                                                <Avatar className="mt-0.5 size-8 shrink-0 border border-border/40 shadow-sm">
+                                                    <AvatarFallback className="bg-primary/5 text-primary">
+                                                        <Bot
+                                                            className="size-4"
+                                                            aria-hidden
+                                                        />
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                            )}
+                                            <div
+                                                className={cn(
+                                                    "max-w-[min(92%,300px)] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm",
+                                                    msg.role === "user"
+                                                        ? "rounded-br-md bg-primary text-primary-foreground"
+                                                        : "rounded-bl-md border border-border/60 bg-background text-foreground",
+                                                )}
+                                            >
+                                                {msg.role === "assistant" ? (
+                                                    <ChatMessageMarkdown
+                                                        content={msg.content}
+                                                        productCards={msg.productCards}
+                                                    />
+                                                ) : (
+                                                    <span className="whitespace-pre-wrap wrap-break-word">
+                                                        {msg.content}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {msg.role === "user" && (
+                                                <Avatar className="mt-0.5 size-8 shrink-0 border border-border/40 shadow-sm">
+                                                    <AvatarFallback className="bg-muted text-muted-foreground">
+                                                        <User
+                                                            className="size-4"
+                                                            aria-hidden
+                                                        />
+                                                    </AvatarFallback>
+                                                </Avatar>
                                             )}
                                         </div>
-                                        {msg.role === "user" && (
-                                            <Avatar className="mt-0.5 size-8 shrink-0">
-                                                <AvatarFallback className="bg-muted text-muted-foreground">
-                                                    <User
-                                                        className="size-4"
-                                                        aria-hidden
-                                                    />
-                                                </AvatarFallback>
-                                            </Avatar>
+                                        {index === 0 && messages.length === 1 && suggestionPrompts.length > 0 && (
+                                            <div className="ml-[42px] mr-4 mt-1 flex animate-in flex-col gap-2 fade-in slide-in-from-bottom-2 duration-500">
+                                                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
+                                                    Gợi ý cho bạn
+                                                </span>
+                                                <div className="flex flex-col items-start gap-2">
+                                                    {suggestionPrompts.map((label) => (
+                                                        <Button
+                                                            key={label}
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            disabled={inputDisabled}
+                                                            className="h-auto max-w-full justify-start whitespace-normal rounded-xl border-border/60 bg-background px-3.5 py-2.5 text-left text-[13px] leading-snug text-muted-foreground shadow-sm transition-all duration-200 hover:bg-muted/50 hover:text-foreground"
+                                                            onClick={() => void sendUserMessage(label)}
+                                                        >
+                                                            {label}
+                                                        </Button>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 ))}
@@ -506,25 +531,7 @@ export default function ChatWidget() {
 
                     <Separator />
 
-                    <CardFooter className="shrink-0 flex-col gap-2 border-t bg-muted/30 p-3">
-                        <div
-                            className="flex w-full flex-wrap gap-2"
-                            aria-label="Gợi ý câu hỏi"
-                        >
-                            {suggestionPrompts.map((label) => (
-                                <Button
-                                    key={label}
-                                    type="button"
-                                    variant="secondary"
-                                    size="sm"
-                                    disabled={inputDisabled}
-                                    className="h-auto min-h-8 max-w-full whitespace-normal px-2.5 py-1.5 text-left text-xs leading-snug"
-                                    onClick={() => void sendUserMessage(label)}
-                                >
-                                    {label}
-                                </Button>
-                            ))}
-                        </div>
+                    <CardFooter className="shrink-0 flex-col gap-2 border-t bg-muted/20 p-3 pt-3.5">
                         <form
                             className="w-full"
                             onSubmit={(e) => {

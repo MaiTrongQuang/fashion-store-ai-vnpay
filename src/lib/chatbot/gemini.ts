@@ -78,7 +78,7 @@ async function sendOnce(
         history: geminiHistory,
         generationConfig: {
             temperature: TEMPERATURE,
-            maxOutputTokens: 1024,
+            maxOutputTokens: 4096,
         },
     });
 
