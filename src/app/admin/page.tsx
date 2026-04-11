@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+﻿import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -258,7 +258,7 @@ export default async function AdminDashboard() {
                     Dashboard
                 </h1>
                 <p className="text-muted-foreground">
-                    Tổng quan hệ thống quản lý LUXE Fashion
+                    Tổng quan hệ thống quản lý Nana Store
                 </p>
             </div>
 

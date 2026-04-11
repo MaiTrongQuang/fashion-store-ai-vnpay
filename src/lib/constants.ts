@@ -1,4 +1,4 @@
-export const SITE_NAME = "LUXE Fashion";
+﻿export const SITE_NAME = "Nana Store";
 export const SITE_DESCRIPTION =
     "Hệ thống bán quần áo trực tuyến - Thời trang cao cấp";
 

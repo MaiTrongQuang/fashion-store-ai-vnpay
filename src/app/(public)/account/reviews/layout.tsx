@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Đánh giá của tôi",
-    description: "Các đánh giá sản phẩm bạn đã gửi tại LUXE Fashion.",
+    description: "Các đánh giá sản phẩm bạn đã gửi tại Nana Store.",
 };
 
 export default function ReviewsLayout({

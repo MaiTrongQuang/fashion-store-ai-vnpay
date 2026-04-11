@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +32,7 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                     <div>
                         <Label>Tên cửa hàng</Label>
-                        <Input defaultValue="LUXE Fashion" disabled />
+                        <Input defaultValue="Nana Store" disabled />
                     </div>
                     <div>
                         <Label>Mô tả</Label>
@@ -40,7 +40,7 @@ export default function AdminSettingsPage() {
                     </div>
                     <div>
                         <Label>Website</Label>
-                        <Input defaultValue="https://luxefashion.store" disabled />
+                        <Input defaultValue="https://Nanafashion.store" disabled />
                     </div>
                 </CardContent>
             </Card>
@@ -80,7 +80,7 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                     <div>
                         <Label>Email hỗ trợ</Label>
-                        <Input defaultValue="support@luxefashion.store" disabled />
+                        <Input defaultValue="support@Nanafashion.store" disabled />
                     </div>
                     <div>
                         <Label>Hotline</Label>

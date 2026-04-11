@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+﻿import { createClient } from "@/lib/supabase/server";
 import HeroBanner from "@/components/home/HeroBanner";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
 import CategoryGrid from "@/components/home/CategoryGrid";
@@ -14,7 +14,7 @@ import { SITE_NAME } from "@/lib/constants";
 export const metadata: Metadata = {
     title: `Trang chủ | ${SITE_NAME}`,
     description:
-        "Khám phá bộ sưu tập thời trang mới nhất tại LUXE Fashion - Thời trang cao cấp, giá cả hợp lý",
+        "Khám phá bộ sưu tập thời trang mới nhất tại Nana Store - Thời trang cao cấp, giá cả hợp lý",
 };
 
 export default async function HomePage() {

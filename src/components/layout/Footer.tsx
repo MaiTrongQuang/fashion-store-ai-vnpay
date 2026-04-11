@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Mail, Phone, MapPin, Globe, Camera } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SITE_NAME, FOOTER_LINKS } from "@/lib/constants";
@@ -79,7 +79,7 @@ export default function Footer() {
                             </li>
                             <li className="flex items-center gap-2 text-sm opacity-80">
                                 <Mail className="h-4 w-4 shrink-0" />
-                                <span>support@luxefashion.vn</span>
+                                <span>support@Nanafashion.vn</span>
                             </li>
                         </ul>
                     </div>

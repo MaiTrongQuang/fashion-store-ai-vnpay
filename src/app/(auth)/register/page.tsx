@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
@@ -131,7 +131,7 @@ export default function RegisterPage() {
                             Tạo tài khoản
                         </CardTitle>
                         <CardDescription>
-                            Đăng ký để lưu đơn hàng và nhận ưu đãi từ LUXE Fashion.
+                            Đăng ký để lưu đơn hàng và nhận ưu đãi từ Nana Store.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">

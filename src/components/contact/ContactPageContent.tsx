@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
@@ -83,7 +83,7 @@ const contactChannels = [
         icon: null,
         customIcon: FacebookIcon,
         title: "Fanpage Facebook",
-        detail: "LUXE Fashion",
+        detail: "Nana Store",
         href: SITE_CONTACT.facebook,
         action: "Xem Fanpage",
         external: true,

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { usePathname } from "next/navigation";
@@ -40,7 +40,7 @@ interface Message {
     productCards?: ChatbotProductCard[];
 }
 
-const CHAT_PANEL_ID = "luxe-chat-widget-panel";
+const CHAT_PANEL_ID = "nana-chat-widget-panel";
 
 type ServerHealthStatus = "ok" | "degraded";
 
@@ -320,7 +320,7 @@ export default function ChatWidget() {
                 />
                 {!open && (
                     <TooltipContent side="left" className="max-w-[220px]">
-                        Chat với trợ lý LUXE — gợi ý size, phối đồ, khuyến mãi
+                        Chat với trợ lý Nana — gợi ý size, phối đồ, khuyến mãi
                     </TooltipContent>
                 )}
             </Tooltip>
@@ -330,7 +330,7 @@ export default function ChatWidget() {
                 <Card
                     id={CHAT_PANEL_ID}
                     role="dialog"
-                    aria-label="Trợ lý mua sắm LUXE"
+                    aria-label="Trợ lý mua sắm Nana"
                     aria-modal="false"
                     size="sm"
                     className={cn(
@@ -349,7 +349,7 @@ export default function ChatWidget() {
                             <div className="min-w-0 flex-1 space-y-0.5">
                                 <div className="flex flex-wrap items-center gap-2">
                                     <CardTitle className="text-sm font-semibold tracking-tight">
-                                        LUXE AI Assistant
+                                        Nana AI Assistant
                                     </CardTitle>
                                     <Tooltip>
                                         <TooltipTrigger

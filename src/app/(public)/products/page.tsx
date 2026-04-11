@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+﻿import { createClient } from "@/lib/supabase/server";
 import ProductCard from "@/components/product/ProductCard";
 import ProductFilters from "@/components/product/ProductFilters";
 import Link from "next/link";
@@ -17,7 +17,7 @@ import type { Brand, Category } from "@/lib/types";
 
 export const metadata: Metadata = {
     title: "Sản Phẩm",
-    description: "Khám phá bộ sưu tập thời trang đa dạng tại LUXE Fashion",
+    description: "Khám phá bộ sưu tập thời trang đa dạng tại Nana Store",
 };
 
 interface Props {

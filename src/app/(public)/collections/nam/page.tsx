@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+﻿import { createClient } from "@/lib/supabase/server";
 import ProductCard from "@/components/product/ProductCard";
 import ProductFilters from "@/components/product/ProductFilters";
 import Link from "next/link";
@@ -20,7 +20,7 @@ import type { Brand, Category } from "@/lib/types";
 export const metadata: Metadata = {
     title: `Thời Trang Nam | ${SITE_NAME}`,
     description:
-        "Khám phá bộ sưu tập thời trang nam mới nhất - Phong cách lịch lãm, hiện đại tại LUXE Fashion",
+        "Khám phá bộ sưu tập thời trang nam mới nhất - Phong cách lịch lãm, hiện đại tại Nana Store",
 };
 
 interface Props {

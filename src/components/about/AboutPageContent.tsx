@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -349,7 +349,7 @@ export default function AboutPageContent() {
                     >
                         <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-background/80 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
                             <Bot className="h-3.5 w-3.5" />
-                            Trải nghiệm LUXE
+                            Trải nghiệm Nana
                         </div>
                         <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl lg:text-4xl">
                             Vì sao khách hàng chọn chúng tôi

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Create test admin account if not exists
-    const testEmail = "admin@luxefashion.com";
+    const testEmail = "admin@Nanafashion.com";
     const testPassword = "Admin@123456";
 
     const { data: existing } = await admin
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
                 email: testEmail,
                 password: testPassword,
                 email_confirm: true,
-                user_metadata: { full_name: "Admin LUXE" },
+                user_metadata: { full_name: "Admin Nana" },
             });
 
         if (createError) {
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
             await admin.from("profiles").upsert({
                 id: newUser.user.id,
                 email: testEmail,
-                full_name: "Admin LUXE",
+                full_name: "Admin Nana",
                 role: "admin",
             });
             results.push(`Created admin ${testEmail} (password: ${testPassword})`);

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+﻿import { createClient } from "@/lib/supabase/server";
 import ProductCard from "@/components/product/ProductCard";
 import ProductFilters from "@/components/product/ProductFilters";
 import Link from "next/link";
@@ -23,7 +23,7 @@ import type { Brand, Category } from "@/lib/types";
 export const metadata: Metadata = {
     title: `Sale - Giảm Giá Sốc | ${SITE_NAME}`,
     description:
-        "Ưu đãi khủng - Giảm giá lên đến 70% các sản phẩm thời trang tại LUXE Fashion. Mua ngay kẻo hết!",
+        "Ưu đãi khủng - Giảm giá lên đến 70% các sản phẩm thời trang tại Nana Store. Mua ngay kẻo hết!",
 };
 
 interface Props {
