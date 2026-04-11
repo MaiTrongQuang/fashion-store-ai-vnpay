@@ -15,6 +15,17 @@ import {
 const MAX_PRODUCTS = 40;
 const MAX_DESC_CHARS = 200;
 
+/** Card metadata returned alongside reply for rich product rendering. */
+export type ChatbotProductCard = {
+    slug: string;
+    name: string;
+    basePrice: number;
+    salePrice: number | null;
+    imageUrl: string | null;
+    imageAlt: string | null;
+    url: string;
+};
+
 export type ChatbotFaqRow = {
     question: string;
     answer: string;
@@ -281,4 +292,58 @@ export async function fetchChatbotContextData(
     if (prodRes.error) console.warn("products:", prodRes.error.message);
 
     return { faqs, categories, products };
+}
+
+// ---------------------------------------------------------------------------
+// Product card enrichment — parse reply for /products/{slug} and fetch images
+// ---------------------------------------------------------------------------
+
+const PRODUCT_LINK_RE = /\/products\/([a-z0-9]+(?:-[a-z0-9]+)*)/gi;
+
+/** Extract unique product slugs mentioned in a Gemini reply. */
+export function extractProductSlugs(reply: string): string[] {
+    const seen = new Set<string>();
+    let m: RegExpExecArray | null;
+    while ((m = PRODUCT_LINK_RE.exec(reply)) !== null) {
+        seen.add(m[1]);
+    }
+    return [...seen];
+}
+
+/** Fetch product cards (name, price, primary image) for a list of slugs. */
+export async function fetchProductCardsForReply(
+    supabase: SupabaseClient,
+    slugs: string[],
+): Promise<ChatbotProductCard[]> {
+    if (!slugs.length) return [];
+
+    const { data, error } = await supabase
+        .from("products")
+        .select(
+            "name, slug, base_price, sale_price, images:product_images(url, alt, is_primary)",
+        )
+        .eq("is_active", true)
+        .in("slug", slugs);
+
+    if (error) {
+        console.warn("fetchProductCardsForReply:", error.message);
+        return [];
+    }
+
+    return (data ?? []).map((p) => {
+        const imgs = Array.isArray(p.images) ? p.images : [];
+        const primary =
+            imgs.find(
+                (i: { is_primary?: boolean }) => i.is_primary,
+            ) || imgs[0];
+        return {
+            slug: String(p.slug),
+            name: String(p.name),
+            basePrice: Number(p.base_price),
+            salePrice: p.sale_price == null ? null : Number(p.sale_price),
+            imageUrl: primary?.url ?? null,
+            imageAlt: primary?.alt ?? null,
+            url: `/products/${p.slug}`,
+        };
+    });
 }

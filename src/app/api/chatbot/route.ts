@@ -3,10 +3,13 @@ import { createClient } from "@/lib/supabase/server";
 import {
     buildDynamicStoreContext,
     buildFullSystemInstruction,
+    extractProductSlugs,
     fetchActiveProductForChatbot,
     fetchChatbotContextData,
+    fetchProductCardsForReply,
     formatActiveProductContextBlock,
     normalizeChatbotPageContext,
+    type ChatbotProductCard,
 } from "@/lib/chatbot/build-context";
 import { getFallbackReply } from "@/lib/chatbot/fallback-reply";
 import { generateGeminiReply, type ChatTurn } from "@/lib/chatbot/gemini";
@@ -136,6 +139,17 @@ export async function POST(request: Request) {
             source = "fallback";
         }
 
+        // ---- Enrich: extract product cards from reply ----
+        let productCards: ChatbotProductCard[] = [];
+        try {
+            const slugs = extractProductSlugs(reply);
+            if (slugs.length) {
+                productCards = await fetchProductCardsForReply(supabase, slugs);
+            }
+        } catch (e) {
+            console.warn("Product card enrichment:", e);
+        }
+
         let convId: string | undefined =
             typeof conversationId === "string" ? conversationId : undefined;
         const {
@@ -165,6 +179,7 @@ export async function POST(request: Request) {
             reply,
             conversationId: convId,
             source,
+            productCards,
         });
     } catch (error) {
         console.error("Chatbot error:", error);

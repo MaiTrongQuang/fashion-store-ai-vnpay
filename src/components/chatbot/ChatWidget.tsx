@@ -30,12 +30,14 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { ChatMessageMarkdown } from "@/components/chatbot/ChatMessageMarkdown";
+import type { ChatbotProductCard } from "@/lib/chatbot/build-context";
 import { SITE_NAME } from "@/lib/constants";
 import { getSuggestedChatPrompts } from "@/lib/chatbot/suggested-prompts";
 
 interface Message {
     role: "user" | "assistant";
     content: string;
+    productCards?: ChatbotProductCard[];
 }
 
 const CHAT_PANEL_ID = "luxe-chat-widget-panel";
@@ -213,6 +215,7 @@ export default function ChatWidget() {
                     content:
                         data.reply ||
                         "Xin lỗi, mình chưa hiểu ý bạn.",
+                    productCards: data.productCards ?? [],
                 },
             ]);
             if (data.conversationId) {
@@ -435,6 +438,7 @@ export default function ChatWidget() {
                                             {msg.role === "assistant" ? (
                                                 <ChatMessageMarkdown
                                                     content={msg.content}
+                                                    productCards={msg.productCards}
                                                 />
                                             ) : (
                                                 <span className="whitespace-pre-wrap wrap-break-word">
