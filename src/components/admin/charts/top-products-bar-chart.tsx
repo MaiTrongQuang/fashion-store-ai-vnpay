@@ -68,8 +68,12 @@ export function TopProductsBarChart({ data }: { data: ProductData[] }) {
                 <CardDescription>Theo số lượng đã bán</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[300px] w-full min-w-0">
+                    <ResponsiveContainer
+                        width="100%"
+                        height="100%"
+                        initialDimension={{ width: 320, height: 300 }}
+                    >
                         <BarChart
                             data={data}
                             layout="vertical"

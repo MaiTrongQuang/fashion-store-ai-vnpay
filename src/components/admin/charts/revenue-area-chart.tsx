@@ -42,8 +42,12 @@ export function RevenueAreaChart({ data }: { data: RevenueData[] }) {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[300px] w-full min-w-0">
+                    <ResponsiveContainer
+                        width="100%"
+                        height="100%"
+                        initialDimension={{ width: 320, height: 300 }}
+                    >
                         <AreaChart data={data}>
                             <defs>
                                 <linearGradient
