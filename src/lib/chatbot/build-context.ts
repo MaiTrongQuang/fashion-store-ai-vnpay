@@ -217,23 +217,23 @@ export function formatActiveProductContextBlock(p: ChatbotProductRow): string {
     const cat = p.category?.name || "—";
     const priceLine =
         p.sale_price != null
-            ? `Giá ${p.sale_price.toLocaleString("vi-VN")}đ (giảm t�� ${p.base_price.toLocaleString("vi-VN")}đ)`
+            ? `Giá ${p.sale_price.toLocaleString("vi-VN")}đ (giảm từ ${p.base_price.toLocaleString("vi-VN")}đ)`
             : `Giá ${p.base_price.toLocaleString("vi-VN")}đ`;
     const desc = p.description
         ? truncateText(p.description, MAX_DESC_CHARS * 2)
         : "";
     const link = `/products/${p.slug}`;
     const lines: string[] = [
-        "## Ngu canh: khach dang o trang chi tiet san pham (uu tien tra loi ve SP nay neu cau hoi lien quan).",
-        `- Ten SP: ${p.name}`,
-        `- Danh muc: ${cat}`,
-        `- Gia (VND, hien thi): ${priceLine}`,
-        `- Duong dan: ${link}`,
+        "## Ngữ cảnh: khách đang ở trang chi tiết sản phẩm (ưu tiên trả lời về SP này nếu câu hỏi liên quan).",
+        `- Tên SP: ${p.name}`,
+        `- Danh mục: ${cat}`,
+        `- Giá (VND, hiển thị): ${priceLine}`,
+        `- Đường dẫn: ${link}`,
     ];
-    if (desc) lines.push(`- Mo ta rut gon: ${desc}`);
+    if (desc) lines.push(`- Mô tả rút gọn: ${desc}`);
     lines.push("");
     lines.push(
-        "Neu hoi chung hoac so sanh SP khac, co the dung them danh muc san pham trong du lieu cua hang.",
+        "Nếu hỏi chung hoặc so sánh SP khác, có thể dùng thêm danh mục sản phẩm trong dữ liệu cửa hàng.",
     );
     return lines.join("\n");
 }

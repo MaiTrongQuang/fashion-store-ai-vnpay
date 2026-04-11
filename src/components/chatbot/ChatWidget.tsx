@@ -50,11 +50,11 @@ function chatThreadKey(pathname: string): string {
 function welcomeForThread(isPdp: boolean, productName: string | null): string {
     if (isPdp) {
         if (productName) {
-            return `Ban dang xem san pham "${productName}". Chon mot cau goi y ben duoi hoac nhap tin nhan.`;
+            return `Bạn đang xem sản phẩm "${productName}". Chọn một câu gợi ý bên dưới hoặc nhập tin nhắn.`;
         }
-        return "Ban dang xem trang chi tiet san pham. Chon mot cau goi y ben duoi hoac nhap tin nhan.";
+        return "Bạn đang xem trang chi tiết sản phẩm. Chọn một câu gợi ý bên dưới hoặc nhập tin nhắn.";
     }
-    return `Xin chao! Minh la tro ly mua sam AI cua ${SITE_NAME}. Chon mot cau goi y ben duoi hoac nhap tin nhan.`;
+    return `Xin chào! Mình là trợ lý mua sắm AI của ${SITE_NAME}. Chọn một câu gợi ý bên dưới hoặc nhập tin nhắn.`;
 }
 
 export default function ChatWidget() {
@@ -210,7 +210,9 @@ export default function ChatWidget() {
                 ...prev,
                 {
                     role: "assistant",
-                    content: data.reply || "Xin loi, minh chua hieu y ban.",
+                    content:
+                        data.reply ||
+                        "Xin lỗi, mình chưa hiểu ý bạn.",
                 },
             ]);
             if (data.conversationId) {
@@ -223,7 +225,7 @@ export default function ChatWidget() {
                 {
                     role: "assistant",
                     content:
-                        "Xin loi, he thong dang ban. Vui long thu lai sau!",
+                        "Xin lỗi, hệ thống đang bận. Vui lòng thử lại sau!",
                 },
             ]);
         } finally {
@@ -503,7 +505,7 @@ export default function ChatWidget() {
                     <CardFooter className="shrink-0 flex-col gap-2 border-t bg-muted/30 p-3">
                         <div
                             className="flex w-full flex-wrap gap-2"
-                            aria-label="Goi y cau hoi"
+                            aria-label="Gợi ý câu hỏi"
                         >
                             {suggestionPrompts.map((label) => (
                                 <Button
