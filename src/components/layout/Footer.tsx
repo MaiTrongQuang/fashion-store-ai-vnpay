@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Mail, Phone, MapPin, Globe, Camera } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SITE_NAME, FOOTER_LINKS } from "@/lib/constants";
