@@ -164,7 +164,92 @@ export type ChatbotContextPayload = {
     products: ChatbotProductRow[];
 };
 
-/** Tải FAQ, danh mục, sản phẩm từ Supabase cho chatbot. */
+/** Page context from client; slug is always re-validated on the server. */
+export type ChatbotClientPageContext =
+    | { type: "home" }
+    | { type: "product"; slug: string };
+
+function mapProductRow(p: Record<string, unknown>): ChatbotProductRow {
+    const c = p.category;
+    const catObj = Array.isArray(c) ? c[0] : c;
+    const name =
+        catObj &&
+        typeof catObj === "object" &&
+        catObj !== null &&
+        "name" in catObj
+            ? String((catObj as { name: string }).name)
+            : "";
+    return {
+        name: String(p.name),
+        slug: String(p.slug),
+        base_price: Number(p.base_price),
+        sale_price: p.sale_price == null ? null : Number(p.sale_price),
+        description: p.description == null ? null : String(p.description),
+        category: name ? { name } : null,
+    };
+}
+
+export async function fetchActiveProductForChatbot(
+    supabase: SupabaseClient,
+    slug: string,
+): Promise<ChatbotProductRow | null> {
+    const trimmed = slug.trim();
+    if (!trimmed) return null;
+
+    const { data, error } = await supabase
+        .from("products")
+        .select(
+            "name, slug, base_price, sale_price, description, category:categories(name)",
+        )
+        .eq("slug", trimmed)
+        .eq("is_active", true)
+        .maybeSingle();
+
+    if (error || !data) {
+        if (error) console.warn("chatbot active product:", error.message);
+        return null;
+    }
+
+    return mapProductRow(data as Record<string, unknown>);
+}
+
+export function formatActiveProductContextBlock(p: ChatbotProductRow): string {
+    const cat = p.category?.name || "—";
+    const priceLine =
+        p.sale_price != null
+            ? `Giá ${p.sale_price.toLocaleString("vi-VN")}đ (giảm t�� ${p.base_price.toLocaleString("vi-VN")}đ)`
+            : `Giá ${p.base_price.toLocaleString("vi-VN")}đ`;
+    const desc = p.description
+        ? truncateText(p.description, MAX_DESC_CHARS * 2)
+        : "";
+    const link = `/products/${p.slug}`;
+    const lines: string[] = [
+        "## Ngu canh: khach dang o trang chi tiet san pham (uu tien tra loi ve SP nay neu cau hoi lien quan).",
+        `- Ten SP: ${p.name}`,
+        `- Danh muc: ${cat}`,
+        `- Gia (VND, hien thi): ${priceLine}`,
+        `- Duong dan: ${link}`,
+    ];
+    if (desc) lines.push(`- Mo ta rut gon: ${desc}`);
+    lines.push("");
+    lines.push(
+        "Neu hoi chung hoac so sanh SP khac, co the dung them danh muc san pham trong du lieu cua hang.",
+    );
+    return lines.join("\n");
+}
+
+export function normalizeChatbotPageContext(
+    raw: unknown,
+): ChatbotClientPageContext {
+    if (!raw || typeof raw !== "object") return { type: "home" };
+    const o = raw as Record<string, unknown>;
+    if (o.type === "product" && typeof o.slug === "string" && o.slug.trim()) {
+        return { type: "product", slug: o.slug.trim() };
+    }
+    return { type: "home" };
+}
+
+/** Load FAQ, categories, products from Supabase for the chatbot. */
 export async function fetchChatbotContextData(
     supabase: SupabaseClient,
 ): Promise<ChatbotContextPayload> {
@@ -187,28 +272,8 @@ export async function fetchChatbotContextData(
     const faqs = (faqRes.error ? [] : faqRes.data ?? []) as ChatbotFaqRow[];
     const categories = (catRes.error ? [] : catRes.data ?? []) as ChatbotCategoryRow[];
     const rawProducts = prodRes.error ? [] : (prodRes.data ?? []);
-    const products: ChatbotProductRow[] = rawProducts.map(
-        (p: Record<string, unknown>) => {
-            const c = p.category;
-            const catObj = Array.isArray(c) ? c[0] : c;
-            const name =
-                catObj &&
-                typeof catObj === "object" &&
-                catObj !== null &&
-                "name" in catObj
-                    ? String((catObj as { name: string }).name)
-                    : "";
-            return {
-                name: String(p.name),
-                slug: String(p.slug),
-                base_price: Number(p.base_price),
-                sale_price:
-                    p.sale_price == null ? null : Number(p.sale_price),
-                description:
-                    p.description == null ? null : String(p.description),
-                category: name ? { name } : null,
-            };
-        },
+        const products: ChatbotProductRow[] = rawProducts.map((p) =>
+        mapProductRow(p as Record<string, unknown>),
     );
 
     if (faqRes.error) console.warn("chatbot_faqs:", faqRes.error.message);

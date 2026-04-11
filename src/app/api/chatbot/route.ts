@@ -3,7 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 import {
     buildDynamicStoreContext,
     buildFullSystemInstruction,
+    fetchActiveProductForChatbot,
     fetchChatbotContextData,
+    formatActiveProductContextBlock,
+    normalizeChatbotPageContext,
 } from "@/lib/chatbot/build-context";
 import { getFallbackReply } from "@/lib/chatbot/fallback-reply";
 import { generateGeminiReply, type ChatTurn } from "@/lib/chatbot/gemini";
@@ -50,7 +53,8 @@ async function loadConversationHistory(
 export async function POST(request: Request) {
     try {
         const supabase = await createClient();
-        const { message, conversationId } = await request.json();
+        const { message, conversationId, pageContext: rawPageContext } =
+            await request.json();
 
         if (!message || typeof message !== "string") {
             return NextResponse.json(
@@ -78,12 +82,26 @@ export async function POST(request: Request) {
             console.error("Chatbot context fetch:", e);
         }
 
+        const pageContext = normalizeChatbotPageContext(rawPageContext);
+        let activeProductSuffix = "";
+        if (pageContext.type === "product") {
+            const active = await fetchActiveProductForChatbot(
+                supabase,
+                pageContext.slug,
+            );
+            if (active) {
+                activeProductSuffix =
+                    "\n\n" + formatActiveProductContextBlock(active);
+            }
+        }
+
         const dynamicBlock = buildDynamicStoreContext(
             faqs,
             categories,
             products,
         );
-        const systemInstruction = buildFullSystemInstruction(dynamicBlock);
+        const systemInstruction =
+            buildFullSystemInstruction(dynamicBlock) + activeProductSuffix;
 
         let history: ChatTurn[] = [];
         if (conversationId && typeof conversationId === "string") {

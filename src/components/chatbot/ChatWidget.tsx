@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { MessageCircle, X, Send, Bot, User, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,8 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { ChatMessageMarkdown } from "@/components/chatbot/ChatMessageMarkdown";
+import { SITE_NAME } from "@/lib/constants";
+import { getSuggestedChatPrompts } from "@/lib/chatbot/suggested-prompts";
 
 interface Message {
     role: "user" | "assistant";
@@ -39,13 +42,33 @@ const CHAT_PANEL_ID = "luxe-chat-widget-panel";
 
 type ServerHealthStatus = "ok" | "degraded";
 
+function chatThreadKey(pathname: string): string {
+    const m = pathname.match(/^\/products\/([^/]+)\/?$/);
+    return m ? `pdp:${m[1]}` : "general";
+}
+
+function welcomeForThread(isPdp: boolean, productName: string | null): string {
+    if (isPdp) {
+        if (productName) {
+            return `Ban dang xem san pham "${productName}". Chon mot cau goi y ben duoi hoac nhap tin nhan.`;
+        }
+        return "Ban dang xem trang chi tiet san pham. Chon mot cau goi y ben duoi hoac nhap tin nhan.";
+    }
+    return `Xin chao! Minh la tro ly mua sam AI cua ${SITE_NAME}. Chon mot cau goi y ben duoi hoac nhap tin nhan.`;
+}
+
 export default function ChatWidget() {
+    const pathname = usePathname() ?? "";
+    const threadKey = useMemo(() => chatThreadKey(pathname), [pathname]);
+
     const [open, setOpen] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([
+    const [productDisplayName, setProductDisplayName] = useState<string | null>(
+        null,
+    );
+    const [messages, setMessages] = useState<Message[]>(() => [
         {
             role: "assistant",
-            content:
-                "Xin chào! Mình là trợ lý mua sắm AI của LUXE Fashion. Bạn cần tư vấn gì về thời trang?",
+            content: welcomeForThread(threadKey.startsWith("pdp:"), null),
         },
     ]);
     const [input, setInput] = useState("");
@@ -105,17 +128,70 @@ export default function ChatWidget() {
         bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }, [messages, loading, open]);
 
+    useEffect(() => {
+        setConversationId(null);
+        setProductDisplayName(null);
+        const isPdp = threadKey.startsWith("pdp:");
+        setMessages([
+            { role: "assistant", content: welcomeForThread(isPdp, null) },
+        ]);
+    }, [threadKey]);
+
+    useEffect(() => {
+        if (!threadKey.startsWith("pdp:")) return;
+        const slug = threadKey.slice(4);
+        let cancelled = false;
+        void (async () => {
+            try {
+                const res = await fetch(
+                    `/api/chatbot/product-summary?slug=${encodeURIComponent(slug)}`,
+                );
+                if (!res.ok) return;
+                const data = (await res.json()) as { name: string };
+                if (!cancelled) setProductDisplayName(data.name);
+            } catch {
+                /* ignore */
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [threadKey]);
+
+    useEffect(() => {
+        if (!threadKey.startsWith("pdp:") || !productDisplayName) return;
+        setMessages((prev) => {
+            if (prev.length !== 1 || prev[0].role !== "assistant") return prev;
+            const next = welcomeForThread(true, productDisplayName);
+            if (prev[0].content === next) return prev;
+            return [{ role: "assistant", content: next }];
+        });
+    }, [productDisplayName, threadKey]);
+
+    const pageContext = useMemo(
+        () =>
+            threadKey.startsWith("pdp:")
+                ? { type: "product" as const, slug: threadKey.slice(4) }
+                : { type: "home" as const },
+        [threadKey],
+    );
+
+    const suggestionPrompts = useMemo(
+        () =>
+            getSuggestedChatPrompts({
+                scope: threadKey.startsWith("pdp:") ? "product" : "home",
+                productName: productDisplayName ?? undefined,
+            }),
+        [threadKey, productDisplayName],
+    );
+
     const inputDisabled = loading || !clientOnline;
 
-    const handleSend = async () => {
-        if (!input.trim() || loading || !clientOnline) return;
+    const sendUserMessage = async (userMessage: string) => {
+        const trimmed = userMessage.trim();
+        if (!trimmed || loading || !clientOnline) return;
 
-        const userMessage = input.trim();
-        setInput("");
-        setMessages((prev) => [
-            ...prev,
-            { role: "user", content: userMessage },
-        ]);
+        setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
         setLoading(true);
 
         try {
@@ -123,8 +199,9 @@ export default function ChatWidget() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    message: userMessage,
+                    message: trimmed,
                     conversationId,
+                    pageContext,
                 }),
             });
 
@@ -133,7 +210,7 @@ export default function ChatWidget() {
                 ...prev,
                 {
                     role: "assistant",
-                    content: data.reply || "Xin lỗi, mình chưa hiểu ý bạn.",
+                    content: data.reply || "Xin loi, minh chua hieu y ban.",
                 },
             ]);
             if (data.conversationId) {
@@ -146,7 +223,7 @@ export default function ChatWidget() {
                 {
                     role: "assistant",
                     content:
-                        "Xin lỗi, hệ thống đang bận. Vui lòng thử lại sau!",
+                        "Xin loi, he thong dang ban. Vui long thu lai sau!",
                 },
             ]);
         } finally {
@@ -154,6 +231,12 @@ export default function ChatWidget() {
         }
     };
 
+    const handleSend = async () => {
+        if (!input.trim() || loading || !clientOnline) return;
+        const userMessage = input.trim();
+        setInput("");
+        await sendUserMessage(userMessage);
+    };
     const badgeMeta = (() => {
         if (!clientOnline) {
             return {
@@ -417,7 +500,25 @@ export default function ChatWidget() {
 
                     <Separator />
 
-                    <CardFooter className="shrink-0 border-t bg-muted/30 p-3">
+                    <CardFooter className="shrink-0 flex-col gap-2 border-t bg-muted/30 p-3">
+                        <div
+                            className="flex w-full flex-wrap gap-2"
+                            aria-label="Goi y cau hoi"
+                        >
+                            {suggestionPrompts.map((label) => (
+                                <Button
+                                    key={label}
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    disabled={inputDisabled}
+                                    className="h-auto min-h-8 max-w-full whitespace-normal px-2.5 py-1.5 text-left text-xs leading-snug"
+                                    onClick={() => void sendUserMessage(label)}
+                                >
+                                    {label}
+                                </Button>
+                            ))}
+                        </div>
                         <form
                             className="w-full"
                             onSubmit={(e) => {
