@@ -1,12 +1,6 @@
 "use client";
 
-import {
-    RadialBarChart,
-    RadialBar,
-    Legend,
-    ResponsiveContainer,
-    Tooltip,
-} from "recharts";
+import { RadialBarChart, RadialBar, Legend } from "recharts";
 import {
     Card,
     CardContent,
@@ -15,6 +9,18 @@ import {
     CardDescription,
 } from "@/components/ui/card";
 import { CreditCard } from "lucide-react";
+import { AdminChartTooltip } from "@/components/admin/charts/admin-chart-tooltip";
+import {
+    ChartContainer,
+    ChartTooltip,
+    type ChartConfig,
+} from "@/components/ui/chart";
+
+const paymentRadialChartConfig = {
+    value: {
+        label: "Tỷ lệ",
+    },
+} satisfies ChartConfig;
 
 interface PaymentData {
     name: string;
@@ -53,48 +59,44 @@ export function PaymentMethodRadialChart({
                 <CardDescription>Tỷ lệ COD vs VNPay</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="h-[300px] w-full min-w-0">
-                    <ResponsiveContainer
-                        width="100%"
-                        height="100%"
-                        initialDimension={{ width: 320, height: 300 }}
+                <ChartContainer
+                    config={paymentRadialChartConfig}
+                    className="aspect-auto h-[300px] w-full min-w-0"
+                    initialDimension={{ width: 320, height: 300 }}
+                >
+                    <RadialBarChart
+                        cx="50%"
+                        cy="50%"
+                        innerRadius="30%"
+                        outerRadius="90%"
+                        barSize={20}
+                        data={chartData}
                     >
-                        <RadialBarChart
-                            cx="50%"
-                            cy="50%"
-                            innerRadius="30%"
-                            outerRadius="90%"
-                            barSize={20}
-                            data={chartData}
-                        >
-                            <RadialBar
-                                dataKey="value"
-                                cornerRadius={6}
-                                background={{ fill: "hsl(var(--muted))" }}
-                            />
-                            <Tooltip
-                                formatter={(value: any, name: any) => [
-                                    `${value}%`,
-                                    name,
-                                ]}
-                                contentStyle={{
-                                    borderRadius: "8px",
-                                    border: "1px solid hsl(var(--border))",
-                                    background: "hsl(var(--card))",
-                                }}
-                            />
-                            <Legend
-                                verticalAlign="bottom"
-                                height={36}
-                                formatter={(value: string) => (
-                                    <span className="text-xs text-muted-foreground">
-                                        {value}
-                                    </span>
-                                )}
-                            />
-                        </RadialBarChart>
-                    </ResponsiveContainer>
-                </div>
+                        <RadialBar
+                            dataKey="value"
+                            cornerRadius={6}
+                            background={{ fill: "hsl(var(--muted))" }}
+                        />
+                        <ChartTooltip
+                            content={
+                                <AdminChartTooltip
+                                    valueFormatter={(value) =>
+                                        `${value ?? 0}%`
+                                    }
+                                />
+                            }
+                        />
+                        <Legend
+                            verticalAlign="bottom"
+                            height={36}
+                            formatter={(value: string) => (
+                                <span className="text-xs text-muted-foreground">
+                                    {value}
+                                </span>
+                            )}
+                        />
+                    </RadialBarChart>
+                </ChartContainer>
             </CardContent>
         </Card>
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, Legend } from "recharts";
 import {
     Card,
     CardContent,
@@ -9,6 +9,18 @@ import {
     CardDescription,
 } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
+import {
+    AdminChartTooltip,
+    ChartContainer,
+    ChartTooltip,
+    type ChartConfig,
+} from "@/components/admin/charts/admin-chart-tooltip";
+
+const orderStatusChartConfig = {
+    value: {
+        label: "Số đơn",
+    },
+} satisfies ChartConfig;
 
 interface StatusData {
     name: string;
@@ -72,53 +84,49 @@ export function OrderStatusPieChart({
                 <CardDescription>Phân bổ trạng thái đơn hàng</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="h-[300px] w-full min-w-0">
-                    <ResponsiveContainer
-                        width="100%"
-                        height="100%"
-                        initialDimension={{ width: 320, height: 300 }}
-                    >
-                        <PieChart>
-                            <Pie
-                                data={chartData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={100}
-                                paddingAngle={3}
-                                dataKey="value"
-                            >
-                                {chartData.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={entry.color}
-                                        strokeWidth={0}
-                                    />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                formatter={(value: any, name: any) => [
-                                    `${value} đơn`,
-                                    name,
-                                ]}
-                                contentStyle={{
-                                    borderRadius: "8px",
-                                    border: "1px solid hsl(var(--border))",
-                                    background: "hsl(var(--card))",
-                                }}
-                            />
-                            <Legend
-                                verticalAlign="bottom"
-                                height={36}
-                                formatter={(value: string) => (
-                                    <span className="text-xs text-muted-foreground">
-                                        {value}
-                                    </span>
-                                )}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
+                <ChartContainer
+                    config={orderStatusChartConfig}
+                    className="aspect-auto h-[300px] w-full min-w-0"
+                    initialDimension={{ width: 320, height: 300 }}
+                >
+                    <PieChart>
+                        <Pie
+                            data={chartData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={100}
+                            paddingAngle={3}
+                            dataKey="value"
+                        >
+                            {chartData.map((entry, index) => (
+                                <Cell
+                                    key={`cell-${index}`}
+                                    fill={entry.color}
+                                    strokeWidth={0}
+                                />
+                            ))}
+                        </Pie>
+                        <ChartTooltip
+                            content={
+                                <AdminChartTooltip
+                                    valueFormatter={(value) =>
+                                        `${value ?? 0} đơn`
+                                    }
+                                />
+                            }
+                        />
+                        <Legend
+                            verticalAlign="bottom"
+                            height={36}
+                            formatter={(value: string) => (
+                                <span className="text-xs text-muted-foreground">
+                                    {value}
+                                </span>
+                            )}
+                        />
+                    </PieChart>
+                </ChartContainer>
             </CardContent>
         </Card>
     );

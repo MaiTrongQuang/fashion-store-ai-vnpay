@@ -1,15 +1,6 @@
 "use client";
 
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    CartesianGrid,
-    Cell,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
 import {
     Card,
     CardContent,
@@ -18,6 +9,12 @@ import {
     CardDescription,
 } from "@/components/ui/card";
 import { Package } from "lucide-react";
+import {
+    AdminChartTooltip,
+    ChartContainer,
+    ChartTooltip,
+    type ChartConfig,
+} from "@/components/admin/charts/admin-chart-tooltip";
 
 interface ProductData {
     name: string;
@@ -34,6 +31,13 @@ const BAR_COLORS = [
     "#e2e8f0",
     "#f1f5f9",
 ];
+
+const topProductsChartConfig = {
+    quantity: {
+        label: "Đã bán",
+        color: BAR_COLORS[0],
+    },
+} satisfies ChartConfig;
 
 export function TopProductsBarChart({ data }: { data: ProductData[] }) {
     if (data.length === 0) {
@@ -68,13 +72,12 @@ export function TopProductsBarChart({ data }: { data: ProductData[] }) {
                 <CardDescription>Theo số lượng đã bán</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="h-[300px] w-full min-w-0">
-                    <ResponsiveContainer
-                        width="100%"
-                        height="100%"
-                        initialDimension={{ width: 320, height: 300 }}
-                    >
-                        <BarChart
+                <ChartContainer
+                    config={topProductsChartConfig}
+                    className="aspect-auto h-[300px] w-full min-w-0"
+                    initialDimension={{ width: 320, height: 300 }}
+                >
+                    <BarChart
                             data={data}
                             layout="vertical"
                             margin={{ left: 20, right: 20 }}
@@ -92,15 +95,18 @@ export function TopProductsBarChart({ data }: { data: ProductData[] }) {
                                 width={120}
                                 className="fill-muted-foreground"
                             />
-                            <Tooltip
-                                formatter={(value: any) => [
-                                    `${value} sản phẩm`,
-                                    "Đã bán",
-                                ]}
-                                contentStyle={{
-                                    borderRadius: "8px",
-                                    border: "1px solid hsl(var(--border))",
-                                    background: "hsl(var(--card))",
+                            <ChartTooltip
+                                content={
+                                    <AdminChartTooltip
+                                        valueFormatter={(value) =>
+                                            `${value ?? 0} sản phẩm`
+                                        }
+                                    />
+                                }
+                                cursor={{
+                                    fill: "transparent",
+                                    stroke: "hsl(var(--muted-foreground) / 0.4)",
+                                    strokeWidth: 1,
                                 }}
                             />
                             <Bar dataKey="quantity" radius={[0, 4, 4, 0]}>
@@ -115,9 +121,8 @@ export function TopProductsBarChart({ data }: { data: ProductData[] }) {
                                     />
                                 ))}
                             </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
+                    </BarChart>
+                </ChartContainer>
             </CardContent>
         </Card>
     );

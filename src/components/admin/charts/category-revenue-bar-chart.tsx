@@ -1,14 +1,6 @@
 "use client";
 
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    CartesianGrid,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import {
     Card,
     CardContent,
@@ -17,6 +9,19 @@ import {
     CardDescription,
 } from "@/components/ui/card";
 import { FolderTree } from "lucide-react";
+import { AdminChartTooltip } from "@/components/admin/charts/admin-chart-tooltip";
+import {
+    ChartContainer,
+    ChartTooltip,
+    type ChartConfig,
+} from "@/components/ui/chart";
+
+const categoryRevenueChartConfig = {
+    revenue: {
+        label: "Doanh thu",
+        color: "#1e293b",
+    },
+} satisfies ChartConfig;
 
 interface CategoryData {
     name: string;
@@ -64,13 +69,12 @@ export function CategoryRevenueBarChart({ data }: { data: CategoryData[] }) {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="h-[300px] w-full min-w-0">
-                    <ResponsiveContainer
-                        width="100%"
-                        height="100%"
-                        initialDimension={{ width: 320, height: 300 }}
-                    >
-                        <BarChart data={data}>
+                <ChartContainer
+                    config={categoryRevenueChartConfig}
+                    className="aspect-auto h-[300px] w-full min-w-0"
+                    initialDimension={{ width: 320, height: 300 }}
+                >
+                    <BarChart data={data}>
                             <CartesianGrid
                                 strokeDasharray="3 3"
                                 className="stroke-muted"
@@ -85,18 +89,21 @@ export function CategoryRevenueBarChart({ data }: { data: CategoryData[] }) {
                                 tick={{ fontSize: 12 }}
                                 className="fill-muted-foreground"
                             />
-                            <Tooltip
-                                formatter={(value: any) => [
-                                    new Intl.NumberFormat("vi-VN", {
-                                        style: "currency",
-                                        currency: "VND",
-                                    }).format(Number(value)),
-                                    "Doanh thu",
-                                ]}
-                                contentStyle={{
-                                    borderRadius: "8px",
-                                    border: "1px solid hsl(var(--border))",
-                                    background: "hsl(var(--card))",
+                            <ChartTooltip
+                                content={
+                                    <AdminChartTooltip
+                                        valueFormatter={(value) =>
+                                            new Intl.NumberFormat("vi-VN", {
+                                                style: "currency",
+                                                currency: "VND",
+                                            }).format(Number(value || 0))
+                                        }
+                                    />
+                                }
+                                cursor={{
+                                    fill: "transparent",
+                                    stroke: "hsl(var(--muted-foreground) / 0.4)",
+                                    strokeWidth: 1,
                                 }}
                             />
                             <Bar
@@ -104,9 +111,8 @@ export function CategoryRevenueBarChart({ data }: { data: CategoryData[] }) {
                                 fill="#1e293b"
                                 radius={[4, 4, 0, 0]}
                             />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
+                    </BarChart>
+                </ChartContainer>
             </CardContent>
         </Card>
     );

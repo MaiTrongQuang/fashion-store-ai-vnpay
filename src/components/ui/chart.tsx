@@ -29,7 +29,7 @@ type ChartContextProps = {
 
 const ChartContext = React.createContext<ChartContextProps | null>(null)
 
-function useChart() {
+export function useChart() {
   const context = React.useContext(ChartContext)
 
   if (!context) {
@@ -370,4 +370,5 @@ export {
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  getPayloadConfigFromPayload,
 }

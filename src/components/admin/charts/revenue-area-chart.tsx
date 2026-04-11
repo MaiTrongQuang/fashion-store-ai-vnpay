@@ -1,14 +1,6 @@
 "use client";
 
-import {
-    Area,
-    AreaChart,
-    CartesianGrid,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-} from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
     Card,
     CardContent,
@@ -17,6 +9,19 @@ import {
     CardDescription,
 } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
+import {
+    AdminChartTooltip,
+    ChartContainer,
+    ChartTooltip,
+    type ChartConfig,
+} from "@/components/admin/charts/admin-chart-tooltip";
+
+const revenueChartConfig = {
+    revenue: {
+        label: "Doanh thu",
+        color: "hsl(142, 76%, 36%)",
+    },
+} satisfies ChartConfig;
 
 interface RevenueData {
     month: string;
@@ -42,13 +47,12 @@ export function RevenueAreaChart({ data }: { data: RevenueData[] }) {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="h-[300px] w-full min-w-0">
-                    <ResponsiveContainer
-                        width="100%"
-                        height="100%"
-                        initialDimension={{ width: 320, height: 300 }}
-                    >
-                        <AreaChart data={data}>
+                <ChartContainer
+                    config={revenueChartConfig}
+                    className="aspect-auto h-[300px] w-full min-w-0"
+                    initialDimension={{ width: 320, height: 300 }}
+                >
+                    <AreaChart data={data}>
                             <defs>
                                 <linearGradient
                                     id="revenueGradient"
@@ -83,18 +87,21 @@ export function RevenueAreaChart({ data }: { data: RevenueData[] }) {
                                 tick={{ fontSize: 12 }}
                                 className="fill-muted-foreground"
                             />
-                            <Tooltip
-                                formatter={(value: any) => [
-                                    new Intl.NumberFormat("vi-VN", {
-                                        style: "currency",
-                                        currency: "VND",
-                                    }).format(Number(value)),
-                                    "Doanh thu",
-                                ]}
-                                contentStyle={{
-                                    borderRadius: "8px",
-                                    border: "1px solid hsl(var(--border))",
-                                    background: "hsl(var(--card))",
+                            <ChartTooltip
+                                content={
+                                    <AdminChartTooltip
+                                        valueFormatter={(value) =>
+                                            new Intl.NumberFormat("vi-VN", {
+                                                style: "currency",
+                                                currency: "VND",
+                                            }).format(Number(value || 0))
+                                        }
+                                    />
+                                }
+                                cursor={{
+                                    stroke: "hsl(var(--muted-foreground))",
+                                    strokeWidth: 1,
+                                    strokeDasharray: "4 4",
                                 }}
                             />
                             <Area
@@ -104,9 +111,8 @@ export function RevenueAreaChart({ data }: { data: RevenueData[] }) {
                                 strokeWidth={2}
                                 fill="url(#revenueGradient)"
                             />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
+                    </AreaChart>
+                </ChartContainer>
             </CardContent>
         </Card>
     );

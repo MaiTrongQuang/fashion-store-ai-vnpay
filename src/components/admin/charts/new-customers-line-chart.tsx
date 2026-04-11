@@ -1,14 +1,6 @@
 "use client";
 
-import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    CartesianGrid,
-} from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import {
     Card,
     CardContent,
@@ -17,6 +9,19 @@ import {
     CardDescription,
 } from "@/components/ui/card";
 import { Users } from "lucide-react";
+import { AdminChartTooltip } from "@/components/admin/charts/admin-chart-tooltip";
+import {
+    ChartContainer,
+    ChartTooltip,
+    type ChartConfig,
+} from "@/components/ui/chart";
+
+const newCustomersChartConfig = {
+    count: {
+        label: "Khách mới",
+        color: "#f97316",
+    },
+} satisfies ChartConfig;
 
 interface CustomerData {
     month: string;
@@ -36,13 +41,12 @@ export function NewCustomersLineChart({ data }: { data: CustomerData[] }) {
                 <CardDescription>Số tài khoản đăng ký mới</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="h-[300px] w-full min-w-0">
-                    <ResponsiveContainer
-                        width="100%"
-                        height="100%"
-                        initialDimension={{ width: 320, height: 300 }}
-                    >
-                        <LineChart data={data}>
+                <ChartContainer
+                    config={newCustomersChartConfig}
+                    className="aspect-auto h-[300px] w-full min-w-0"
+                    initialDimension={{ width: 320, height: 300 }}
+                >
+                    <LineChart data={data}>
                             <CartesianGrid
                                 strokeDasharray="3 3"
                                 className="stroke-muted"
@@ -57,15 +61,18 @@ export function NewCustomersLineChart({ data }: { data: CustomerData[] }) {
                                 className="fill-muted-foreground"
                                 allowDecimals={false}
                             />
-                            <Tooltip
-                                formatter={(value: any) => [
-                                    `${value} khách`,
-                                    "Mới",
-                                ]}
-                                contentStyle={{
-                                    borderRadius: "8px",
-                                    border: "1px solid hsl(var(--border))",
-                                    background: "hsl(var(--card))",
+                            <ChartTooltip
+                                content={
+                                    <AdminChartTooltip
+                                        valueFormatter={(value) =>
+                                            `${value ?? 0} khách`
+                                        }
+                                    />
+                                }
+                                cursor={{
+                                    stroke: "hsl(var(--muted-foreground))",
+                                    strokeWidth: 1,
+                                    strokeDasharray: "4 4",
                                 }}
                             />
                             <Line
@@ -76,9 +83,8 @@ export function NewCustomersLineChart({ data }: { data: CustomerData[] }) {
                                 dot={{ fill: "#f97316", r: 4 }}
                                 activeDot={{ r: 6 }}
                             />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
+                    </LineChart>
+                </ChartContainer>
             </CardContent>
         </Card>
     );
