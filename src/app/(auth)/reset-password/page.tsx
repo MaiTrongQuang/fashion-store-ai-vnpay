@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useReducedMotion } from "framer-motion";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Lock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,16 +19,13 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import type { RegisterSuccessResponse } from "@/lib/auth/api-types";
 import { SITE_NAME } from "@/lib/constants";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { AuthMotionSurface } from "@/components/auth/auth-success-transition";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-const registerSchema = z
+const resetPasswordSchema = z
     .object({
-        fullName: z.string().min(2, "Họ tên tối thiểu 2 ký tự"),
-        email: z.string().email("Email không hợp lệ"),
         password: z.string().min(6, "Mật khẩu tối thiểu 6 ký tự"),
         confirmPassword: z.string(),
     })
@@ -38,72 +34,43 @@ const registerSchema = z
         path: ["confirmPassword"],
     });
 
-type RegisterForm = z.infer<typeof registerSchema>;
+type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
-export default function RegisterPage() {
+function ResetPasswordForm() {
     const router = useRouter();
-    const reducedMotion = useReducedMotion();
+    const searchParams = useSearchParams();
+    const errorParam = searchParams.get("error");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [successExit, setSuccessExit] = useState(false);
-    const pendingHref = useRef<string | null>(null);
-
-    const handleExitComplete = useCallback(() => {
-        const href = pendingHref.current;
-        pendingHref.current = null;
-        if (href) {
-            router.replace(href);
-            queueMicrotask(() => router.refresh());
-        }
-    }, [router]);
+    const [success, setSuccess] = useState(false);
 
     const {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<RegisterForm>({
-        resolver: zodResolver(registerSchema),
+    } = useForm<ResetPasswordForm>({
+        resolver: zodResolver(resetPasswordSchema),
     });
 
-    const onSubmit = async (data: RegisterForm) => {
+    const onSubmit = async (data: ResetPasswordForm) => {
         setLoading(true);
         try {
-            const res = await fetch("/api/auth/register", {
+            const res = await fetch("/api/auth/reset-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: data.email,
-                    password: data.password,
-                    fullName: data.fullName,
-                }),
+                body: JSON.stringify({ password: data.password }),
                 credentials: "include",
             });
 
-            const json = (await res.json()) as
-                | RegisterSuccessResponse
-                | { error: string };
+            const json = await res.json();
 
             if (!res.ok) {
-                toast.error(
-                    "error" in json ? json.error : "Đăng ký thất bại.",
-                );
+                toast.error(json.error || "Có lỗi xảy ra.");
                 return;
             }
 
-            const ok = json as RegisterSuccessResponse;
-
-            toast.success(
-                ok.needsEmailConfirmation
-                    ? "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản."
-                    : "Đăng ký thành công!",
-            );
-            if (reducedMotion) {
-                router.replace("/login");
-                queueMicrotask(() => router.refresh());
-                return;
-            }
-            pendingHref.current = "/login";
-            setSuccessExit(true);
+            setSuccess(true);
+            toast.success("Đặt lại mật khẩu thành công!");
         } catch {
             toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
         } finally {
@@ -111,13 +78,10 @@ export default function RegisterPage() {
         }
     };
 
-    return (
-        <AuthShell>
-            <AuthMotionSurface
-                exit={successExit}
-                onExitComplete={handleExitComplete}
-            >
-                <Card className="w-full border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
+    if (errorParam) {
+        return (
+            <AuthShell>
+                <Card className="w-full max-w-md border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
                     <CardHeader className="space-y-1 border-b border-border/60 pb-4 text-center">
                         <Link
                             href="/"
@@ -128,66 +92,76 @@ export default function RegisterPage() {
                             </span>
                         </Link>
                         <CardTitle className="text-lg font-semibold">
-                            Tạo tài khoản
+                            Liên kết hết hạn
                         </CardTitle>
-                        <CardDescription>
-                            Đăng ký để lưu đơn hàng và nhận ưu đãi từ Nana Store.
-                        </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
+                        <div className="flex flex-col items-center gap-4 py-4 text-center">
+                            <p className="text-sm text-muted-foreground">
+                                Link đặt lại mật khẩu đã hết hạn hoặc không
+                                hợp lệ. Vui lòng yêu cầu lại.
+                            </p>
+                            <Button asChild>
+                                <Link href="/forgot-password">
+                                    Yêu cầu lại
+                                </Link>
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </AuthShell>
+        );
+    }
+
+    return (
+        <AuthShell>
+            <Card className="w-full max-w-md border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
+                <CardHeader className="space-y-1 border-b border-border/60 pb-4 text-center">
+                    <Link
+                        href="/"
+                        className="text-2xl font-bold tracking-tight transition-opacity hover:opacity-80"
+                    >
+                        <span className="heading-gradient-vi text-gradient-brand">
+                            {SITE_NAME}
+                        </span>
+                    </Link>
+                    <CardTitle className="text-lg font-semibold">
+                        Đặt lại mật khẩu
+                    </CardTitle>
+                    <CardDescription>
+                        Nhập mật khẩu mới cho tài khoản của bạn.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                    {success ? (
+                        <div className="flex flex-col items-center gap-4 py-4 text-center">
+                            <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
+                                <CheckCircle2 className="size-8 text-primary" />
+                            </div>
+                            <div className="space-y-2">
+                                <p className="text-sm font-medium text-foreground">
+                                    Đặt lại mật khẩu thành công!
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    Bạn có thể đăng nhập bằng mật khẩu mới.
+                                </p>
+                            </div>
+                            <Button
+                                className="mt-2"
+                                onClick={() => router.push("/login")}
+                            >
+                                Đăng nhập ngay
+                            </Button>
+                        </div>
+                    ) : (
                         <form
                             onSubmit={handleSubmit(onSubmit)}
                             className="space-y-4"
                         >
                             <div className="space-y-2">
-                                <Label htmlFor="fullName">Họ và tên</Label>
-                                <div className="relative">
-                                    <User
-                                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                                        aria-hidden
-                                    />
-                                    <Input
-                                        id="fullName"
-                                        autoComplete="name"
-                                        placeholder="Nguyễn Văn A"
-                                        className="pl-10"
-                                        aria-invalid={!!errors.fullName}
-                                        {...register("fullName")}
-                                    />
-                                </div>
-                                {errors.fullName && (
-                                    <p className="text-xs text-destructive">
-                                        {errors.fullName.message}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <div className="relative">
-                                    <Mail
-                                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                                        aria-hidden
-                                    />
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        autoComplete="email"
-                                        placeholder="your@email.com"
-                                        className="pl-10"
-                                        aria-invalid={!!errors.email}
-                                        {...register("email")}
-                                    />
-                                </div>
-                                {errors.email && (
-                                    <p className="text-xs text-destructive">
-                                        {errors.email.message}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Mật khẩu</Label>
+                                <Label htmlFor="password">
+                                    Mật khẩu mới
+                                </Label>
                                 <div className="relative">
                                     <Lock
                                         className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -201,6 +175,7 @@ export default function RegisterPage() {
                                         autoComplete="new-password"
                                         placeholder="••••••••"
                                         className="pl-10 pr-12"
+                                        autoFocus
                                         aria-invalid={!!errors.password}
                                         {...register("password")}
                                     />
@@ -238,7 +213,7 @@ export default function RegisterPage() {
 
                             <div className="space-y-2">
                                 <Label htmlFor="confirmPassword">
-                                    Nhập lại mật khẩu
+                                    Nhập lại mật khẩu mới
                                 </Label>
                                 <div className="relative">
                                     <Lock
@@ -269,29 +244,57 @@ export default function RegisterPage() {
                             <Button
                                 type="submit"
                                 className="w-full"
-                                disabled={loading || successExit}
+                                disabled={loading}
                             >
-                                {successExit
-                                    ? "Đang chuyển trang..."
-                                    : loading
-                                      ? "Đang đăng ký..."
-                                      : "Đăng ký"}
+                                {loading
+                                    ? "Đang xử lý..."
+                                    : "Đặt lại mật khẩu"}
                             </Button>
                         </form>
-                    </CardContent>
-                    <CardFooter className="flex flex-col gap-1 border-t border-border/60 bg-muted/30 pt-4 text-center text-sm text-muted-foreground">
-                        <span>
-                            Đã có tài khoản?{" "}
-                            <Link
-                                href="/login"
-                                className="font-medium text-primary underline-offset-4 hover:underline"
-                            >
-                                Đăng nhập
-                            </Link>
-                        </span>
-                    </CardFooter>
-                </Card>
-            </AuthMotionSurface>
+                    )}
+                </CardContent>
+                <CardFooter className="flex flex-col gap-1 border-t border-border/60 bg-muted/30 pt-4 text-center text-sm text-muted-foreground">
+                    <Link
+                        href="/login"
+                        className="font-medium text-primary underline-offset-4 hover:underline"
+                    >
+                        Quay lại đăng nhập
+                    </Link>
+                </CardFooter>
+            </Card>
         </AuthShell>
+    );
+}
+
+function ResetPasswordFallback() {
+    return (
+        <AuthShell>
+            <Card className="w-full max-w-md border-0 bg-card/90 shadow-xl backdrop-blur-md dark:bg-card/80">
+                <CardHeader className="space-y-3 border-b border-border/60 pb-4 text-center">
+                    <Skeleton className="mx-auto h-8 w-44" />
+                    <Skeleton className="mx-auto h-5 w-32" />
+                    <Skeleton className="mx-auto h-4 w-full max-w-xs" />
+                </CardHeader>
+                <CardContent className="space-y-4 pt-6">
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-36" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+            </Card>
+        </AuthShell>
+    );
+}
+
+export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={<ResetPasswordFallback />}>
+            <ResetPasswordForm />
+        </Suspense>
     );
 }

@@ -157,15 +157,7 @@ function LoginForm() {
                         </div>
 
                         <div className="space-y-2">
-                            <div className="flex items-center justify-between gap-2">
-                                <Label htmlFor="password">Mật khẩu</Label>
-                                <Link
-                                    href="/forgot-password"
-                                    className="text-xs font-medium text-primary underline-offset-4 hover:underline"
-                                >
-                                    Quên mật khẩu?
-                                </Link>
-                            </div>
+                            <Label htmlFor="password">Mật khẩu</Label>
                             <div className="relative">
                                 <Lock
                                     className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -182,6 +174,7 @@ function LoginForm() {
                                 />
                                 <button
                                     type="button"
+                                    tabIndex={-1}
                                     onClick={() =>
                                         setShowPassword(!showPassword)
                                     }
@@ -209,6 +202,15 @@ function LoginForm() {
                                     {errors.password.message}
                                 </p>
                             )}
+                            <div className="flex justify-end">
+                                <Link
+                                    href="/forgot-password"
+                                    tabIndex={-1}
+                                    className="text-xs font-medium text-primary underline-offset-4 hover:underline"
+                                >
+                                    Quên mật khẩu?
+                                </Link>
+                            </div>
                         </div>
 
                         <Button

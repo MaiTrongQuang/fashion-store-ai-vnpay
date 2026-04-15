@@ -75,6 +75,10 @@ export async function POST(request: Request) {
         },
     );
 
+    const appUrl = (
+        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    ).replace(/\/+$/, "");
+
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -82,6 +86,7 @@ export async function POST(request: Request) {
             data: {
                 full_name: fullName,
             },
+            emailRedirectTo: `${appUrl}/auth/callback?next=/login`,
         },
     });
 
