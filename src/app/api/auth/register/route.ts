@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { RegisterSuccessResponse } from "@/lib/auth/api-types";
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
         email?: string;
         password?: string;
         fullName?: string;
+        otpCode?: string;
     };
     try {
         body = await request.json();
@@ -37,9 +39,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Dữ liệu không hợp lệ." }, { status: 400 });
     }
 
-    const email = body.email?.trim();
+    const email = body.email?.trim().toLowerCase();
     const password = body.password;
     const fullName = body.fullName?.trim();
+    const otpCode = body.otpCode?.trim();
+
     if (!email || !password) {
         return NextResponse.json(
             { error: "Thiếu email hoặc mật khẩu." },
@@ -52,6 +56,51 @@ export async function POST(request: Request) {
             { status: 400 },
         );
     }
+    if (!otpCode) {
+        return NextResponse.json(
+            { error: "Vui lòng xác thực mã OTP." },
+            { status: 400 },
+        );
+    }
+
+    // Verify OTP with service role
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) {
+        return NextResponse.json(
+            { error: "Server chưa được cấu hình." },
+            { status: 503 },
+        );
+    }
+
+    const adminSupabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        serviceKey,
+    );
+
+    // Check OTP is verified
+    const { data: otpRecord } = await adminSupabase
+        .from("otp_codes")
+        .select("*")
+        .eq("email", email)
+        .eq("purpose", "register")
+        .eq("verified", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+    if (!otpRecord) {
+        return NextResponse.json(
+            { error: "Mã OTP chưa được xác thực. Vui lòng xác thực trước." },
+            { status: 400 },
+        );
+    }
+
+    // Clean up used OTP
+    await adminSupabase
+        .from("otp_codes")
+        .delete()
+        .eq("email", email)
+        .eq("purpose", "register");
 
     const cookieStore = await cookies();
     const supabase = createServerClient(
@@ -75,10 +124,7 @@ export async function POST(request: Request) {
         },
     );
 
-    const appUrl = (
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-    ).replace(/\/+$/, "");
-
+    // Since OTP is already verified, we can skip email confirmation
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -86,7 +132,8 @@ export async function POST(request: Request) {
             data: {
                 full_name: fullName,
             },
-            emailRedirectTo: `${appUrl}/auth/callback?next=/login`,
+            // OTP already verified, so email confirmed via our custom flow
+            emailRedirectTo: undefined,
         },
     });
 

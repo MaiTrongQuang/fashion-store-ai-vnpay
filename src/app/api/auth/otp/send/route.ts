@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         );
     }
 
-    let body: { email?: string };
+    let body: { email?: string; purpose?: string };
     try {
         body = await request.json();
     } catch {
@@ -25,63 +25,56 @@ export async function POST(request: Request) {
     }
 
     const email = body.email?.trim().toLowerCase();
-    if (!email) {
+    const purpose = body.purpose;
+    if (!email || !purpose) {
         return NextResponse.json(
-            { error: "Vui lòng nhập email." },
+            { error: "Thiếu email hoặc mục đích." },
+            { status: 400 },
+        );
+    }
+    if (purpose !== "register" && purpose !== "reset_password") {
+        return NextResponse.json(
+            { error: "Mục đích không hợp lệ." },
             { status: 400 },
         );
     }
 
     const supabase = createClient(url, serviceKey);
 
-    // Check if user exists using admin API
-    const { data: existingUsers } =
-        await supabase.auth.admin.listUsers();
-
-    const userExists = existingUsers?.users?.some(
-        (u) => u.email?.toLowerCase() === email,
-    );
-
-    if (!userExists) {
-        // Don't reveal user doesn't exist — still return success
-        return NextResponse.json({
-            message:
-                "Nếu email tồn tại trong hệ thống, bạn sẽ nhận được mã OTP.",
-        });
-    }
-
-    // Rate limit: max 3 OTP sends per 5 minutes
+    // Rate limit: max 3 OTP sends per 5 minutes per email+purpose
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const { count } = await supabase
         .from("otp_codes")
         .select("*", { count: "exact", head: true })
         .eq("email", email)
-        .eq("purpose", "reset_password")
+        .eq("purpose", purpose)
         .gte("created_at", fiveMinutesAgo);
 
     if (count !== null && count >= 3) {
         return NextResponse.json(
-            { error: "Bạn đã gửi quá nhiều mã. Vui lòng đợi 5 phút." },
+            {
+                error: "Bạn đã gửi quá nhiều mã. Vui lòng đợi 5 phút.",
+            },
             { status: 429 },
         );
     }
 
-    // Invalidate old OTPs
+    // Invalidate old OTPs for same email+purpose
     await supabase
         .from("otp_codes")
         .delete()
         .eq("email", email)
-        .eq("purpose", "reset_password")
+        .eq("purpose", purpose)
         .eq("verified", false);
 
-    // Generate & store OTP
+    // Generate & store new OTP
     const code = generateOtp();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
     const { error: insertError } = await supabase.from("otp_codes").insert({
         email,
         code,
-        purpose: "reset_password",
+        purpose,
         expires_at: expiresAt,
     });
 
@@ -93,11 +86,11 @@ export async function POST(request: Request) {
         );
     }
 
-    // Send OTP email
+    // Send email
     const { success, error: emailError } = await sendOtpEmail(
         email,
         code,
-        "reset_password",
+        purpose,
     );
 
     if (!success) {
@@ -110,6 +103,5 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
         message: "Đã gửi mã OTP đến email của bạn.",
-        sent: true,
     });
 }

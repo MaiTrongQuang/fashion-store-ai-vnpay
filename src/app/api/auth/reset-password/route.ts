@@ -1,20 +1,19 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !key) {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !serviceKey) {
         return NextResponse.json(
-            { error: "Xác thực chưa được cấu hình." },
+            { error: "Server chưa được cấu hình." },
             { status: 503 },
         );
     }
 
-    let body: { password?: string };
+    let body: { email?: string; password?: string; otpCode?: string };
     try {
         body = await request.json();
     } catch {
@@ -24,47 +23,71 @@ export async function POST(request: Request) {
         );
     }
 
+    const email = body.email?.trim().toLowerCase();
     const password = body.password;
-    if (!password || password.length < 6) {
+    const otpCode = body.otpCode?.trim();
+
+    if (!email || !password || !otpCode) {
+        return NextResponse.json(
+            { error: "Thiếu thông tin bắt buộc." },
+            { status: 400 },
+        );
+    }
+    if (password.length < 6) {
         return NextResponse.json(
             { error: "Mật khẩu tối thiểu 6 ký tự." },
             { status: 400 },
         );
     }
 
-    const cookieStore = await cookies();
-    const supabase = createServerClient(url, key, {
-        cookies: {
-            getAll() {
-                return cookieStore.getAll();
-            },
-            setAll(cookiesToSet) {
-                try {
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        cookieStore.set(name, value, options),
-                    );
-                } catch {
-                    /* ignore */
-                }
-            },
-        },
-    });
+    const supabase = createClient(url, serviceKey);
 
-    // Verify user is authenticated (came from reset password link)
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    // Verify OTP is verified
+    const { data: otpRecord } = await supabase
+        .from("otp_codes")
+        .select("*")
+        .eq("email", email)
+        .eq("purpose", "reset_password")
+        .eq("verified", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
 
-    if (!user) {
+    if (!otpRecord) {
         return NextResponse.json(
             {
-                error: "Phiên đặt lại mật khẩu đã hết hạn. Vui lòng yêu cầu lại.",
+                error: "Mã OTP chưa được xác thực. Vui lòng xác thực trước.",
             },
-            { status: 401 },
+            { status: 400 },
         );
     }
 
-    const { error } = await supabase.auth.updateUser({ password });
+    // Clean up used OTP
+    await supabase
+        .from("otp_codes")
+        .delete()
+        .eq("email", email)
+        .eq("purpose", "reset_password");
+
+    // Find user by email
+    const { data: existingUsers } =
+        await supabase.auth.admin.listUsers();
+
+    const user = existingUsers?.users?.find(
+        (u) => u.email?.toLowerCase() === email,
+    );
+
+    if (!user) {
+        return NextResponse.json(
+            { error: "Tài khoản không tồn tại." },
+            { status: 404 },
+        );
+    }
+
+    // Update password using admin API (user is not logged in)
+    const { error } = await supabase.auth.admin.updateUserById(user.id, {
+        password,
+    });
 
     if (error) {
         return NextResponse.json(
