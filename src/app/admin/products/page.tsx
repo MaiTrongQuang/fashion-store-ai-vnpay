@@ -1,10 +1,10 @@
-import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
     Table,
     TableBody,
@@ -13,9 +13,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Plus, Edit, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { ProductToggle } from "./product-toggle";
+import { ProductForm } from "./product-form";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Quản lý sản phẩm" };
@@ -31,10 +32,11 @@ export default async function AdminProductsPage({
     const currentPage = Number(params.page) || 1;
     const pageSize = 20;
 
+    // Fetch products with images and variants
     let query = supabase
         .from("products")
         .select(
-            "*, category:categories(name), brand:brands(name), images:product_images(url, is_primary)",
+            "*, category:categories(id, name), brand:brands(id, name), images:product_images(id, url, alt, is_primary, sort_order), variants:product_variants(id, size, color, color_hex, price, stock, sku, is_active)",
             { count: "exact" }
         )
         .order("created_at", { ascending: false });
@@ -49,6 +51,20 @@ export default async function AdminProductsPage({
     const { data: products, count } = await query;
     const totalPages = Math.ceil((count || 0) / pageSize);
 
+    // Fetch categories and brands for the form selects
+    const [{ data: categories }, { data: brands }] = await Promise.all([
+        supabase
+            .from("categories")
+            .select("id, name")
+            .eq("is_active", true)
+            .order("name"),
+        supabase
+            .from("brands")
+            .select("id, name")
+            .eq("is_active", true)
+            .order("name"),
+    ]);
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -58,12 +74,10 @@ export default async function AdminProductsPage({
                         {count || 0} sản phẩm
                     </p>
                 </div>
-                <Link href="/admin/products/new">
-                    <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Thêm sản phẩm
-                    </Button>
-                </Link>
+                <ProductForm
+                    categories={categories || []}
+                    brands={brands || []}
+                />
             </div>
 
             {/* Search */}
@@ -97,7 +111,9 @@ export default async function AdminProductsPage({
                                 <TableHead>Thương hiệu</TableHead>
                                 <TableHead>Giá</TableHead>
                                 <TableHead>Trạng thái</TableHead>
-                                <TableHead className="w-24">Thao tác</TableHead>
+                                <TableHead className="w-24">
+                                    Thao tác
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -163,16 +179,17 @@ export default async function AdminProductsPage({
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            <Link
-                                                href={`/admin/products/${product.id}/edit`}
-                                            >
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
-                                            </Link>
+                                            <ProductForm
+                                                categories={categories || []}
+                                                brands={brands || []}
+                                                editItem={{
+                                                    ...product,
+                                                    category_id:
+                                                        product.category?.id,
+                                                    brand_id:
+                                                        product.brand?.id,
+                                                }}
+                                            />
                                         </TableCell>
                                     </TableRow>
                                 );

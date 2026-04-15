@@ -69,7 +69,149 @@ export async function toggleProductActive(productId: string) {
         .eq("id", productId);
 
     if (error) throw new Error(error.message);
+    // Note: no revalidatePath here — the client uses optimistic local state
+    // so the row stays in place. The page will refresh on next navigation.
+}
+
+export async function upsertProduct(payload: {
+    id?: string;
+    name: string;
+    slug: string;
+    description?: string;
+    category_id?: string;
+    brand_id?: string;
+    base_price: number;
+    sale_price?: number | null;
+    is_active: boolean;
+    is_featured: boolean;
+    is_new: boolean;
+    tags: string[];
+    images: { url: string; alt?: string; is_primary: boolean; sort_order: number }[];
+    variants: {
+        id?: string;
+        size: string;
+        color: string;
+        color_hex?: string;
+        price: number;
+        stock: number;
+        sku: string;
+        is_active: boolean;
+    }[];
+}) {
+    const supabase = await requireAdmin();
+
+    const productData = {
+        name: payload.name,
+        slug: payload.slug,
+        description: payload.description || null,
+        category_id: payload.category_id || null,
+        brand_id: payload.brand_id || null,
+        base_price: payload.base_price,
+        sale_price: payload.sale_price || null,
+        is_active: payload.is_active,
+        is_featured: payload.is_featured,
+        is_new: payload.is_new,
+        tags: payload.tags,
+        updated_at: new Date().toISOString(),
+    };
+
+    let productId = payload.id;
+
+    if (productId) {
+        // Update existing product
+        const { error } = await supabase
+            .from("products")
+            .update(productData)
+            .eq("id", productId);
+        if (error) throw new Error(error.message);
+    } else {
+        // Insert new product
+        const { data, error } = await supabase
+            .from("products")
+            .insert(productData)
+            .select("id")
+            .single();
+        if (error) throw new Error(error.message);
+        productId = data.id;
+    }
+
+    // ── Images: delete old, insert new ──
+    await supabase.from("product_images").delete().eq("product_id", productId);
+    if (payload.images.length > 0) {
+        const { error: imgError } = await supabase.from("product_images").insert(
+            payload.images.map((img, idx) => ({
+                product_id: productId,
+                url: img.url,
+                alt: img.alt || null,
+                is_primary: img.is_primary,
+                sort_order: img.sort_order ?? idx,
+            }))
+        );
+        if (imgError) throw new Error(imgError.message);
+    }
+
+    // ── Variants: delete removed, upsert existing + new ──
+    // Get current variant IDs
+    const { data: existingVariants } = await supabase
+        .from("product_variants")
+        .select("id")
+        .eq("product_id", productId);
+
+    const existingIds = new Set<string>((existingVariants || []).map((v: any) => v.id));
+    const incomingIds = new Set<string | undefined>(payload.variants.filter((v) => v.id).map((v) => v.id));
+
+    // Delete variants that are no longer present
+    const toDelete = [...existingIds].filter((id) => !incomingIds.has(id));
+    if (toDelete.length > 0) {
+        await supabase.from("product_variants").delete().in("id", toDelete);
+    }
+
+    // Upsert each variant
+    for (const variant of payload.variants) {
+        const variantData = {
+            product_id: productId,
+            size: variant.size,
+            color: variant.color,
+            color_hex: variant.color_hex || null,
+            price: variant.price,
+            stock: variant.stock,
+            sku: variant.sku,
+            is_active: variant.is_active,
+        };
+
+        if (variant.id && existingIds.has(variant.id)) {
+            const { error } = await supabase
+                .from("product_variants")
+                .update(variantData)
+                .eq("id", variant.id);
+            if (error) throw new Error(`Variant error: ${error.message}`);
+        } else {
+            const { error } = await supabase
+                .from("product_variants")
+                .insert(variantData);
+            if (error) throw new Error(`Variant error: ${error.message}`);
+        }
+    }
+
     revalidatePath("/admin/products");
+    revalidatePath("/admin");
+}
+
+export async function deleteProduct(productId: string) {
+    const supabase = await requireAdmin();
+
+    // Delete related data first (cascading may not be set up)
+    await supabase.from("product_images").delete().eq("product_id", productId);
+    await supabase.from("product_variants").delete().eq("product_id", productId);
+
+    const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", productId);
+
+    if (error) throw new Error(error.message);
+    revalidatePath("/admin/products");
+    revalidatePath("/admin");
 }
 
 // ═══════════════════════════════════════════════════════════════

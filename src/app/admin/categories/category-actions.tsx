@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { upsertCategory, deleteCategory } from "@/app/admin/actions";
+import { FileUpload } from "@/components/admin/file-upload";
 import { slugify } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -36,11 +37,13 @@ export function CategoryActions({
     const [isPending, startTransition] = useTransition();
     const [name, setName] = useState(editItem?.name || "");
     const [slug, setSlug] = useState(editItem?.slug || "");
+    const [imageUrl, setImageUrl] = useState(editItem?.image_url || "");
 
     const isEdit = !!editItem;
 
     const handleSubmit = (formData: FormData) => {
         if (editItem) formData.set("id", editItem.id);
+        formData.set("image_url", imageUrl);
         startTransition(async () => {
             try {
                 await upsertCategory(formData);
@@ -70,18 +73,19 @@ export function CategoryActions({
         <div className="flex items-center gap-1">
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger
-                    render={isEdit ? (
-                        <Button variant="ghost" size="icon">
-                            <Edit className="h-4 w-4" />
-                        </Button>
-                    ) : (
-                        <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Thêm danh mục
-                        </Button>
-                    )}
-                >
-                </DialogTrigger>
+                    render={
+                        isEdit ? (
+                            <Button variant="ghost" size="icon">
+                                <Edit className="h-4 w-4" />
+                            </Button>
+                        ) : (
+                            <Button>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Thêm danh mục
+                            </Button>
+                        )
+                    }
+                />
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
@@ -121,14 +125,14 @@ export function CategoryActions({
                                 defaultValue={editItem?.description || ""}
                             />
                         </div>
-                        <div>
-                            <Label htmlFor="image_url">URL hình ảnh</Label>
-                            <Input
-                                id="image_url"
-                                name="image_url"
-                                defaultValue={editItem?.image_url || ""}
-                            />
-                        </div>
+                        <FileUpload
+                            value={imageUrl}
+                            onChange={setImageUrl}
+                            label="Hình ảnh danh mục"
+                            folder="categories"
+                            accept="image/*"
+                        />
+                        <input type="hidden" name="image_url" value={imageUrl} />
                         <div>
                             <Label htmlFor="parent_id">Danh mục cha</Label>
                             <Select
@@ -173,7 +177,11 @@ export function CategoryActions({
                             />
                             <Label htmlFor="is_active">Kích hoạt</Label>
                         </div>
-                        <Button type="submit" className="w-full" disabled={isPending}>
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={isPending}
+                        >
                             {isPending
                                 ? "Đang xử lý..."
                                 : isEdit
