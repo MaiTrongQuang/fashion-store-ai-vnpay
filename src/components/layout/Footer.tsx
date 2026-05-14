@@ -88,7 +88,7 @@ export default function Footer() {
                 <Separator className="my-8 bg-primary-foreground/10" />
 
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm opacity-60">
-                    <p>© 2025 {SITE_NAME}. Tất cả quyền được bảo lưu.</p>
+                    <p>© 2026 {SITE_NAME}. Tất cả quyền được bảo lưu.</p>
                     <p>Đồ án tốt nghiệp - Mai Trọng Quang</p>
                 </div>
             </div>
