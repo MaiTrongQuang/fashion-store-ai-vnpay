@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductGallery from "@/components/product/ProductGallery";
 import ProductInfo from "@/components/product/ProductInfo";
@@ -68,35 +69,41 @@ export default async function ProductDetailPage({ params }: Props) {
             : 0;
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
             {/* Breadcrumb */}
-            <nav className="text-sm text-muted-foreground mb-6">
-                <a href="/" className="hover:text-primary">
+            <nav
+                aria-label="Breadcrumb"
+                className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"
+            >
+                <Link href="/" className="transition-colors hover:text-primary">
                     Trang chủ
-                </a>
-                <span className="mx-2">/</span>
-                <a href="/products" className="hover:text-primary">
+                </Link>
+                <span>/</span>
+                <Link
+                    href="/products"
+                    className="transition-colors hover:text-primary"
+                >
                     Sản phẩm
-                </a>
+                </Link>
                 {product.category && (
                     <>
-                        <span className="mx-2">/</span>
-                        <a
+                        <span>/</span>
+                        <Link
                             href={`/collections/${product.category.slug}`}
-                            className="hover:text-primary"
+                            className="transition-colors hover:text-primary"
                         >
                             {product.category.name}
-                        </a>
+                        </Link>
                     </>
                 )}
-                <span className="mx-2">/</span>
-                <span className="text-foreground font-medium">
+                <span>/</span>
+                <span className="font-medium text-foreground">
                     {product.name}
                 </span>
             </nav>
 
             {/* Product Detail */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            <section className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)] lg:gap-12 xl:gap-16">
                 <ProductGallery
                     images={product.images || []}
                     productName={product.name}
@@ -106,15 +113,21 @@ export default async function ProductDetailPage({ params }: Props) {
                     avgRating={avgRating}
                     reviewCount={reviews?.length || 0}
                 />
-            </div>
+            </section>
 
             {/* Description */}
-            <div className="mt-12 max-w-3xl">
-                <h2 className="text-xl font-bold mb-4">Mô Tả Sản Phẩm</h2>
-                <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
-                    {product.description}
-                </div>
-            </div>
+            {product.description && (
+                <section className="mt-12 border-t border-border pt-8">
+                    <div className="max-w-3xl">
+                        <h2 className="mb-4 text-xl font-bold">
+                            Mô Tả Sản Phẩm
+                        </h2>
+                        <p className="text-sm leading-7 text-muted-foreground">
+                            {product.description}
+                        </p>
+                    </div>
+                </section>
+            )}
 
             {/* Reviews */}
             <ProductReviews reviews={reviews || []} avgRating={avgRating} />

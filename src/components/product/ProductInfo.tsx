@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { formatPrice, getDiscountPercent } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import type { Product, ProductVariant } from "@/lib/types";
+import type { Product } from "@/lib/types";
 
 interface ProductInfoProps {
     product: Product;
@@ -176,15 +176,15 @@ export default function ProductInfo({
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-5 lg:pt-1">
             {/* Brand & Name */}
-            <div>
+            <div className="space-y-2">
                 {product.brand && (
-                    <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider mb-1">
+                    <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                         {product.brand.name}
                     </p>
                 )}
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                     {product.name}
                 </h1>
             </div>
@@ -198,7 +198,7 @@ export default function ProductInfo({
                             className={`h-4 w-4 ${
                                 star <= Math.round(avgRating)
                                     ? "fill-amber-400 text-amber-400"
-                                    : "text-muted"
+                                    : "text-muted-foreground/25"
                             }`}
                         />
                     ))}
@@ -209,16 +209,16 @@ export default function ProductInfo({
             </div>
 
             {/* Price */}
-            <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-bold text-primary">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+                <span className="text-4xl font-bold tracking-tight text-primary">
                     {formatPrice(currentPrice)}
                 </span>
                 {discount > 0 && (
                     <>
-                        <span className="text-lg text-muted-foreground line-through">
+                        <span className="text-xl text-muted-foreground line-through">
                             {formatPrice(product.base_price)}
                         </span>
-                        <Badge variant="destructive" className="text-xs">
+                        <Badge variant="destructive" className="rounded-full px-3 py-1 text-xs">
                             -{discount}%
                         </Badge>
                     </>
@@ -236,7 +236,7 @@ export default function ProductInfo({
                             {selectedColor || "Chưa chọn"}
                         </span>
                     </Label>
-                    <div className="flex gap-2.5 flex-wrap">
+                    <div className="flex flex-wrap gap-3">
                         {colors.map((color) => {
                             const isSelected = selectedColor === color.name;
                             const isLightColor =
@@ -250,10 +250,10 @@ export default function ProductInfo({
                                     onClick={() =>
                                         setSelectedColor(color.name)
                                     }
-                                    className={`relative w-10 h-10 rounded-full transition-all duration-200 ${
+                                    className={`relative h-11 w-11 rounded-full transition-all duration-200 ${
                                         isSelected
-                                            ? "ring-2 ring-primary ring-offset-2 scale-110 shadow-md"
-                                            : "ring-1 ring-border hover:ring-primary/60 hover:scale-105"
+                                            ? "scale-105 shadow-md ring-2 ring-primary ring-offset-2"
+                                            : "ring-1 ring-border hover:scale-105 hover:ring-primary/60"
                                     }`}
                                     style={{ backgroundColor: color.hex }}
                                     title={color.name}
@@ -305,12 +305,12 @@ export default function ProductInfo({
                                         !isOutOfStock && setSelectedSize(size)
                                     }
                                     disabled={isOutOfStock}
-                                    className={`min-w-[48px] h-11 px-4 rounded-lg border text-sm font-medium transition-all ${
+                                    className={`h-12 min-w-14 rounded-xl border px-4 text-sm font-semibold transition-all ${
                                         selectedSize === size
                                             ? "border-primary bg-primary text-primary-foreground"
                                             : isOutOfStock
-                                              ? "border-muted bg-muted text-muted-foreground cursor-not-allowed line-through"
-                                              : "border-border hover:border-primary"
+                                              ? "cursor-not-allowed border-muted bg-muted text-muted-foreground line-through"
+                                              : "border-border bg-background hover:border-primary"
                                     }`}
                                 >
                                     {size}
@@ -335,10 +335,11 @@ export default function ProductInfo({
             {/* Quantity */}
             <div className="space-y-3">
                 <Label className="text-sm font-medium">Số lượng</Label>
-                <div className="flex items-center gap-2">
+                <div className="inline-flex h-12 items-center overflow-hidden rounded-xl border border-border bg-background">
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
+                        className="h-12 w-12 rounded-none"
                         onClick={() =>
                             quantity > 1 && setQuantity(quantity - 1)
                         }
@@ -346,12 +347,13 @@ export default function ProductInfo({
                     >
                         <Minus className="h-4 w-4" />
                     </Button>
-                    <span className="w-14 text-center font-medium">
+                    <span className="w-14 text-center font-semibold tabular-nums">
                         {quantity}
                     </span>
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
+                        className="h-12 w-12 rounded-none"
                         onClick={() => setQuantity(quantity + 1)}
                         disabled={
                             selectedVariant
@@ -365,11 +367,11 @@ export default function ProductInfo({
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-2">
+            <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-[1fr_1fr_auto]">
                 <Button
                     size="lg"
                     variant="outline"
-                    className="flex-1 h-12 text-base font-semibold border-primary text-primary hover:bg-primary/5"
+                    className="h-[52px] border-primary text-base font-semibold text-primary hover:bg-primary/5"
                     onClick={handleAddToCart}
                     disabled={loading || buyNowLoading}
                 >
@@ -378,32 +380,38 @@ export default function ProductInfo({
                 </Button>
                 <Button
                     size="lg"
-                    className="flex-1 h-12 text-base font-semibold border-0 bg-gradient-brand-cta text-primary-foreground shadow-brand-cta hover:brightness-110 transition-[filter,transform]"
+                    className="h-[52px] border-0 bg-gradient-brand-cta text-base font-semibold text-primary-foreground shadow-brand-cta transition-[filter,transform] hover:brightness-110"
                     onClick={handleBuyNow}
                     disabled={loading || buyNowLoading}
                 >
                     <Zap className="h-5 w-5 mr-2" />
                     {buyNowLoading ? "Đang xử lý..." : "Mua Ngay"}
                 </Button>
-                <Button variant="outline" size="lg" className="h-12">
-                    <Heart className="h-5 w-5" />
+                <Button
+                    variant="outline"
+                    size="lg"
+                    className="h-[52px] w-full px-4 text-foreground hover:text-primary sm:w-[52px] sm:px-0"
+                    aria-label="Thêm vào yêu thích"
+                >
+                    <Heart className="size-5" />
+                    <span className="sm:sr-only">Yêu thích</span>
                 </Button>
             </div>
 
             <Separator />
 
             {/* Policies */}
-            <div className="space-y-3 text-sm text-muted-foreground">
-                <div className="flex items-center gap-3">
-                    <Truck className="h-4 w-4 text-primary" />
+            <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                <div className="flex items-center gap-3 rounded-xl bg-muted/40 px-3 py-3">
+                    <Truck className="h-4 w-4 shrink-0 text-primary" />
                     <span>Miễn phí vận chuyển đơn từ 500.000đ</span>
                 </div>
-                <div className="flex items-center gap-3">
-                    <RotateCcw className="h-4 w-4 text-primary" />
+                <div className="flex items-center gap-3 rounded-xl bg-muted/40 px-3 py-3">
+                    <RotateCcw className="h-4 w-4 shrink-0 text-primary" />
                     <span>Đổi trả miễn phí trong 7 ngày</span>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Shield className="h-4 w-4 text-primary" />
+                <div className="flex items-center gap-3 rounded-xl bg-muted/40 px-3 py-3">
+                    <Shield className="h-4 w-4 shrink-0 text-primary" />
                     <span>Cam kết hàng chính hãng 100%</span>
                 </div>
             </div>

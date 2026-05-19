@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { ImageOff } from "lucide-react";
 import type { ProductImage } from "@/lib/types";
 
 interface ProductGalleryProps {
@@ -24,24 +25,31 @@ export default function ProductGallery({
 
     if (sortedImages.length === 0) {
         return (
-            <div className="aspect-[3/4] bg-muted rounded-2xl flex items-center justify-center">
-                <p className="text-muted-foreground">Chưa có ảnh</p>
+            <div className="flex aspect-square min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-border bg-muted/40">
+                <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                    <ImageOff className="h-10 w-10" />
+                    <p className="text-sm font-medium">Chưa có ảnh</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 lg:sticky lg:top-28">
             {/* Main Image */}
-            <div className="relative aspect-[3/4] bg-muted rounded-2xl overflow-hidden group cursor-zoom-in">
-                <Image
-                    src={selectedImage.url}
-                    alt={selectedImage.alt || productName}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    priority
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                />
+            <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-[#f7f7f5] shadow-sm">
+                <div className="relative aspect-square w-full sm:aspect-[5/6]">
+                    <div className="absolute inset-3 sm:inset-5">
+                        <Image
+                            src={selectedImage.url}
+                            alt={selectedImage.alt || productName}
+                            fill
+                            className="object-contain transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+                            priority
+                            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 52vw, 640px"
+                        />
+                    </div>
+                </div>
             </div>
 
             {/* Thumbnails */}
@@ -49,19 +57,20 @@ export default function ProductGallery({
                 <div className="flex gap-3 overflow-x-auto pb-2">
                     {sortedImages.map((img, index) => (
                         <button
+                            type="button"
                             key={img.id}
                             onClick={() => setSelectedIndex(index)}
-                            className={`relative w-20 h-20 rounded-lg overflow-hidden shrink-0 transition-all duration-200 ${
+                            className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border bg-muted/30 transition-all duration-200 ${
                                 index === selectedIndex
-                                    ? "ring-2 ring-primary ring-offset-2"
-                                    : "opacity-60 hover:opacity-100"
+                                    ? "border-primary ring-2 ring-primary/20"
+                                    : "border-border opacity-70 hover:opacity-100"
                             }`}
                         >
                             <Image
                                 src={img.url}
                                 alt={img.alt || `${productName} - ${index + 1}`}
                                 fill
-                                className="object-cover"
+                                className="object-contain p-1"
                                 sizes="80px"
                             />
                         </button>
