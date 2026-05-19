@@ -109,11 +109,10 @@ export default async function WomenCollectionPage({ searchParams }: Props) {
     const limit = 12;
     const offset = (page - 1) * limit;
 
-    // ── Lọc sản phẩm Nữ: category slug "nu" hoặc tags chứa "nu" ──
-    const { data: genderCategory } = await supabase
+    const { data: dressCategory } = await supabase
         .from("categories")
         .select("id")
-        .eq("slug", "nu")
+        .eq("slug", "dam-vay")
         .maybeSingle();
 
     // Optimized: chỉ select fields cần thiết
@@ -125,11 +124,16 @@ export default async function WomenCollectionPage({ searchParams }: Props) {
         .select(productSelect, { count: "exact" })
         .eq("is_active", true);
 
-    if (genderCategory) {
-        query = query.eq("category_id", genderCategory.id);
-    } else {
-        query = query.contains("tags", ["nu"]);
+    const womenFilters = [
+        "tags.cs.{nữ}",
+        "tags.cs.{nu}",
+        "tags.cs.{unisex}",
+        "name.ilike.%Nữ%",
+    ];
+    if (dressCategory) {
+        womenFilters.push(`category_id.eq.${dressCategory.id}`);
     }
+    query = query.or(womenFilters.join(","));
 
     if (params.category) {
         const { data: cat } = await supabase

@@ -98,12 +98,20 @@ function uniqueModels(primary: string, ...fallbacks: (string | undefined)[]): st
 }
 
 /**
- * Fallback mặc định khi không set GEMINI_FALLBACK_MODEL: ưu tiên Gemini 3 Flash (text), tránh 1.5 (thường 404).
+ * Fallback mặc định khi không set GEMINI_FALLBACK_MODEL: ưu tiên model text ổn định,
+ * tránh Live/preview cho chatbot text vì quota preview thường chặt hơn.
  */
 function defaultFallbackForPrimary(primary: string): string {
-    return primary.includes("3.1-flash-live")
-        ? "gemini-3-flash-preview"
-        : "gemini-3.1-flash-live-preview";
+    if (primary === "gemini-3.1-flash-lite") {
+        return "gemini-2.5-flash-lite";
+    }
+    if (primary === "gemini-2.5-flash") {
+        return "gemini-2.5-flash-lite";
+    }
+    if (primary === "gemini-2.5-flash-lite") {
+        return "gemini-3.1-flash-lite";
+    }
+    return "gemini-3.1-flash-lite";
 }
 
 /**

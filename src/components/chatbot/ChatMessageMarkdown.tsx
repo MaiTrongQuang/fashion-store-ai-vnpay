@@ -5,9 +5,54 @@ import Link from "next/link";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { ReactNode } from "react";
+import { Children, isValidElement } from "react";
 import { ShoppingBag, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChatbotProductCard } from "@/lib/chatbot/build-context";
+
+const PRODUCT_PATH_RE = /\/products\/([a-z0-9]+(?:-[a-z0-9]+)*)(?:\/)?/gi;
+const PRODUCT_HREF_RE =
+    /^\/products\/([a-z0-9]+(?:-[a-z0-9]+)*)(?:\/)?(?:[?#].*)?$/i;
+const STRONG_INTERNAL_LINK_RE =
+    /\*\*([^*\n]+)\*\*\s*\((\/(?:products|collections|policies|account|cart|checkout|contact|about|search)(?:[^\s)]*)?)\)/gi;
+
+function getProductSlugFromHref(href: string): string | null {
+    return href.match(PRODUCT_HREF_RE)?.[1] ?? null;
+}
+
+function normalizeAssistantMarkdown(content: string): string {
+    const withStrongLinks = content.replace(
+        STRONG_INTERNAL_LINK_RE,
+        (_match, label: string, href: string) => `[**${label.trim()}**](${href})`,
+    );
+
+    return withStrongLinks.replace(
+        PRODUCT_PATH_RE,
+        (match: string, _slug: string, offset: number, text: string) => {
+            const isAlreadyMarkdownHref =
+                offset >= 2 && text.slice(offset - 2, offset) === "](";
+            if (isAlreadyMarkdownHref) return match;
+            return `[Xem sản phẩm](${match})`;
+        },
+    );
+}
+
+function extractLinkedProductSlugs(content: string): Set<string> {
+    const slugs = new Set<string>();
+    let m: RegExpExecArray | null;
+    PRODUCT_PATH_RE.lastIndex = 0;
+    while ((m = PRODUCT_PATH_RE.exec(content)) !== null) {
+        slugs.add(m[1]);
+    }
+    return slugs;
+}
+
+function containsProductCard(children: ReactNode): boolean {
+    return Children.toArray(children).some(
+        (child) => isValidElement(child) && child.type === ChatProductCard,
+    );
+}
 
 // ---------------------------------------------------------------------------
 // Inline Product Card (rendered inside chat bubble)
@@ -80,9 +125,9 @@ function buildMarkdownComponents(
             if (!href) return <span>{children}</span>;
 
             // Check if this is a product link with a card
-            const match = href.match(/^\/products\/([a-z0-9]+(?:-[a-z0-9]+)*)$/i);
-            if (match) {
-                const card = cardMap.get(match[1]);
+            const productSlug = getProductSlugFromHref(href);
+            if (productSlug) {
+                const card = cardMap.get(productSlug);
                 if (card) {
                     return <ChatProductCard card={card} />;
                 }
@@ -110,9 +155,16 @@ function buildMarkdownComponents(
                 </a>
             );
         },
-        p: ({ children }) => (
-            <p className="mb-2 text-[0.8125rem] leading-relaxed last:mb-0">{children}</p>
-        ),
+        p: ({ children }) =>
+            containsProductCard(children) ? (
+                <div className="mb-2 text-[0.8125rem] leading-relaxed last:mb-0">
+                    {children}
+                </div>
+            ) : (
+                <p className="mb-2 text-[0.8125rem] leading-relaxed last:mb-0">
+                    {children}
+                </p>
+            ),
         ul: ({ children }) => (
             <ul className="mb-2 ml-0.5 list-disc space-y-1 pl-4 text-[0.8125rem] leading-relaxed">
                 {children}
@@ -222,6 +274,9 @@ export function ChatMessageMarkdown({
     className,
     productCards,
 }: ChatMessageMarkdownProps) {
+    const normalizedContent = normalizeAssistantMarkdown(content);
+    const linkedProductSlugs = extractLinkedProductSlugs(normalizedContent);
+
     // Build a slug → card map for O(1) lookup inside the link renderer
     const cardMap = new Map<string, ChatbotProductCard>();
     if (productCards?.length) {
@@ -229,6 +284,8 @@ export function ChatMessageMarkdown({
             cardMap.set(card.slug, card);
         }
     }
+    const cardsWithoutInlineLink =
+        productCards?.filter((card) => !linkedProductSlugs.has(card.slug)) ?? [];
 
     const components = buildMarkdownComponents(cardMap);
 
@@ -243,8 +300,15 @@ export function ChatMessageMarkdown({
                 remarkPlugins={[remarkGfm]}
                 components={components}
             >
-                {content}
+                {normalizedContent}
             </ReactMarkdown>
+            {cardsWithoutInlineLink.length > 0 && (
+                <div className="mt-2 space-y-2">
+                    {cardsWithoutInlineLink.map((card) => (
+                        <ChatProductCard key={card.slug} card={card} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

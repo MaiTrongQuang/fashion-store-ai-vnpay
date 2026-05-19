@@ -109,14 +109,6 @@ export default async function MenCollectionPage({ searchParams }: Props) {
     const limit = 12;
     const offset = (page - 1) * limit;
 
-    // ── Lọc sản phẩm Nam: category slug "nam" hoặc tags chứa "nam" ──
-    // Ưu tiên: tìm category slug = "nam" trước
-    const { data: genderCategory } = await supabase
-        .from("categories")
-        .select("id")
-        .eq("slug", "nam")
-        .maybeSingle();
-
     // Optimized: chỉ select fields cần thiết
     const productSelect =
         "id, name, slug, base_price, sale_price, is_new, is_featured, tags, category:categories(name, slug), brand:brands(name, slug), images:product_images(url, alt, is_primary, sort_order)";
@@ -126,11 +118,7 @@ export default async function MenCollectionPage({ searchParams }: Props) {
         .select(productSelect, { count: "exact" })
         .eq("is_active", true);
 
-    if (genderCategory) {
-        query = query.eq("category_id", genderCategory.id);
-    } else {
-        query = query.contains("tags", ["nam"]);
-    }
+    query = query.or("tags.cs.{nam},tags.cs.{unisex},name.ilike.%Nam%");
 
     // Lọc thêm theo các filter params
     if (params.category) {

@@ -14,8 +14,8 @@ import {
 import { getFallbackReply } from "@/lib/chatbot/fallback-reply";
 import { generateGeminiReply, type ChatTurn } from "@/lib/chatbot/gemini";
 
-/** Gemini 3.1 Flash Live (preview) — hỗ trợ text qua generateContent; xem ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-live-preview */
-const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-live-preview";
+/** Gemini 3.1 Flash-Lite — stable free-tier model phù hợp cho chatbot text. */
+const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite";
 const MAX_HISTORY_MESSAGES = 20;
 
 export type ChatbotPostSource = "gemini" | "fallback";
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
         // ---- Enrich: extract product cards from reply ----
         let productCards: ChatbotProductCard[] = [];
         try {
-            const slugs = extractProductSlugs(reply);
+            const slugs = extractProductSlugs(reply, products);
             if (slugs.length) {
                 productCards = await fetchProductCardsForReply(supabase, slugs);
             }

@@ -111,7 +111,7 @@ function formatFaqBlock(faqs: ChatbotFaqRow[]): string {
 function formatCategoriesBlock(cats: ChatbotCategoryRow[]): string {
     if (!cats?.length) return "(Không có danh mục.)";
     return cats
-        .map((c) => `- ${c.name} — /collections hoặc lọc theo slug: ${c.slug}`)
+        .map((c) => `- [${c.name}](/collections/${c.slug})`)
         .join("\n");
 }
 
@@ -128,7 +128,7 @@ function formatProductsBlock(products: ChatbotProductRow[]): string {
                 ? truncateText(p.description, MAX_DESC_CHARS)
                 : "";
             const path = `/products/${p.slug}`;
-            return `- ${p.name} (${cat}) — ${price}${desc ? ` — Mô tả rút gọn: ${desc}` : ""} — Link: ${path}`;
+            return `- [${p.name}](${path})${cat ? ` (${cat})` : ""} — ${price}${desc ? ` — Mô tả rút gọn: ${desc}` : ""}`;
         })
         .join("\n");
 }
@@ -156,7 +156,13 @@ QUY TẮC CHỐNG ẢO GIÁC (bắt buộc):
 - Nếu khách hỏi thông tin không có trong dữ liệu: nói rõ bạn không thấy trong hệ thống, và hướng dẫn xem trang chính sách tương ứng (/policies/...) hoặc liên hệ ${SITE_CONTACT.hotline} / ${SITE_CONTACT.email} / trang /contact.
 - Không đóng vai như bạn biết trạng thái đơn hàng, mã đơn, hoặc giỏ hàng của khách (không có dữ liệu tài khoản trong cuộc trò chuyện). Gợi ý vào mục "Đơn hàng" trong tài khoản (/account/orders).
 - Không bịa mã khuyến mãi, % giảm, hoặc cam kết giao trong X ngày nếu không có trong FAQ/dữ liệu.
-- Có thể gợi ý sản phẩm và đường dẫn /products/{slug} dựa trên danh sách sản phẩm được cung cấp.`;
+- Có thể gợi ý sản phẩm và đường dẫn /products/{slug} dựa trên danh sách sản phẩm được cung cấp.
+
+QUY TẮC ĐỊNH DẠNG LINK (bắt buộc):
+- Khi gợi ý sản phẩm, luôn viết tên sản phẩm bằng markdown link: [Tên sản phẩm](/products/slug).
+- Khi dẫn danh mục/trang nội bộ, dùng markdown link: [Tên trang](/duong-dan).
+- Không viết URL thô hoặc dạng "Tên sản phẩm (/products/slug)" vì giao diện cần markdown link để hiển thị ảnh sản phẩm.
+- Nếu liệt kê sản phẩm, ưu tiên 2-4 sản phẩm phù hợp nhất, mỗi sản phẩm một bullet.`;
 
 /** System instruction đầy đủ cho một request (tĩnh + động). */
 export function buildFullSystemInstruction(dynamicBlock: string): string {
@@ -239,7 +245,7 @@ export function formatActiveProductContextBlock(p: ChatbotProductRow): string {
         `- Tên SP: ${p.name}`,
         `- Danh mục: ${cat}`,
         `- Giá (VND, hiển thị): ${priceLine}`,
-        `- Đường dẫn: ${link}`,
+        `- Markdown link: [${p.name}](${link})`,
     ];
     if (desc) lines.push(`- Mô tả rút gọn: ${desc}`);
     lines.push("");
@@ -298,14 +304,36 @@ export async function fetchChatbotContextData(
 // Product card enrichment — parse reply for /products/{slug} and fetch images
 // ---------------------------------------------------------------------------
 
-const PRODUCT_LINK_RE = /\/products\/([a-z0-9]+(?:-[a-z0-9]+)*)/gi;
+const PRODUCT_LINK_RE = /\/products\/([a-z0-9]+(?:-[a-z0-9]+)*)(?:\/)?/gi;
+
+function normalizeSearchText(text: string): string {
+    return text
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+}
 
 /** Extract unique product slugs mentioned in a Gemini reply. */
-export function extractProductSlugs(reply: string): string[] {
+export function extractProductSlugs(
+    reply: string,
+    products: ChatbotProductRow[] = [],
+): string[] {
     const seen = new Set<string>();
     let m: RegExpExecArray | null;
     while ((m = PRODUCT_LINK_RE.exec(reply)) !== null) {
         seen.add(m[1]);
+    }
+    if (products.length) {
+        const normalizedReply = normalizeSearchText(reply);
+        for (const product of products) {
+            const normalizedName = normalizeSearchText(product.name);
+            if (
+                normalizedName.length >= 4 &&
+                normalizedReply.includes(normalizedName)
+            ) {
+                seen.add(product.slug);
+            }
+        }
     }
     return [...seen];
 }
@@ -320,7 +348,7 @@ export async function fetchProductCardsForReply(
     const { data, error } = await supabase
         .from("products")
         .select(
-            "name, slug, base_price, sale_price, images:product_images(url, alt, is_primary)",
+            "name, slug, base_price, sale_price, images:product_images(url, alt, is_primary, sort_order)",
         )
         .eq("is_active", true)
         .in("slug", slugs);
@@ -330,12 +358,20 @@ export async function fetchProductCardsForReply(
         return [];
     }
 
+    const order = new Map(slugs.map((slug, index) => [slug, index]));
+
     return (data ?? []).map((p) => {
         const imgs = Array.isArray(p.images) ? p.images : [];
-        const primary =
-            imgs.find(
-                (i: { is_primary?: boolean }) => i.is_primary,
-            ) || imgs[0];
+        const sortedImages = [...imgs].sort(
+            (
+                a: { is_primary?: boolean; sort_order?: number | null },
+                b: { is_primary?: boolean; sort_order?: number | null },
+            ) => {
+                if (a.is_primary !== b.is_primary) return a.is_primary ? -1 : 1;
+                return (a.sort_order ?? 0) - (b.sort_order ?? 0);
+            },
+        );
+        const primary = sortedImages[0];
         return {
             slug: String(p.slug),
             name: String(p.name),
@@ -345,5 +381,9 @@ export async function fetchProductCardsForReply(
             imageAlt: primary?.alt ?? null,
             url: `/products/${p.slug}`,
         };
-    });
+    }).sort(
+        (a, b) =>
+            (order.get(a.slug) ?? Number.MAX_SAFE_INTEGER) -
+            (order.get(b.slug) ?? Number.MAX_SAFE_INTEGER),
+    );
 }
