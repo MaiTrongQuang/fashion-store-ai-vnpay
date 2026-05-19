@@ -6,7 +6,7 @@ import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ReactNode } from "react";
-import { Children, isValidElement } from "react";
+import { Children, isValidElement, memo, useMemo } from "react";
 import { ShoppingBag, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChatbotProductCard } from "@/lib/chatbot/build-context";
@@ -58,7 +58,11 @@ function containsProductCard(children: ReactNode): boolean {
 // Inline Product Card (rendered inside chat bubble)
 // ---------------------------------------------------------------------------
 
-function ChatProductCard({ card }: { card: ChatbotProductCard }) {
+const ChatProductCard = memo(function ChatProductCard({
+    card,
+}: {
+    card: ChatbotProductCard;
+}) {
     const hasDiscount = card.salePrice != null && card.salePrice < card.basePrice;
     const displayPrice = hasDiscount ? card.salePrice! : card.basePrice;
 
@@ -111,7 +115,7 @@ function ChatProductCard({ card }: { card: ChatbotProductCard }) {
             </div>
         </Link>
     );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Markdown Components
@@ -269,25 +273,38 @@ type ChatMessageMarkdownProps = {
 };
 
 /** Render Markdown an toàn cho tin nhắn assistant (GFM: list, link, bảng, …). */
-export function ChatMessageMarkdown({
+export const ChatMessageMarkdown = memo(function ChatMessageMarkdown({
     content,
     className,
     productCards,
 }: ChatMessageMarkdownProps) {
-    const normalizedContent = normalizeAssistantMarkdown(content);
-    const linkedProductSlugs = extractLinkedProductSlugs(normalizedContent);
+    const normalizedContent = useMemo(
+        () => normalizeAssistantMarkdown(content),
+        [content],
+    );
+    const linkedProductSlugs = useMemo(
+        () => extractLinkedProductSlugs(normalizedContent),
+        [normalizedContent],
+    );
 
     // Build a slug → card map for O(1) lookup inside the link renderer
-    const cardMap = new Map<string, ChatbotProductCard>();
-    if (productCards?.length) {
-        for (const card of productCards) {
-            cardMap.set(card.slug, card);
+    const cardMap = useMemo(() => {
+        const map = new Map<string, ChatbotProductCard>();
+        if (productCards?.length) {
+            for (const card of productCards) {
+                map.set(card.slug, card);
+            }
         }
-    }
-    const cardsWithoutInlineLink =
-        productCards?.filter((card) => !linkedProductSlugs.has(card.slug)) ?? [];
+        return map;
+    }, [productCards]);
+    const cardsWithoutInlineLink = useMemo(
+        () =>
+            productCards?.filter((card) => !linkedProductSlugs.has(card.slug)) ??
+            [],
+        [linkedProductSlugs, productCards],
+    );
 
-    const components = buildMarkdownComponents(cardMap);
+    const components = useMemo(() => buildMarkdownComponents(cardMap), [cardMap]);
 
     return (
         <div
@@ -311,4 +328,4 @@ export function ChatMessageMarkdown({
             )}
         </div>
     );
-}
+});
