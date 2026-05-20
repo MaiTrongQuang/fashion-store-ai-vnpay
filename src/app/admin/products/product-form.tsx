@@ -18,9 +18,8 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
 } from "@/components/ui/select";
-import { Plus, Edit, Trash2, X, ImagePlus } from "lucide-react";
+import { Plus, Edit, Trash2, X } from "lucide-react";
 import { upsertProduct, deleteProduct } from "@/app/admin/actions";
 import { FileUpload } from "@/components/admin/file-upload";
 import { slugify } from "@/lib/utils";
@@ -67,6 +66,16 @@ export function ProductForm({ categories, brands, editItem }: ProductFormProps) 
     const [isFeatured, setIsFeatured] = useState(editItem?.is_featured || false);
     const [isNew, setIsNew] = useState(editItem?.is_new !== false);
     const [tags, setTags] = useState(editItem?.tags?.join(", ") || "");
+    const selectedCategoryLabel =
+        categoryId === "none"
+            ? "Không có"
+            : categories.find((category) => category.id === categoryId)?.name ||
+              "Chọn danh mục";
+    const selectedBrandLabel =
+        brandId === "none"
+            ? "Không có"
+            : brands.find((brand) => brand.id === brandId)?.name ||
+              "Chọn thương hiệu";
 
     // ── Images ──
     const [images, setImages] = useState<ProductImage[]>(
@@ -298,8 +307,13 @@ export function ProductForm({ categories, brands, editItem }: ProductFormProps) 
                                         value={categoryId}
                                         onValueChange={setCategoryId}
                                     >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Chọn danh mục" />
+                                        <SelectTrigger className="w-full">
+                                            <span
+                                                data-slot="select-value"
+                                                className="min-w-0 flex-1 truncate text-left"
+                                            >
+                                                {selectedCategoryLabel}
+                                            </span>
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="none">
@@ -322,8 +336,13 @@ export function ProductForm({ categories, brands, editItem }: ProductFormProps) 
                                         value={brandId}
                                         onValueChange={setBrandId}
                                     >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Chọn thương hiệu" />
+                                        <SelectTrigger className="w-full">
+                                            <span
+                                                data-slot="select-value"
+                                                className="min-w-0 flex-1 truncate text-left"
+                                            >
+                                                {selectedBrandLabel}
+                                            </span>
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="none">
