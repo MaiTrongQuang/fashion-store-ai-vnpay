@@ -5,6 +5,7 @@ import ProductGallery from "@/components/product/ProductGallery";
 import ProductInfo from "@/components/product/ProductInfo";
 import ProductReviews from "@/components/product/ProductReviews";
 import ProductCard from "@/components/product/ProductCard";
+import { getProductDisplayImages } from "@/lib/legacy-product-images";
 import type { Metadata } from "next";
 
 interface Props {
@@ -69,7 +70,7 @@ export default async function ProductDetailPage({ params }: Props) {
             : 0;
 
     return (
-        <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
             {/* Breadcrumb */}
             <nav
                 aria-label="Breadcrumb"
@@ -103,9 +104,9 @@ export default async function ProductDetailPage({ params }: Props) {
             </nav>
 
             {/* Product Detail */}
-            <section className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)] lg:gap-12 xl:gap-16">
+            <section className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:gap-10 xl:gap-14">
                 <ProductGallery
-                    images={product.images || []}
+                    images={getProductDisplayImages(product)}
                     productName={product.name}
                 />
                 <ProductInfo
@@ -119,7 +120,7 @@ export default async function ProductDetailPage({ params }: Props) {
             {product.description && (
                 <section className="mt-12 border-t border-border pt-8">
                     <div className="max-w-3xl">
-                        <h2 className="mb-4 text-xl font-bold">
+                        <h2 className="mb-4 text-xl font-semibold">
                             Mô Tả Sản Phẩm
                         </h2>
                         <p className="text-sm leading-7 text-muted-foreground">
@@ -134,11 +135,11 @@ export default async function ProductDetailPage({ params }: Props) {
 
             {/* Related Products */}
             {relatedProducts && relatedProducts.length > 0 && (
-                <section className="mt-16">
-                    <h2 className="text-xl font-bold mb-6">
+                <section className="mt-16 border-t border-border pt-8">
+                    <h2 className="mb-6 text-xl font-semibold">
                         Sản Phẩm Liên Quan
                     </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 md:grid-cols-4">
                         {relatedProducts.map((p: any) => (
                             <ProductCard key={p.id} product={p} />
                         ))}

@@ -176,7 +176,7 @@ export default function ProductInfo({
     };
 
     return (
-        <div className="space-y-5 lg:pt-1">
+        <div className="space-y-5 lg:sticky lg:top-24 lg:pt-1">
             {/* Brand & Name */}
             <div className="space-y-2">
                 {product.brand && (
@@ -218,7 +218,7 @@ export default function ProductInfo({
                         <span className="text-xl text-muted-foreground line-through">
                             {formatPrice(product.base_price)}
                         </span>
-                        <Badge variant="destructive" className="rounded-full px-3 py-1 text-xs">
+                        <Badge variant="destructive" className="rounded-sm px-2.5 py-1 text-xs">
                             -{discount}%
                         </Badge>
                     </>
@@ -250,10 +250,10 @@ export default function ProductInfo({
                                     onClick={() =>
                                         setSelectedColor(color.name)
                                     }
-                                    className={`relative h-11 w-11 rounded-full transition-all duration-200 ${
+                                    className={`relative h-11 w-11 rounded-md transition-all duration-200 ${
                                         isSelected
-                                            ? "scale-105 shadow-md ring-2 ring-primary ring-offset-2"
-                                            : "ring-1 ring-border hover:scale-105 hover:ring-primary/60"
+                                            ? "shadow-sm ring-2 ring-primary ring-offset-2"
+                                            : "ring-1 ring-border hover:ring-primary/60"
                                     }`}
                                     style={{ backgroundColor: color.hex }}
                                     title={color.name}
@@ -305,7 +305,7 @@ export default function ProductInfo({
                                         !isOutOfStock && setSelectedSize(size)
                                     }
                                     disabled={isOutOfStock}
-                                    className={`h-12 min-w-14 rounded-xl border px-4 text-sm font-semibold transition-all ${
+                                    className={`h-11 min-w-14 rounded-md border px-4 text-sm font-semibold transition-all ${
                                         selectedSize === size
                                             ? "border-primary bg-primary text-primary-foreground"
                                             : isOutOfStock
@@ -335,11 +335,11 @@ export default function ProductInfo({
             {/* Quantity */}
             <div className="space-y-3">
                 <Label className="text-sm font-medium">Số lượng</Label>
-                <div className="inline-flex h-12 items-center overflow-hidden rounded-xl border border-border bg-background">
+                <div className="inline-flex h-11 items-center overflow-hidden rounded-md border border-border bg-background">
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-12 w-12 rounded-none"
+                        className="h-11 w-11 rounded-none"
                         onClick={() =>
                             quantity > 1 && setQuantity(quantity - 1)
                         }
@@ -347,13 +347,13 @@ export default function ProductInfo({
                     >
                         <Minus className="h-4 w-4" />
                     </Button>
-                    <span className="w-14 text-center font-semibold tabular-nums">
+                    <span className="w-12 text-center font-semibold tabular-nums">
                         {quantity}
                     </span>
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-12 w-12 rounded-none"
+                        className="h-11 w-11 rounded-none"
                         onClick={() => setQuantity(quantity + 1)}
                         disabled={
                             selectedVariant
@@ -371,7 +371,7 @@ export default function ProductInfo({
                 <Button
                     size="lg"
                     variant="outline"
-                    className="h-[52px] border-primary text-base font-semibold text-primary hover:bg-primary/5"
+                    className="h-[52px] rounded-md border-primary text-base font-semibold text-primary hover:bg-primary/5"
                     onClick={handleAddToCart}
                     disabled={loading || buyNowLoading}
                 >
@@ -380,7 +380,7 @@ export default function ProductInfo({
                 </Button>
                 <Button
                     size="lg"
-                    className="h-[52px] border-0 bg-gradient-brand-cta text-base font-semibold text-primary-foreground shadow-brand-cta transition-[filter,transform] hover:brightness-110"
+                    className="h-[52px] rounded-md border-0 bg-primary text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                     onClick={handleBuyNow}
                     disabled={loading || buyNowLoading}
                 >
@@ -390,7 +390,7 @@ export default function ProductInfo({
                 <Button
                     variant="outline"
                     size="lg"
-                    className="h-[52px] w-full px-4 text-foreground hover:text-primary sm:w-[52px] sm:px-0"
+                    className="h-[52px] w-full rounded-md px-4 text-foreground hover:text-primary sm:w-[52px] sm:px-0"
                     aria-label="Thêm vào yêu thích"
                 >
                     <Heart className="size-5" />
@@ -402,15 +402,15 @@ export default function ProductInfo({
 
             {/* Policies */}
             <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                <div className="flex items-center gap-3 rounded-xl bg-muted/40 px-3 py-3">
+                <div className="flex items-center gap-3 rounded-md bg-muted/50 px-3 py-3">
                     <Truck className="h-4 w-4 shrink-0 text-primary" />
                     <span>Miễn phí vận chuyển đơn từ 500.000đ</span>
                 </div>
-                <div className="flex items-center gap-3 rounded-xl bg-muted/40 px-3 py-3">
+                <div className="flex items-center gap-3 rounded-md bg-muted/50 px-3 py-3">
                     <RotateCcw className="h-4 w-4 shrink-0 text-primary" />
                     <span>Đổi trả miễn phí trong 7 ngày</span>
                 </div>
-                <div className="flex items-center gap-3 rounded-xl bg-muted/40 px-3 py-3">
+                <div className="flex items-center gap-3 rounded-md bg-muted/50 px-3 py-3">
                     <Shield className="h-4 w-4 shrink-0 text-primary" />
                     <span>Cam kết hàng chính hãng 100%</span>
                 </div>

@@ -2,46 +2,41 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ImageOff } from "lucide-react";
+import { Heart, ImageOff, ShoppingBag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatPrice, getDiscountPercent } from "@/lib/utils";
 import type { Product } from "@/lib/types";
+import { getProductDisplayImages } from "@/lib/legacy-product-images";
 
 interface ProductCardProps {
     product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-    const images = product.images ?? [];
-    const primaryImage =
-        images.find((img) => img.is_primary) || images[0];
+    const images = getProductDisplayImages(product);
+    const primaryImage = images.find((img) => img.is_primary) || images[0];
     const secondaryImage = primaryImage
-        ? images.find((img) => img.id !== primaryImage.id && img.url)
+        ? images.find(
+              (img) =>
+                  img.url &&
+                  img.url !== primaryImage.url &&
+                  img.sort_order !== primaryImage.sort_order,
+          )
         : undefined;
 
     const discount = product.sale_price
         ? getDiscountPercent(product.base_price, product.sale_price)
         : 0;
 
-    const salePrice = product.sale_price ?? null;
-    const currentPrice = salePrice ?? product.base_price;
+    const currentPrice = product.sale_price ?? product.base_price;
 
     return (
-        <article
-            className={cn(
-                "group/card relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-card",
-                "shadow-sm transition-[box-shadow,transform] duration-300 ease-out",
-                "hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20",
-                "motion-reduce:transition-none motion-reduce:hover:transform-none",
-            )}
-        >
-            <div className="relative">
+        <article className="group/product flex h-full min-w-0 flex-col">
+            <div className="relative overflow-hidden rounded-md bg-muted">
                 <Link
                     href={`/products/${product.slug}`}
-                    className={cn(
-                        "relative block aspect-3/4 overflow-hidden bg-muted",
-                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                    )}
+                    className="relative block aspect-3/4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    aria-label={`Xem ${product.name}`}
                 >
                     {primaryImage ? (
                         <>
@@ -52,11 +47,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                     aria-hidden
                                     fill
                                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                    className={cn(
-                                        "z-0 object-cover",
-                                        "motion-safe:transition-transform motion-safe:duration-700 motion-safe:ease-out",
-                                        "motion-safe:group-hover/card:scale-[1.03] motion-reduce:group-hover/card:scale-100",
-                                    )}
+                                    className="object-cover transition-transform duration-700 ease-out group-hover/product:scale-[1.03]"
                                 />
                             )}
                             <Image
@@ -65,11 +56,9 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 fill
                                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                 className={cn(
-                                    "z-1 object-cover transition-opacity duration-500 ease-out",
+                                    "object-cover transition-all duration-500 ease-out group-hover/product:scale-[1.03]",
                                     secondaryImage &&
-                                        "group-hover/card:opacity-0 motion-reduce:group-hover/card:opacity-100",
-                                    "motion-safe:transition-transform motion-safe:duration-700 motion-safe:ease-out",
-                                    "motion-safe:group-hover/card:scale-[1.03] motion-reduce:group-hover/card:scale-100",
+                                        "group-hover/product:opacity-0",
                                 )}
                                 priority={false}
                             />
@@ -79,114 +68,86 @@ export default function ProductCard({ product }: ProductCardProps) {
                             className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center text-muted-foreground"
                             aria-hidden
                         >
-                            <ImageOff className="h-10 w-10 opacity-50" />
+                            <ImageOff className="h-9 w-9 opacity-50" />
                             <span className="text-xs font-medium">
                                 Chưa có ảnh
                             </span>
                         </div>
                     )}
 
-                    {/* Gradient nhẹ phía dưới ảnh — giúp badge/CTA dễ đọc trên ảnh sáng */}
                     <div
-                        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-linear-to-t from-black/25 to-transparent opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 motion-reduce:opacity-0"
-                        aria-hidden
-                    />
-
-                    {/* Badges */}
-                    <div className="absolute left-2.5 top-2.5 z-1 flex max-w-[calc(100%-4rem)] flex-col gap-1.5 sm:left-3 sm:top-3">
-                        {discount > 0 && (
-                            <Badge className="border-0 bg-red-600 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm hover:bg-red-600">
-                                −{discount}%
-                            </Badge>
-                        )}
-                        <div className="flex flex-wrap gap-1">
-                            {product.is_new && (
-                                <Badge className="border-0 bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-600">
-                                    Mới
-                                </Badge>
-                            )}
-                            {product.is_featured && (
-                                <Badge className="border-0 bg-amber-500 px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm hover:bg-amber-500">
-                                    Nổi bật
-                                </Badge>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Gợi ý CTA — chỉ opacity, không đẩy layout */}
-                    <div
-                        className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-3 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 motion-reduce:opacity-0"
+                        className="pointer-events-none absolute inset-x-0 bottom-0 hidden translate-y-2 justify-center bg-linear-to-t from-black/28 via-black/8 to-transparent pb-3 pt-10 opacity-0 transition-all duration-300 group-hover/product:translate-y-0 group-hover/product:opacity-100 sm:flex"
                         aria-hidden
                     >
-                        <span className="rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground shadow-md backdrop-blur-sm">
+                        <span className="inline-flex items-center gap-2 rounded-md bg-background/95 px-3 py-2 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+                            <ShoppingBag className="h-3.5 w-3.5" />
                             Xem chi tiết
                         </span>
                     </div>
                 </Link>
 
-                {/* Ngoài <Link> — tránh nút lồng trong link */}
+                <div className="absolute left-2 top-2 z-10 flex max-w-[calc(100%-3.5rem)] flex-wrap gap-1.5">
+                    {discount > 0 && (
+                        <Badge className="rounded-sm border-0 bg-red-600 px-2 py-0.5 text-[11px] font-bold uppercase tracking-normal text-white hover:bg-red-600">
+                            -{discount}%
+                        </Badge>
+                    )}
+                    {product.is_new && (
+                        <Badge className="rounded-sm border-0 bg-neutral-950 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-normal text-white hover:bg-neutral-950 dark:bg-white dark:text-neutral-950">
+                            Mới
+                        </Badge>
+                    )}
+                    {product.is_featured && (
+                        <Badge className="rounded-sm border-0 bg-amber-500 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-normal text-white hover:bg-amber-500">
+                            Hot
+                        </Badge>
+                    )}
+                </div>
+
                 <button
                     type="button"
-                    className={cn(
-                        "absolute right-2 top-2 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full",
-                        "border border-border/80 bg-background/90 text-foreground shadow-md backdrop-blur-sm",
-                        "transition-colors duration-200 hover:bg-accent hover:text-accent-foreground",
-                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                        "opacity-100 sm:opacity-0 sm:transition-opacity sm:duration-200 sm:group-hover/card:opacity-100",
-                        "sm:translate-y-0 sm:group-hover/card:translate-y-0",
-                    )}
+                    className="absolute right-2 top-2 z-10 flex h-10 w-10 items-center justify-center rounded-md border border-white/70 bg-white/90 text-neutral-950 shadow-sm backdrop-blur transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:opacity-0 sm:group-hover/product:opacity-100"
                     aria-label={`Thêm "${product.name}" vào yêu thích`}
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        // TODO: wishlist
                     }}
                 >
-                    <Heart
-                        className="h-[18px] w-[18px] sm:h-5 sm:w-5"
-                        strokeWidth={1.75}
-                    />
+                    <Heart className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </button>
             </div>
 
-            <div className="flex flex-1 flex-col border-t border-border/50 p-3 sm:p-4">
+            <div className="flex flex-1 flex-col gap-1.5 pt-3">
+                {product.brand && (
+                    <p className="truncate text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
+                        {product.brand.name}
+                    </p>
+                )}
                 <Link
                     href={`/products/${product.slug}`}
-                    className="group/info flex min-h-0 flex-1 flex-col gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-b-xl -m-px p-px"
+                    className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
-                    {product.brand && (
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:text-xs">
-                            {product.brand.name}
-                        </p>
-                    )}
-                    <h3 className="line-clamp-2 min-h-10 text-sm font-semibold leading-snug text-foreground transition-colors duration-200 group-hover/info:text-primary sm:min-h-11 sm:text-base">
+                    <h3 className="line-clamp-2 min-h-10 text-sm font-medium leading-snug text-foreground transition-colors group-hover/product:text-primary sm:text-base">
                         {product.name}
                     </h3>
-
-                    <div className="mt-auto flex flex-wrap items-baseline gap-x-2 gap-y-1 pt-1">
-                        <span className="text-base font-bold tabular-nums tracking-tight text-foreground sm:text-lg">
-                            {formatPrice(currentPrice)}
-                        </span>
-                        {salePrice && (
-                            <>
-                                <span className="text-sm tabular-nums text-muted-foreground line-through decoration-muted-foreground/80">
-                                    {formatPrice(product.base_price)}
-                                </span>
-                                {discount > 0 && (
-                                    <span className="text-xs font-medium text-red-600 dark:text-red-400">
-                                        Tiết kiệm {discount}%
-                                    </span>
-                                )}
-                            </>
-                        )}
-                    </div>
-
-                    {product.category?.name && (
-                        <p className="text-[11px] text-muted-foreground/90 sm:text-xs">
-                            {product.category.name}
-                        </p>
-                    )}
                 </Link>
+
+                <div className="mt-auto flex flex-wrap items-baseline gap-x-2 gap-y-1 pt-1">
+                    <span className="text-sm font-semibold tabular-nums text-foreground sm:text-base">
+                        {formatPrice(currentPrice)}
+                    </span>
+                    {product.sale_price && (
+                        <span className="text-xs tabular-nums text-muted-foreground line-through">
+                            {formatPrice(product.base_price)}
+                        </span>
+                    )}
+                </div>
+
+                {product.category?.name && (
+                    <p className="truncate text-xs text-muted-foreground">
+                        {product.category.name}
+                    </p>
+                )}
             </div>
         </article>
     );

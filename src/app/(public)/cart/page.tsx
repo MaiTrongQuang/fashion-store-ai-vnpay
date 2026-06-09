@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
+import { getProductDisplayImages } from "@/lib/legacy-product-images";
 import { toast } from "sonner";
 
 interface CartItemFull {
@@ -145,9 +146,10 @@ export default function CartPage() {
                     <div className="lg:col-span-2 space-y-4">
                         {items.map((item) => {
                             const product = item.variant.product;
+                            const images = getProductDisplayImages(product);
                             const primaryImage =
-                                product.images?.find((img) => img.is_primary) ||
-                                product.images?.[0];
+                                images.find((img) => img.is_primary) ||
+                                images[0];
                             const effectivePrice = getEffectivePrice(item);
                             const hasDiscount =
                                 product.sale_price != null &&

@@ -31,6 +31,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
+import AnimatedLogo from "@/components/layout/AnimatedLogo";
 import SearchDialog from "@/components/layout/SearchDialog";
 
 type NavLinkItem = (typeof NAV_LINKS)[number];
@@ -189,11 +190,18 @@ export default function Header() {
     const userId = user?.id;
 
     useEffect(() => {
-        if (!userId) {
-            setCartCount(0);
-            return;
-        }
         let cancelled = false;
+
+        if (!userId) {
+            const timeoutId = window.setTimeout(() => {
+                if (!cancelled) setCartCount(0);
+            }, 0);
+            return () => {
+                cancelled = true;
+                window.clearTimeout(timeoutId);
+            };
+        }
+
         async function getCartCount() {
             const { data: cart } = await supabase
                 .from("carts")
@@ -233,12 +241,13 @@ export default function Header() {
                     : "bg-background border-b border-transparent"
             }`}
         >
-            {/* Top bar */}
-            <div className="bg-primary text-primary-foreground text-xs py-1.5 text-center hidden md:block">
-                <p>
-                    🚚 Miễn phí vận chuyển cho đơn hàng từ 500.000đ | Hotline:{" "}
-                    <span className="font-semibold">1900-xxxx</span>
-                </p>
+            <div className="hidden border-b border-border bg-neutral-950 text-white sm:block">
+                <div className="container mx-auto flex h-9 items-center justify-between px-4 text-xs">
+                    <span>Miễn phí vận chuyển cho đơn từ 500.000đ</span>
+                    <span className="text-white/70">
+                        Đổi trả trong 7 ngày · Thanh toán VNPay an toàn
+                    </span>
+                </div>
             </div>
 
             {/* Main header */}
@@ -247,7 +256,7 @@ export default function Header() {
                     {/* Mobile Menu */}
                     <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                         <SheetTrigger
-                            className="md:hidden"
+                            className="lg:hidden"
                             render={
                                 <Button variant="ghost" size="icon">
                                     <Menu className="h-5 w-5" />
@@ -258,10 +267,11 @@ export default function Header() {
                             <div className="flex flex-col gap-4 mt-8">
                                 <Link
                                     href="/"
-                                    className="text-xl font-bold tracking-tight"
+                                    aria-label={`Về trang chủ ${SITE_NAME}`}
+                                    className="inline-flex w-fit rounded-md transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                                     onClick={() => setMobileOpen(false)}
                                 >
-                                    {SITE_NAME}
+                                    <AnimatedLogo textClassName="text-2xl" />
                                 </Link>
                                 <nav
                                     className="flex flex-col gap-1 mt-4"
@@ -293,16 +303,18 @@ export default function Header() {
                     {/* Logo */}
                     <Link
                         href="/"
-                        className="text-xl md:text-2xl font-bold tracking-tight hover:opacity-80 transition-opacity"
+                        aria-label={`Về trang chủ ${SITE_NAME}`}
+                        className="inline-flex min-w-0 shrink-0 rounded-md transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
-                        <span className="heading-gradient-vi text-gradient-brand">
-                            {SITE_NAME}
-                        </span>
+                        <AnimatedLogo
+                            className="max-w-[min(48vw,15rem)]"
+                            textClassName="text-xl md:text-2xl"
+                        />
                     </Link>
 
                     {/* Desktop Nav */}
                     <nav
-                        className="hidden md:flex items-center gap-0.5"
+                        className="hidden lg:flex items-center gap-0.5"
                         aria-label="Menu chính"
                     >
                         {NAV_LINKS.map((link) => (

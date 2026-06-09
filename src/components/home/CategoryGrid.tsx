@@ -1,65 +1,45 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import type { Category } from "@/lib/types";
-import { GridPattern } from "@/components/ui/backgrounds";
-import { motion, type Variants } from "framer-motion";
 
 interface CategoryGridProps {
     categories: Category[];
 }
 
 const CATEGORY_IMAGES: Record<string, string> = {
-    ao: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=600",
-    quan: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600",
+    ao: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=900",
+    quan: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=900",
     "dam-vay":
-        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600",
+        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=900",
     "phu-kien":
-        "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=600",
+        "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=900",
 };
 
 const PLACEHOLDER_CATEGORIES = [
     {
         name: "Áo",
         slug: "ao",
-        image: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=600",
+        image: CATEGORY_IMAGES.ao,
     },
     {
         name: "Quần",
         slug: "quan",
-        image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600",
+        image: CATEGORY_IMAGES.quan,
     },
     {
         name: "Đầm & Váy",
         slug: "dam-vay",
-        image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600",
+        image: CATEGORY_IMAGES["dam-vay"],
     },
     {
         name: "Phụ Kiện",
         slug: "phu-kien",
-        image: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=600",
+        image: CATEGORY_IMAGES["phu-kien"],
     },
 ];
-
-const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.15,
-        },
-    },
-};
-
-const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30 },
-    show: {
-        opacity: 1,
-        y: 0,
-        transition: { type: "spring", stiffness: 300, damping: 24 },
-    },
-};
 
 export default function CategoryGrid({ categories }: CategoryGridProps) {
     const hasCategories = categories.length > 0;
@@ -68,113 +48,67 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
         : PLACEHOLDER_CATEGORIES;
 
     return (
-        <section className="relative py-20 overflow-hidden bg-brand-mesh-diagonal">
-            <div className="absolute inset-0 bg-background/5" />
-            <div
-                className="absolute top-20 right-0 h-72 w-72 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-3)_50%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_14%,transparent)]"
-                aria-hidden
-            />
-            <div
-                className="absolute bottom-0 left-0 h-64 w-64 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-1)_45%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-1)_12%,transparent)]"
-                aria-hidden
-            />
-            <GridPattern
-                width={32}
-                height={32}
-                x={-1}
-                y={-1}
-                className="absolute inset-0 h-[200%] rotate-12 scale-150 origin-top-left opacity-25 stroke-brand-2/20 dark:stroke-brand-2/14 mask-[linear-gradient(to_bottom,transparent,white,transparent)]"
-            />
-
-            <div className="container relative mx-auto px-4 z-10">
-                <div className="text-center mb-12">
-                    <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="inline-flex items-center rounded-full border border-brand-2/45 bg-[color-mix(in_oklch,var(--brand-soft-3)_82%,white)] px-3 py-1 text-sm font-medium text-brand-1 uppercase tracking-widest mb-3 dark:border-brand-2/35 dark:bg-brand-soft-3/35 dark:text-brand-2"
+        <section className="border-b border-border bg-background py-12 md:py-16">
+            <div className="container mx-auto px-4">
+                <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                            Mua theo danh mục
+                        </p>
+                        <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
+                            Tìm nhanh phong cách bạn cần
+                        </h2>
+                    </div>
+                    <Link
+                        href="/products"
+                        className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-foreground underline-offset-4 hover:underline"
                     >
-                        Bộ sưu tập AI
-                    </motion.p>
-                    <motion.h2
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="heading-section-vi text-3xl md:text-5xl font-bold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5]"
-                    >
-                        <span className="heading-gradient-vi text-gradient-brand">
-                            Khám Phá Danh Mục
-                        </span>
-                    </motion.h2>
+                        Xem tất cả
+                        <ArrowRight className="h-4 w-4" aria-hidden />
+                    </Link>
                 </div>
 
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true, margin: "-100px" }}
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
-                >
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
                     {displayCategories.map((category) => {
                         const imageUrl =
                             "image_url" in category
-                                ? (category as Category).image_url ||
+                                ? category.image_url ||
                                   CATEGORY_IMAGES[category.slug] ||
-                                  "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600"
-                                : (
-                                      category as (typeof PLACEHOLDER_CATEGORIES)[0]
-                                  ).image;
-                        const href = hasCategories
-                            ? `/collections/${category.slug}`
-                            : `/collections/${category.slug}`;
-                        const key =
-                            "id" in category
-                                ? (category as Category).id
-                                : category.slug;
+                                  "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900"
+                                : category.image;
 
                         return (
-                            <motion.div key={key} variants={itemVariants}>
-                                <Link
-                                    href={href}
-                                    className="group relative block aspect-4/5 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-brand-2/25 ring-1 ring-transparent hover:ring-brand-2/40 dark:border-white/10 dark:hover:ring-brand-2/25 cursor-pointer"
-                                >
+                            <Link
+                                key={"id" in category ? category.id : category.slug}
+                                href={`/collections/${category.slug}`}
+                                className="group relative block overflow-hidden rounded-md bg-muted"
+                            >
+                                <div className="relative aspect-[4/5]">
                                     <Image
                                         src={imageUrl}
                                         alt={category.name}
                                         fill
-                                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                                        className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                                        sizes="(max-width: 768px) 50vw, 25vw"
                                     />
-                                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
-
-                                    <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mb-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-75 group-hover:scale-100">
-                                            <svg
-                                                className="w-5 h-5 text-white"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                                                />
-                                            </svg>
-                                        </div>
-                                        <h3 className="text-2xl font-bold text-white mb-1">
-                                            {category.name}
-                                        </h3>
-                                        <p className="text-sm text-white/70">
-                                            Định hình phong cách
-                                        </p>
-                                    </div>
-                                </Link>
-                            </motion.div>
+                                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/12 to-transparent" />
+                                </div>
+                                <div className="absolute inset-x-0 bottom-0 p-4 text-white md:p-5">
+                                    <h3 className="text-lg font-semibold md:text-xl">
+                                        {category.name}
+                                    </h3>
+                                    <p className="mt-1 flex items-center gap-1 text-sm text-white/82">
+                                        Khám phá
+                                        <ArrowRight
+                                            className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                                            aria-hidden
+                                        />
+                                    </p>
+                                </div>
+                            </Link>
                         );
                     })}
-                </motion.div>
+                </div>
             </div>
         </section>
     );

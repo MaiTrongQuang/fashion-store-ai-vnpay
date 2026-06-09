@@ -1,845 +1,163 @@
 "use client";
 
-import { Crown } from "lucide-react";
-import { DotPattern } from "@/components/ui/backgrounds";
-import { motion } from "framer-motion";
+/* eslint-disable @next/next/no-img-element */
+import { Sparkles } from "lucide-react";
 
-/* ------------------------------------------------------------------ */
-/*  Brand data with inline SVG logos                                   */
-/* ------------------------------------------------------------------ */
-
-interface FashionBrand {
+type Brand = {
     name: string;
-    logo: React.ReactNode;
-}
+    logo: string;
+    tag: string;
+    logoPanelBackground?: string;
+};
 
-/**
- * Helper – renders a text-based logo inside a consistent SVG viewport.
- * Uses elegant serif / sans-serif styling per brand.
- */
-function TextLogo({
-    text,
-    fontSize = 14,
-    fontFamily = "'Georgia', serif",
-    letterSpacing = 2,
-    fontWeight = 700,
-}: {
-    text: string;
-    fontSize?: number;
-    fontFamily?: string;
-    letterSpacing?: number;
-    fontWeight?: number;
-}) {
-    return (
-        <svg
-            viewBox="0 0 120 40"
-            fill="currentColor"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-full"
-        >
-            <text
-                x="50%"
-                y="54%"
-                dominantBaseline="middle"
-                textAnchor="middle"
-                fontSize={fontSize}
-                fontFamily={fontFamily}
-                fontWeight={fontWeight}
-                letterSpacing={letterSpacing}
-            >
-                {text}
-            </text>
-        </svg>
-    );
-}
-
-/* ── Inline SVG logos for each brand ── */
-
-const ChanelLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <path
-            d="M60 8c-12 0-22 10-22 22s10 22 22 22c5 0 10-2 14-5-4-3-7-7-8-12h-6c-.5 0-1-.5-1-1s.5-1 1-1h6c0-1 0-2 0-3s0-2 0-3h-6c-.5 0-1-.5-1-1s.5-1 1-1h6c1-5 4-9 8-12-4-3-9-5-14-5z"
-            opacity=".85"
-        />
-        <path
-            d="M60 8c12 0 22 10 22 22s-10 22-22 22c-5 0-10-2-14-5 4-3 7-7 8-12h6c.5 0 1-.5 1-1s-.5-1-1-1h-6c0-1 0-2 0-3s0-2 0-3h6c.5 0 1-.5 1-1s-.5-1-1-1h-6c-1-5-4-9-8-12 4-3 9-5 14-5z"
-            opacity=".85"
-        />
-    </svg>
-);
-
-const LVLogo = () => (
-    <TextLogo
-        text="LOUIS VUITTON"
-        fontSize={9}
-        letterSpacing={1.5}
-        fontFamily="'Georgia', serif"
-    />
-);
-
-const GucciLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="54%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="16"
-            fontFamily="'Georgia', serif"
-            fontWeight="700"
-            letterSpacing="3"
-        >
-            GUCCI
-        </text>
-    </svg>
-);
-
-const PradaLogo = () => (
-    <svg viewBox="0 0 120 50" fill="currentColor" className="w-full h-full">
-        <path d="M10 10h100v2H10z" opacity=".7" />
-        <text
-            x="50%"
-            y="56%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="15"
-            fontFamily="'Georgia', serif"
-            fontWeight="600"
-            letterSpacing="4"
-        >
-            PRADA
-        </text>
-        <path d="M10 38h100v2H10z" opacity=".7" />
-    </svg>
-);
-
-const VersaceLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <circle
-            cx="60"
-            cy="30"
-            r="22"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            opacity=".4"
-        />
-        <text
-            x="50%"
-            y="36%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="8"
-            fontFamily="'Georgia', serif"
-            fontWeight="700"
-            letterSpacing="2"
-        >
-            VERSACE
-        </text>
-        <text
-            x="50%"
-            y="60%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="18"
-            fontFamily="'Georgia', serif"
-            fontWeight="700"
-        >
-            ♔
-        </text>
-    </svg>
-);
-
-const DiorLogo = () => (
-    <TextLogo
-        text="DIOR"
-        fontSize={22}
-        letterSpacing={6}
-        fontFamily="'Georgia', serif"
-    />
-);
-
-const HermesLogo = () => (
-    <TextLogo
-        text="HERMÈS"
-        fontSize={14}
-        letterSpacing={3}
-        fontFamily="'Georgia', serif"
-        fontWeight={600}
-    />
-);
-
-const BurberryLogo = () => (
-    <TextLogo
-        text="BURBERRY"
-        fontSize={12}
-        letterSpacing={3}
-        fontFamily="'Helvetica', sans-serif"
-        fontWeight={600}
-    />
-);
-
-const ZaraLogo = () => (
-    <TextLogo
-        text="ZARA"
-        fontSize={22}
-        letterSpacing={5}
-        fontFamily="'Georgia', serif"
-        fontWeight={400}
-    />
-);
-
-const HMLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="54%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="28"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="900"
-            letterSpacing="0"
-        >
-            H&amp;M
-        </text>
-    </svg>
-);
-
-const NikeLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <path
-            d="M25 40 C30 38, 80 15, 100 12 C95 15, 50 32, 30 42 Z"
-            opacity=".85"
-        />
-        <text
-            x="50%"
-            y="78%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="7"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="700"
-            letterSpacing="1"
-            opacity=".6"
-        >
-            NIKE
-        </text>
-    </svg>
-);
-
-const AdidasLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <rect x="30" y="18" width="8" height="18" rx="1" opacity=".7" />
-        <rect x="43" y="12" width="8" height="24" rx="1" opacity=".8" />
-        <rect x="56" y="6" width="8" height="30" rx="1" opacity=".9" />
-        <text
-            x="50%"
-            y="78%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="9"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="800"
-            letterSpacing="2"
-        >
-            ADIDAS
-        </text>
-    </svg>
-);
-
-const UniqloLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <rect
-            x="35"
-            y="6"
-            width="50"
-            height="28"
-            rx="2"
-            fill="currentColor"
-            opacity=".12"
-        />
-        <text
-            x="50%"
-            y="34%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="11"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="900"
-            letterSpacing="0"
-        >
-            UNIQLO
-        </text>
-        <text
-            x="50%"
-            y="74%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="6"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="400"
-            letterSpacing="1"
-            opacity=".6"
-        >
-            ユニクロ
-        </text>
-    </svg>
-);
-
-const CKLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="38%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="18"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="300"
-            letterSpacing="1"
-        >
-            Calvin Klein
-        </text>
-        <path d="M25 38h70v.5H25z" opacity=".3" />
-        <text
-            x="50%"
-            y="68%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="7"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="400"
-            letterSpacing="3"
-            opacity=".5"
-        >
-            EST. 1968
-        </text>
-    </svg>
-);
-
-const TommyLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <rect x="20" y="14" width="80" height="6" rx="1" opacity=".15" />
-        <rect x="20" y="22" width="80" height="8" rx="1" opacity=".08" />
-        <rect x="20" y="32" width="80" height="6" rx="1" opacity=".15" />
-        <text
-            x="50%"
-            y="72%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="7"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="800"
-            letterSpacing="0.5"
-        >
-            TOMMY HILFIGER
-        </text>
-    </svg>
-);
-
-/* ── Vietnamese Brands ── */
-
-const ThienLongLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="38%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="11"
-            fontFamily="'Georgia', serif"
-            fontWeight="700"
-            letterSpacing="1"
-        >
-            NINOMAXX
-        </text>
-        <path d="M30 40h60v.5H30z" opacity=".3" />
-        <text
-            x="50%"
-            y="68%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="6"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="400"
-            letterSpacing="2"
-            opacity=".5"
-        >
-            VIETNAM
-        </text>
-    </svg>
-);
-
-const EliseLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="40%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="18"
-            fontFamily="'Georgia', serif"
-            fontWeight="400"
-            letterSpacing="4"
-            fontStyle="italic"
-        >
-            Elise
-        </text>
-        <text
-            x="50%"
-            y="70%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="5.5"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="400"
-            letterSpacing="2"
-            opacity=".5"
-        >
-            FASHION
-        </text>
-    </svg>
-);
-
-const CanifaLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="44%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="16"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="900"
-            letterSpacing="3"
-        >
-            CANIFA
-        </text>
-        <text
-            x="50%"
-            y="72%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="5"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="500"
-            letterSpacing="2"
-            opacity=".45"
-        >
-            FASHION FOR ALL
-        </text>
-    </svg>
-);
-
-const IvyModaLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="38%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="14"
-            fontFamily="'Georgia', serif"
-            fontWeight="700"
-            letterSpacing="2"
-        >
-            IVY
-        </text>
-        <text
-            x="50%"
-            y="62%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="10"
-            fontFamily="'Georgia', serif"
-            fontWeight="400"
-            letterSpacing="3"
-        >
-            moda
-        </text>
-    </svg>
-);
-
-const MaisonLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="34%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="12"
-            fontFamily="'Georgia', serif"
-            fontWeight="600"
-            letterSpacing="1"
-        >
-            ROUTINE
-        </text>
-        <path d="M30 40h60v.5H30z" opacity=".25" />
-        <text
-            x="50%"
-            y="68%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="5.5"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="400"
-            letterSpacing="2"
-            opacity=".5"
-        >
-            MENSWEAR
-        </text>
-    </svg>
-);
-
-const OwenLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="44%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="20"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="800"
-            letterSpacing="4"
-        >
-            OWEN
-        </text>
-        <text
-            x="50%"
-            y="72%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="5"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="500"
-            letterSpacing="3"
-            opacity=".4"
-        >
-            MENSWEAR
-        </text>
-    </svg>
-);
-
-const AnPhuocLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="34%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="12"
-            fontFamily="'Georgia', serif"
-            fontWeight="700"
-            letterSpacing="1"
-        >
-            AN PHƯỚC
-        </text>
-        <path d="M28 40h64v.5H28z" opacity=".25" />
-        <text
-            x="50%"
-            y="66%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="5.5"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="400"
-            letterSpacing="2"
-            opacity=".45"
-        >
-            SINCE 1952
-        </text>
-    </svg>
-);
-
-const HoangPhucLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="34%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="10"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="800"
-            letterSpacing="1"
-        >
-            HOÀNG PHÚC
-        </text>
-        <text
-            x="50%"
-            y="58%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="7"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="400"
-            letterSpacing="2"
-            opacity=".6"
-        >
-            International
-        </text>
-    </svg>
-);
-
-const VietTienLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="34%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="11"
-            fontFamily="'Georgia', serif"
-            fontWeight="700"
-            letterSpacing="1"
-        >
-            VIỆT TIẾN
-        </text>
-        <path d="M30 40h60v.5H30z" opacity=".3" />
-        <text
-            x="50%"
-            y="66%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="5.5"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="400"
-            letterSpacing="2"
-            opacity=".45"
-        >
-            VIETTIEN
-        </text>
-    </svg>
-);
-
-const TMLogo = () => (
-    <svg viewBox="0 0 120 60" fill="currentColor" className="w-full h-full">
-        <text
-            x="50%"
-            y="38%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="14"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="900"
-            letterSpacing="2"
-        >
-            YODY
-        </text>
-        <text
-            x="50%"
-            y="66%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fontSize="5.5"
-            fontFamily="'Helvetica', sans-serif"
-            fontWeight="500"
-            letterSpacing="2"
-            opacity=".45"
-        >
-            LOVE YOUR BODY
-        </text>
-    </svg>
-);
-
-/* ── Brand arrays ── */
-
-const ROW_1_BRANDS: FashionBrand[] = [
-    { name: "CHANEL", logo: <ChanelLogo /> },
-    { name: "Louis Vuitton", logo: <LVLogo /> },
-    { name: "Gucci", logo: <GucciLogo /> },
-    { name: "Prada", logo: <PradaLogo /> },
-    { name: "Versace", logo: <VersaceLogo /> },
-    { name: "Dior", logo: <DiorLogo /> },
-    { name: "Hermès", logo: <HermesLogo /> },
-    { name: "Burberry", logo: <BurberryLogo /> },
-    { name: "Zara", logo: <ZaraLogo /> },
-    { name: "H&M", logo: <HMLogo /> },
-    { name: "Ninomaxx", logo: <ThienLongLogo /> },
-    { name: "Elise", logo: <EliseLogo /> },
+const BRANDS: Brand[] = [
+    {
+        name: "Zara",
+        logo: "/brand-logos/zara.svg",
+        tag: "Sàn diễn",
+    },
+    {
+        name: "H&M",
+        logo: "/brand-logos/hm.png",
+        tag: "Đời thường",
+    },
+    {
+        name: "Uniqlo",
+        logo: "/brand-logos/uniqlo.svg",
+        tag: "Basic tinh gọn",
+    },
+    {
+        name: "Nike",
+        logo: "/brand-logos/nike.svg",
+        tag: "Năng động",
+    },
+    {
+        name: "Adidas",
+        logo: "/brand-logos/adidas.svg",
+        tag: "Streetwear",
+    },
+    {
+        name: "CANIFA",
+        logo: "/brand-logos/canifa.png",
+        tag: "Gia đình",
+    },
+    {
+        name: "YODY",
+        logo: "/brand-logos/yody.png",
+        tag: "Rực rỡ",
+    },
+    {
+        name: "Routine",
+        logo: "/brand-logos/routine.png",
+        tag: "Nam tính",
+    },
+    {
+        name: "OWEN",
+        logo: "/brand-logos/owen.svg",
+        tag: "Công sở",
+        logoPanelBackground: "#111827",
+    },
+    {
+        name: "IVY moda",
+        logo: "/brand-logos/ivymoda.avif",
+        tag: "Nữ tính",
+    },
+    {
+        name: "Elise",
+        logo: "/brand-logos/elise.png",
+        tag: "Thanh lịch",
+    },
+    {
+        name: "Ninomaxx",
+        logo: "/brand-logos/ninomaxx.jpg",
+        tag: "Phố thị",
+    },
 ];
-
-const ROW_2_BRANDS: FashionBrand[] = [
-    { name: "Nike", logo: <NikeLogo /> },
-    { name: "Adidas", logo: <AdidasLogo /> },
-    { name: "Uniqlo", logo: <UniqloLogo /> },
-    { name: "Calvin Klein", logo: <CKLogo /> },
-    { name: "Tommy Hilfiger", logo: <TommyLogo /> },
-    { name: "CANIFA", logo: <CanifaLogo /> },
-    { name: "IVY moda", logo: <IvyModaLogo /> },
-    { name: "Routine", logo: <MaisonLogo /> },
-    { name: "OWEN", logo: <OwenLogo /> },
-    { name: "An Phước", logo: <AnPhuocLogo /> },
-    { name: "Hoàng Phúc", logo: <HoangPhucLogo /> },
-    { name: "Việt Tiến", logo: <VietTienLogo /> },
-    { name: "YODY", logo: <TMLogo /> },
-];
-
-/* ------------------------------------------------------------------ */
-/*  Brand card – improved UI with glassmorphism                        */
-/* ------------------------------------------------------------------ */
-
-function BrandCard({ brand }: { brand: FashionBrand }) {
-    return (
-        <div className="group shrink-0 flex items-center gap-4 px-5 py-4 mx-2 bg-white/85 dark:bg-card/70 backdrop-blur-sm rounded-xl border border-violet-200/35 hover:border-violet-400/45 hover:shadow-lg hover:shadow-violet-500/10 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 select-none cursor-pointer min-w-44 dark:border-white/10">
-            {/* Logo container */}
-            <div className="shrink-0 w-12 h-12 rounded-lg bg-violet-50/90 border border-violet-200/40 flex items-center justify-center overflow-hidden motion-safe:group-hover:scale-105 group-hover:bg-violet-100/95 group-hover:border-violet-300/55 transition-all duration-300 text-violet-900/80 group-hover:text-violet-950 dark:bg-violet-950/40 dark:border-violet-500/25 dark:text-violet-100 dark:group-hover:bg-violet-900/50">
-                {brand.logo}
-            </div>
-            {/* Brand name */}
-            <span className="text-[13px] font-semibold text-foreground/65 group-hover:text-foreground transition-colors duration-300 whitespace-nowrap tracking-wide">
-                {brand.name}
-            </span>
-        </div>
-    );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Marquee row – pure CSS infinite scroll, hover-pause                */
-/* ------------------------------------------------------------------ */
-
-function MarqueeRow({
-    brands,
-    direction = "left",
-    speed = 35,
-}: {
-    brands: FashionBrand[];
-    direction?: "left" | "right";
-    speed?: number;
-}) {
-    const duplicated = [...brands, ...brands];
-    const animClass =
-        direction === "left" ? "marquee-scroll-left" : "marquee-scroll-right";
-
-    return (
-        <div className="relative overflow-hidden py-2 group/row">
-            {/* Gradient fade edges */}
-            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-28 z-10 bg-linear-to-r from-muted/50 via-muted/20 to-transparent" />
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-28 z-10 bg-linear-to-l from-muted/50 via-muted/20 to-transparent" />
-
-            <div
-                className={`flex w-max ${animClass}`}
-                style={{ animationDuration: `${speed}s` }}
-            >
-                {duplicated.map((brand, i) => (
-                    <BrandCard key={`${brand.name}-${i}`} brand={brand} />
-                ))}
-            </div>
-        </div>
-    );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Main component                                                     */
-/* ------------------------------------------------------------------ */
 
 export default function BrandShowcase() {
     return (
-        <section className="relative py-20 overflow-hidden bg-brand-mesh">
-            <div
-                className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[color-mix(in_oklch,var(--brand-2)_45%,transparent)] to-transparent dark:via-[color-mix(in_oklch,var(--brand-cta-2)_28%,transparent)]"
-                aria-hidden
-            />
-            <DotPattern
-                width={24}
-                height={24}
-                cx={1}
-                cy={1}
-                cr={1}
-                className="absolute inset-0 opacity-20 mask-[linear-gradient(to_bottom,transparent,white,transparent)] fill-brand-2/16 dark:fill-brand-2/10"
-            />
-
-            <div className="container relative mx-auto px-4 z-10">
-                {/* ── Heading ── */}
-                <div className="text-center mb-12">
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="inline-flex items-center space-x-2 rounded-full border border-violet-300/50 bg-violet-50/90 px-4 py-1.5 text-sm font-medium text-violet-800 uppercase tracking-widest mb-3 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-200"
-                    >
-                        <Crown className="w-4 h-4" />
-                        <span>Đối Tác Uy Tín</span>
-                    </motion.div>
-                    <motion.h2
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="heading-section-vi text-3xl md:text-5xl font-bold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5]"
-                    >
-                        <span className="heading-gradient-vi text-gradient-brand">
-                            Thương Hiệu Nổi Bật
-                        </span>
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                        className="mt-3 text-muted-foreground text-lg max-w-2xl mx-auto"
-                    >
-                        Hợp tác cùng các thương hiệu thời trang quốc tế &amp;
-                        Việt Nam hàng đầu, cam kết chính hãng 100%.
-                    </motion.p>
+        <section
+            id="brand-showcase"
+            className="scroll-mt-28 border-b border-border bg-neutral-50/60 py-12"
+        >
+            <div className="container mx-auto px-4">
+                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-border bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground shadow-sm">
+                            <Sparkles className="h-3.5 w-3.5" />
+                            Bộ sưu tập
+                        </div>
+                        <h2 className="text-lg font-bold uppercase tracking-[0.18em] text-foreground sm:text-xl">
+                            Thương hiệu nổi bật
+                        </h2>
+                    </div>
+                    <p className="max-w-xl text-sm leading-6 text-muted-foreground sm:text-right">
+                        Lựa chọn đa dạng từ basic hằng ngày đến streetwear,
+                        phối màu theo từng cá tính.
+                    </p>
                 </div>
 
-                {/* ── Row 1 : Left → Right (International + VN) ── */}
-                <motion.div
-                    initial={{ opacity: 0, x: -40 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                >
-                    <MarqueeRow
-                        brands={ROW_1_BRANDS}
-                        direction="right"
-                        speed={45}
-                    />
-                </motion.div>
-
-                {/* ── Row 2 : Right → Left (Sports + VN) ── */}
-                <motion.div
-                    initial={{ opacity: 0, x: 40 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.15 }}
-                    className="mt-3"
-                >
-                    <MarqueeRow
-                        brands={ROW_2_BRANDS}
-                        direction="left"
-                        speed={40}
-                    />
-                </motion.div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                    {BRANDS.map((brand) => (
+                        <article
+                            key={brand.name}
+                            className="group relative min-h-28 overflow-hidden rounded-md border border-border bg-white p-4 shadow-sm transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-md"
+                        >
+                            <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-neutral-900 via-brand-2 to-neutral-200 opacity-60" />
+                            <div className="flex flex-col gap-3">
+                                <div
+                                    className="flex h-14 w-full items-center justify-center rounded-md border border-border bg-white p-2.5 shadow-sm transition-transform duration-300 group-hover:scale-[1.01]"
+                                    style={{
+                                        backgroundColor:
+                                            brand.logoPanelBackground ??
+                                            "#ffffff",
+                                    }}
+                                >
+                                    <img
+                                        src={brand.logo}
+                                        alt={`${brand.name} logo`}
+                                        className="max-h-full max-w-full object-contain"
+                                        onError={(event) => {
+                                            event.currentTarget.style.display =
+                                                "none";
+                                            const fallback =
+                                                event.currentTarget
+                                                    .nextElementSibling;
+                                            if (fallback instanceof HTMLElement) {
+                                                fallback.hidden = false;
+                                            }
+                                        }}
+                                    />
+                                    <span
+                                        hidden
+                                        className="text-center text-xs font-black uppercase tracking-tight text-foreground"
+                                    >
+                                        {brand.name}
+                                    </span>
+                                </div>
+                                <div className="min-w-0">
+                                    <h3 className="text-base font-bold leading-tight text-foreground">
+                                        {brand.name}
+                                    </h3>
+                                    <p className="mt-1 text-xs font-medium text-muted-foreground">
+                                        {brand.tag}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="mt-5 flex items-center gap-1.5">
+                                <span
+                                    className="h-px flex-1 rounded-full bg-neutral-300"
+                                    aria-hidden="true"
+                                />
+                                <span
+                                    className="h-px w-5 rounded-full bg-brand-2/70"
+                                    aria-hidden="true"
+                                />
+                            </div>
+                        </article>
+                    ))}
+                </div>
             </div>
-
-            {/* ── Global keyframes ── */}
-            <style
-                dangerouslySetInnerHTML={{
-                    __html: `
-                    .marquee-scroll-left {
-                        animation: marquee-left linear infinite;
-                    }
-                    .marquee-scroll-right {
-                        animation: marquee-right linear infinite;
-                    }
-                    .group\\/row:hover .marquee-scroll-left,
-                    .group\\/row:hover .marquee-scroll-right {
-                        animation-play-state: paused;
-                    }
-                    @keyframes marquee-left {
-                        0% { transform: translateX(0); }
-                        100% { transform: translateX(-50%); }
-                    }
-                    @keyframes marquee-right {
-                        0% { transform: translateX(-50%); }
-                        100% { transform: translateX(0); }
-                    }
-                `,
-                }}
-            />
         </section>
     );
 }

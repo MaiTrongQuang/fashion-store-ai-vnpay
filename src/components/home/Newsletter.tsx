@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Send, Sparkles } from "lucide-react";
+import { Mail, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { GridPattern } from "@/components/ui/backgrounds";
-import { motion } from "framer-motion";
 import { toast } from "sonner";
 
 export default function Newsletter() {
@@ -17,91 +15,56 @@ export default function Newsletter() {
         if (!email) return;
 
         setIsSubmitting(true);
-        // Simulate API call
-        await new Promise((r) => setTimeout(r, 1000));
+        await new Promise((r) => setTimeout(r, 700));
         toast.success("Đăng ký thành công! Cảm ơn bạn đã quan tâm.");
         setEmail("");
         setIsSubmitting(false);
     };
 
     return (
-        <section className="relative py-24 overflow-hidden bg-brand-mesh">
-            {/* Background pattern */}
-            <GridPattern
-                width={30}
-                height={30}
-                x={-1}
-                y={-1}
-                className="absolute inset-0 opacity-30 stroke-brand-2/28 dark:stroke-brand-2/16 mask-[radial-gradient(600px_circle_at_center,white,transparent)]"
-            />
-
-            {/* Glow effects */}
-            <div className="absolute top-0 left-1/4 w-72 h-72 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-2)_55%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-2)_16%,transparent)]" />
-            <div className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--brand-soft-3)_50%,transparent)] dark:bg-[color-mix(in_oklch,var(--brand-cta-3)_14%,transparent)]" />
-
-            <div className="container relative mx-auto px-4 z-10">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="max-w-2xl mx-auto text-center"
-                >
-                    <div className="inline-flex items-center space-x-2 rounded-full border border-brand-2/45 bg-white/90 px-4 py-1.5 text-sm font-medium text-brand-1 uppercase tracking-widest mb-6 shadow-sm dark:border-brand-2/35 dark:bg-brand-soft-1/45 dark:text-brand-2">
-                        <Sparkles className="w-4 h-4 text-brand-3" />
-                        <span>Ưu đãi độc quyền</span>
+        <section className="bg-neutral-950 py-12 text-white md:py-16">
+            <div className="container mx-auto px-4">
+                <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)] md:items-center">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
+                            Nana Store
+                        </p>
+                        <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
+                            Nhận thông tin ưu đãi và bộ sưu tập mới
+                        </h2>
+                        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/68 md:text-base">
+                            Cập nhật sản phẩm mới, mã giảm giá và các đợt sale
+                            nổi bật qua email.
+                        </p>
                     </div>
 
-                    <h2 className="heading-section-vi text-3xl md:text-5xl font-extrabold tracking-normal md:tracking-tight leading-[1.55] md:leading-[1.5] mb-4 text-foreground">
-                        Đừng Bỏ Lỡ{" "}
-                        <span className="heading-gradient-vi text-gradient-brand">
-                            Ưu Đãi Hấp Dẫn
-                        </span>
-                    </h2>
-
-                    <p className="text-muted-foreground text-lg mb-10 max-w-lg mx-auto">
-                        Đăng ký nhận thông tin để cập nhật xu hướng mới nhất và
-                        nhận mã giảm giá đặc biệt.
-                    </p>
-
-                    <form
-                        onSubmit={handleSubmit}
-                        className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-                    >
-                        <div className="relative flex-1">
-                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <form onSubmit={handleSubmit} className="flex gap-2">
+                        <div className="relative min-w-0 flex-1">
+                            <Mail
+                                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
+                                aria-hidden
+                            />
                             <Input
                                 type="email"
-                                placeholder="Nhập email của bạn..."
+                                placeholder="Email của bạn"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="pl-10 h-12 rounded-full bg-background border-border/50 focus-visible:ring-primary/50"
+                                className="h-11 rounded-md border-white/20 bg-white pl-9 text-neutral-950 placeholder:text-neutral-500"
                             />
                         </div>
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="h-12 px-8 rounded-full font-semibold border-0 bg-gradient-brand-cta text-primary-foreground shadow-brand-cta hover:brightness-110 transition-[transform,filter] hover:-translate-y-0.5"
+                            className="h-11 rounded-md bg-white px-4 font-semibold text-neutral-950 hover:bg-white/90"
                         >
-                            {isSubmitting ? (
-                                <span className="flex items-center gap-2">
-                                    <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Đang gửi...
-                                </span>
-                            ) : (
-                                <span className="flex items-center gap-2">
-                                    <Send className="h-4 w-4" />
-                                    Đăng Ký
-                                </span>
-                            )}
+                            <Send className="h-4 w-4" aria-hidden />
+                            <span className="hidden sm:inline">
+                                {isSubmitting ? "Đang gửi" : "Đăng ký"}
+                            </span>
                         </Button>
                     </form>
-
-                    <p className="text-xs text-muted-foreground mt-4">
-                        Chúng tôi tôn trọng quyền riêng tư của bạn. Huỷ đăng ký
-                        bất cứ lúc nào.
-                    </p>
-                </motion.div>
+                </div>
             </div>
         </section>
     );

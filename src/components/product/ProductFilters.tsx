@@ -41,14 +41,19 @@ function FilterSection({
 }) {
     const [open, setOpen] = useState(defaultOpen);
     return (
-        <div className="border-b pb-4">
+        <div className="border-b border-border/70 pb-4">
             <button
+                type="button"
                 onClick={() => setOpen(!open)}
-                className="flex items-center justify-between w-full text-sm font-medium py-2"
+                className="flex w-full items-center justify-between rounded-md py-2 text-left text-sm font-semibold text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                aria-expanded={open}
             >
                 {title}
                 <ChevronDown
-                    className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
+                    className={`h-4 w-4 text-muted-foreground transition-transform ${
+                        open ? "rotate-180" : ""
+                    }`}
+                    aria-hidden
                 />
             </button>
             {open && <div className="mt-2">{children}</div>}
@@ -65,6 +70,14 @@ export default function ProductFilters({
     const searchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
 
+    const getNextPath = useCallback(
+        (params: URLSearchParams) => {
+            const qs = params.toString();
+            return qs ? `${basePath}?${qs}` : basePath;
+        },
+        [basePath],
+    );
+
     // Navigate without scrolling to top; wrap in startTransition
     // so React marks the navigation as non-blocking and lets the
     // checkbox state update (optimistic) before the server responds.
@@ -78,12 +91,12 @@ export default function ProductFilters({
             }
             params.delete("page");
             startTransition(() => {
-                router.push(`${basePath}?${params.toString()}`, {
+                router.push(getNextPath(params), {
                     scroll: false,
                 });
             });
         },
-        [searchParams, basePath, router],
+        [searchParams, getNextPath, router],
     );
 
     const clearFilters = useCallback(() => {
@@ -98,12 +111,12 @@ export default function ProductFilters({
     return (
         <div
             className={cn(
-                "space-y-4 transition-opacity duration-200",
+                "space-y-5 transition-opacity duration-200",
                 isPending && "opacity-60 pointer-events-none",
             )}
         >
             <div className="flex items-center justify-between">
-                <h3 className="font-semibold flex items-center gap-2">
+                <h3 className="flex items-center gap-2 font-semibold">
                     <SlidersHorizontal className="h-4 w-4" />
                     Bộ lọc
                     {isPending && (
@@ -115,9 +128,9 @@ export default function ProductFilters({
                         variant="ghost"
                         size="sm"
                         onClick={clearFilters}
-                        className="text-xs h-7"
+                        className="h-8 rounded-md text-xs"
                     >
-                        <X className="h-3 w-3 mr-1" />
+                        <X className="mr-1 h-3 w-3" />
                         Xóa lọc
                     </Button>
                 )}
@@ -127,18 +140,24 @@ export default function ProductFilters({
 
             {/* Sort */}
             <div className="space-y-2">
-                <p className="text-sm font-medium">Sắp xếp</p>
-                <select
-                    value={currentSort}
-                    onChange={(e) => updateFilter("sort", e.target.value)}
-                    className="w-full h-9 rounded-lg border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                    {SORT_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                        </option>
-                    ))}
-                </select>
+                <p className="text-sm font-semibold">Sắp xếp</p>
+                <div className="relative">
+                    <select
+                        value={currentSort}
+                        onChange={(e) => updateFilter("sort", e.target.value)}
+                        className="h-11 w-full rounded-md border border-input bg-background px-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                        {SORT_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </option>
+                        ))}
+                    </select>
+                    <ChevronDown
+                        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        aria-hidden
+                    />
+                </div>
             </div>
 
             <Separator />
@@ -149,7 +168,7 @@ export default function ProductFilters({
                     {categories.map((cat) => (
                         <label
                             key={cat.id}
-                            className="flex items-center gap-2 cursor-pointer text-sm hover:text-primary transition-colors"
+                            className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 text-sm transition-colors hover:bg-muted/70 hover:text-primary"
                         >
                             <Checkbox
                                 checked={
@@ -174,7 +193,7 @@ export default function ProductFilters({
                     {brands.map((brand) => (
                         <label
                             key={brand.id}
-                            className="flex items-center gap-2 cursor-pointer text-sm hover:text-primary transition-colors"
+                            className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 text-sm transition-colors hover:bg-muted/70 hover:text-primary"
                         >
                             <Checkbox
                                 checked={
@@ -199,7 +218,7 @@ export default function ProductFilters({
                     {PRICE_RANGES.map((range, index) => (
                         <label
                             key={index}
-                            className="flex items-center gap-2 cursor-pointer text-sm hover:text-primary transition-colors"
+                            className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2 text-sm transition-colors hover:bg-muted/70 hover:text-primary"
                         >
                             <Checkbox
                                 checked={
@@ -222,10 +241,9 @@ export default function ProductFilters({
                                     }
                                     params.delete("page");
                                     startTransition(() => {
-                                        router.push(
-                                            `${basePath}?${params.toString()}`,
-                                            { scroll: false },
-                                        );
+                                        router.push(getNextPath(params), {
+                                            scroll: false,
+                                        });
                                     });
                                 }}
                             />
@@ -237,4 +255,3 @@ export default function ProductFilters({
         </div>
     );
 }
-

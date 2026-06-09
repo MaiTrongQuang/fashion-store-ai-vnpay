@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Mail, Phone, MapPin, Globe, Camera } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SITE_CONTACT, SITE_NAME, FOOTER_LINKS } from "@/lib/constants";
+import AnimatedLogo from "@/components/layout/AnimatedLogo";
 
 export default function Footer() {
     return (
@@ -10,9 +11,16 @@ export default function Footer() {
                 <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-x-16 lg:grid-cols-[1.25fr_0.75fr_1fr_1.3fr] lg:gap-x-20">
                     {/* Brand */}
                     <div className="max-w-sm">
-                        <h3 className="mb-4 text-2xl font-bold tracking-tight">
-                            {SITE_NAME}
-                        </h3>
+                        <Link
+                            href="/"
+                            aria-label={`Về trang chủ ${SITE_NAME}`}
+                            className="mb-4 inline-flex rounded-md transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary-foreground/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+                        >
+                            <AnimatedLogo
+                                inverse
+                                textClassName="text-2xl"
+                            />
+                        </Link>
                         <p className="mb-6 text-sm leading-7 opacity-75">
                             Hệ thống thời trang trực tuyến hàng đầu. Mang đến
                             cho bạn những sản phẩm chất lượng với giá cả hợp lý.

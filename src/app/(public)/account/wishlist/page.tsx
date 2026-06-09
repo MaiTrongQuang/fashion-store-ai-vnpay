@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { formatPrice, getDiscountPercent } from "@/lib/utils";
+import { getProductDisplayImages } from "@/lib/legacy-product-images";
 
 const productSelect = `
   id,
@@ -85,10 +86,9 @@ export default async function WishlistPage() {
                                 </li>
                             );
                         }
-                        const images = p.images ?? [];
+                        const images = getProductDisplayImages(p);
                         const primaryImage =
-                            images.find((img: any) => img.is_primary) ||
-                            images[0];
+                            images.find((img) => img.is_primary) || images[0];
                         const salePrice = p.sale_price ?? null;
                         const currentPrice = salePrice ?? p.base_price;
                         const discount = salePrice

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, X, Loader2, ImageOff, ArrowRight } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn, formatPrice, getDiscountPercent } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import type { Product } from "@/lib/types";
+import { getProductDisplayImages } from "@/lib/legacy-product-images";
 
 export default function SearchDialog() {
     const [open, setOpen] = useState(false);
@@ -39,17 +40,24 @@ export default function SearchDialog() {
         return () => window.removeEventListener("keydown", onKeyDown);
     }, []);
 
+    const resetSearch = useCallback(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        setQuery("");
+        setResults([]);
+        setHasSearched(false);
+        setIsSearching(false);
+    }, []);
+
+    function handleOpenChange(nextOpen: boolean) {
+        setOpen(nextOpen);
+        if (!nextOpen) resetSearch();
+    }
+
     // Focus input when dialog opens
     useEffect(() => {
         if (open) {
-            // small delay for dialog animation
             const timer = setTimeout(() => inputRef.current?.focus(), 100);
             return () => clearTimeout(timer);
-        } else {
-            // Reset state when closing
-            setQuery("");
-            setResults([]);
-            setHasSearched(false);
         }
     }, [open]);
 
@@ -94,22 +102,27 @@ export default function SearchDialog() {
 
     function handleClose() {
         setOpen(false);
+        resetSearch();
     }
 
     return (
         <>
-            {/* Search trigger button */}
-            <Button
-                variant="ghost"
-                size="icon"
-                className="hidden sm:inline-flex"
+            <button
+                type="button"
                 onClick={() => setOpen(true)}
-                aria-label="Tìm kiếm (Ctrl+K)"
+                className="inline-flex h-10 min-w-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-0 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:w-52 sm:justify-start sm:px-3 lg:w-72"
+                aria-label="Tìm kiếm sản phẩm"
             >
-                <Search className="h-4 w-4" />
-            </Button>
+                <Search className="h-4 w-4 shrink-0" aria-hidden />
+                <span className="hidden truncate sm:inline">
+                    Tìm sản phẩm...
+                </span>
+                <kbd className="ml-auto hidden rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground lg:inline-flex">
+                    Ctrl K
+                </kbd>
+            </button>
 
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog open={open} onOpenChange={handleOpenChange}>
                 <DialogContent
                     className="sm:max-w-2xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden"
                     showCloseButton={false}
@@ -233,7 +246,7 @@ function SearchResultItem({
     product: Product;
     onSelect: () => void;
 }) {
-    const images = product.images ?? [];
+    const images = getProductDisplayImages(product);
     const primaryImage =
         images.find((img) => img.is_primary) || images[0];
     const discount = product.sale_price

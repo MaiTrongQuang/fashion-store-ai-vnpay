@@ -35,9 +35,9 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { SITE_NAME } from "@/lib/constants";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { cn } from "@/lib/utils";
+import AnimatedLogo from "@/components/layout/AnimatedLogo";
 
 const emailSchema = z.object({
     email: z.string().email("Email không hợp lệ"),
@@ -221,11 +221,12 @@ export default function ForgotPasswordPage() {
                 <CardHeader className="space-y-1 border-b border-border/60 pb-4 text-center">
                     <Link
                         href="/"
-                        className="text-2xl font-bold tracking-tight transition-opacity hover:opacity-80"
+                        className="inline-flex justify-center rounded-md transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
-                        <span className="heading-gradient-vi text-gradient-brand">
-                            {SITE_NAME}
-                        </span>
+                        <AnimatedLogo
+                            className="flex-col gap-1.5 text-center"
+                            textClassName="text-2xl"
+                        />
                     </Link>
                     <CardTitle className="text-lg font-semibold">
                         {currentTitle}

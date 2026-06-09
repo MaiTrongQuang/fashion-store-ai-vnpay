@@ -14,13 +14,13 @@ export default function ProductReviews({
     avgRating,
 }: ProductReviewsProps) {
     return (
-        <section className="mt-16">
-            <h2 className="text-xl font-bold mb-6">
+        <section className="mt-16 border-t border-border pt-8">
+            <h2 className="mb-6 text-xl font-semibold">
                 Đánh Giá ({reviews.length})
             </h2>
 
             {reviews.length === 0 ? (
-                <div className="text-center py-12 bg-accent/30 rounded-2xl">
+                <div className="rounded-md bg-accent/30 py-12 text-center">
                     <p className="text-muted-foreground">
                         Chưa có đánh giá nào cho sản phẩm này
                     </p>
@@ -28,7 +28,7 @@ export default function ProductReviews({
             ) : (
                 <div className="space-y-6">
                     {/* Rating Summary */}
-                    <div className="flex items-center gap-6 p-6 bg-accent/30 rounded-2xl">
+                    <div className="flex items-center gap-6 rounded-md bg-accent/30 p-6">
                         <div className="text-center">
                             <p className="text-4xl font-bold">
                                 {avgRating.toFixed(1)}

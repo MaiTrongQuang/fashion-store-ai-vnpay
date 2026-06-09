@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { MessageSquareQuote, Star } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
+import { getProductDisplayImages } from "@/lib/legacy-product-images";
 
 export default async function AccountReviewsPage() {
     const supabase = await createClient();
@@ -64,9 +65,9 @@ export default async function AccountReviewsPage() {
                 <ul className="space-y-4">
                     {list.map((r: any) => {
                         const p = r.product;
-                        const images = p?.images ?? [];
+                        const images = p ? getProductDisplayImages(p) : [];
                         const img =
-                            images.find((i: any) => i.is_primary) || images[0];
+                            images.find((i) => i.is_primary) || images[0];
 
                         return (
                             <li key={r.id}>

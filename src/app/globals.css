@@ -371,6 +371,192 @@
             color-mix(in oklch, var(--brand-cta-2) 38%, transparent);
     }
 
+    .animated-logo {
+        --logo-duration: 4.8s;
+        --logo-ease: cubic-bezier(0.45, 0, 0.2, 1);
+        --logo-frame-x: 0.34rem;
+        --logo-frame-y: 0.34rem;
+        --logo-stroke: 2px;
+        --logo-gold: oklch(0.74 0.16 86);
+        --logo-gold-deep: oklch(0.64 0.14 80);
+        --logo-gold-light: oklch(0.92 0.13 94);
+        --logo-glow: oklch(0.82 0.14 88 / 0.16);
+        color: var(--logo-gold);
+        text-decoration: none;
+    }
+
+    .animated-logo--inverse {
+        --logo-gold: oklch(0.88 0.14 90);
+        --logo-gold-deep: oklch(0.76 0.14 84);
+        --logo-gold-light: oklch(0.98 0.1 98);
+        --logo-glow: oklch(0.94 0.12 96 / 0.32);
+    }
+
+    .animated-logo__wordmark {
+        position: relative;
+        isolation: isolate;
+        display: inline-grid;
+        min-width: 0;
+        place-items: center;
+        overflow: visible;
+        padding: 0.58rem 0.54rem 0.5rem;
+        line-height: 1;
+    }
+
+    .animated-logo__title {
+        position: relative;
+        z-index: 1;
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        background-image: linear-gradient(
+            110deg,
+            var(--logo-gold-deep) 0%,
+            var(--logo-gold) 46%,
+            var(--logo-gold-light) 54%,
+            var(--logo-gold) 62%,
+            var(--logo-gold-deep) 100%
+        );
+        background-size: 230% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: 800;
+        letter-spacing: 0;
+        line-height: 1.05;
+        text-shadow: 0 0 5px var(--logo-glow);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        animation: animated-logo-title-shine var(--logo-duration)
+            var(--logo-ease) infinite;
+    }
+
+    .animated-logo__title::after {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(
+            100deg,
+            transparent 0%,
+            transparent 36%,
+            var(--logo-gold-light) 50%,
+            transparent 62%,
+            transparent 100%
+        );
+        background-size: 230% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        content: attr(data-text);
+        transform: translateX(-110%);
+        animation: animated-logo-text-sweep var(--logo-duration)
+            var(--logo-ease) infinite;
+        pointer-events: none;
+    }
+
+    .animated-logo__bar {
+        position: absolute;
+        z-index: 2;
+        overflow: hidden;
+        border-radius: var(--logo-stroke);
+        background: linear-gradient(
+            90deg,
+            var(--logo-gold-deep),
+            var(--logo-gold)
+        );
+        box-shadow: 0 0 5px var(--logo-glow);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .animated-logo__bar::after {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            var(--logo-gold) 32%,
+            var(--logo-gold-light) 50%,
+            var(--logo-gold) 68%,
+            transparent 100%
+        );
+        content: "";
+        opacity: 0;
+        transform: translateX(-160%);
+        animation: animated-logo-line-shine var(--logo-duration)
+            linear infinite;
+    }
+
+    .animated-logo__bar--top {
+        top: var(--logo-frame-y);
+        left: var(--logo-frame-x);
+        width: calc((100% - (var(--logo-frame-x) * 2)) / 3);
+        height: var(--logo-stroke);
+    }
+
+    .animated-logo__bar--left {
+        top: var(--logo-frame-y);
+        bottom: var(--logo-frame-y);
+        left: var(--logo-frame-x);
+        width: var(--logo-stroke);
+        background: linear-gradient(
+            180deg,
+            var(--logo-gold-deep),
+            var(--logo-gold)
+        );
+    }
+
+    .animated-logo__bar--bottom {
+        right: var(--logo-frame-x);
+        bottom: var(--logo-frame-y);
+        width: calc((100% - (var(--logo-frame-x) * 2)) / 3);
+        height: var(--logo-stroke);
+    }
+
+    .animated-logo__bar--right {
+        top: var(--logo-frame-y);
+        right: var(--logo-frame-x);
+        bottom: var(--logo-frame-y);
+        width: var(--logo-stroke);
+        background: linear-gradient(
+            180deg,
+            var(--logo-gold-deep),
+            var(--logo-gold)
+        );
+    }
+
+    .animated-logo__bar--left::after,
+    .animated-logo__bar--right::after {
+        background: linear-gradient(
+            180deg,
+            transparent 0%,
+            var(--logo-gold) 32%,
+            var(--logo-gold-light) 50%,
+            var(--logo-gold) 68%,
+            transparent 100%
+        );
+        animation-name: animated-logo-side-shine;
+    }
+
+    .animated-logo--mark .animated-logo__wordmark {
+        min-width: 2.7rem;
+        padding-inline: 0.9rem;
+    }
+
+    .animated-logo--mark .animated-logo__bar--top {
+        width: calc((100% - (var(--logo-frame-x) * 2)) / 3);
+    }
+
+    .animated-logo--mark .animated-logo__bar--bottom {
+        width: calc((100% - (var(--logo-frame-x) * 2)) / 3);
+    }
+
+    .animated-logo:is(:hover, :focus-visible) .animated-logo__bar,
+    .animated-logo:is(:hover, :focus-visible) .animated-logo__title,
+    .animated-logo:is(:hover, :focus-visible) .animated-logo__title::after,
+    .animated-logo:is(:hover, :focus-visible) .animated-logo__bar::after {
+        animation-duration: 3s;
+    }
+
     /* ── Sale gradient chữ đỏ-cam ── */
     .text-gradient-sale {
         background-image: linear-gradient(
@@ -426,6 +612,87 @@
             var(--background) 50%,
             color-mix(in oklch, var(--sale-3) 6%, var(--background)) 100%
         );
+    }
+}
+
+@keyframes animated-logo-title-shine {
+    0%,
+    100% {
+        background-position: 0% 50%;
+        filter: saturate(1);
+    }
+    50% {
+        background-position: 100% 50%;
+        filter: saturate(1.16);
+    }
+}
+
+@keyframes animated-logo-text-sweep {
+    0%,
+    20% {
+        opacity: 0;
+        transform: translateX(-110%);
+    }
+    38% {
+        opacity: 0.5;
+    }
+    58% {
+        opacity: 0.36;
+        transform: translateX(112%);
+    }
+    78%,
+    100% {
+        opacity: 0;
+        transform: translateX(112%);
+    }
+}
+
+@keyframes animated-logo-line-shine {
+    0% {
+        opacity: 0;
+        transform: translateX(-160%);
+    }
+    12% {
+        opacity: 0.95;
+        transform: translateX(-88%);
+    }
+    58% {
+        opacity: 0.82;
+        transform: translateX(72%);
+    }
+    82%,
+    100% {
+        opacity: 0;
+        transform: translateX(160%);
+    }
+}
+
+@keyframes animated-logo-side-shine {
+    0% {
+        opacity: 0;
+        transform: translateY(-160%);
+    }
+    12% {
+        opacity: 0.95;
+        transform: translateY(-88%);
+    }
+    58% {
+        opacity: 0.82;
+        transform: translateY(72%);
+    }
+    82%,
+    100% {
+        opacity: 0;
+        transform: translateY(160%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animated-logo *,
+    .animated-logo *::before,
+    .animated-logo *::after,
+    .animated-logo__title {
+        animation: none !important;
     }
 }
 

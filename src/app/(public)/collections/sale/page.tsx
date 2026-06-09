@@ -1,21 +1,19 @@
 ﻿import { createClient } from "@/lib/supabase/server";
 import ProductCard from "@/components/product/ProductCard";
+import ProductFilterDrawer from "@/components/product/ProductFilterDrawer";
 import ProductFilters from "@/components/product/ProductFilters";
 import Link from "next/link";
 import {
-    LayoutGrid,
     ChevronRight,
     PackageSearch,
     Flame,
     Star,
     Sparkles,
     Timer,
-    Percent,
     TrendingDown,
     BadgePercent,
 } from "lucide-react";
 import type { Metadata } from "next";
-import { DotPattern } from "@/components/ui/backgrounds";
 import { cn } from "@/lib/utils";
 import { SITE_NAME } from "@/lib/constants";
 import type { Brand, Category } from "@/lib/types";
@@ -195,7 +193,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
         params.featured === "true" || params.new === "true";
 
     const pillBase =
-        "inline-flex min-h-11 min-w-[44px] cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+        "inline-flex min-h-10 min-w-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border px-3.5 py-2 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
 
     const paginationItems =
         totalPages > 1 ? getPaginationItems(page, totalPages) : [];
@@ -204,23 +202,10 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
     const totalSaleProducts = count ?? 0;
 
     return (
-        <div className="relative">
-            {/* Hero — gradient đỏ/cam nổi bật cho Sale */}
-            <section className="relative overflow-hidden border-b border-border/40 bg-sale-mesh">
-                <DotPattern
-                    width={16}
-                    height={16}
-                    cx={1}
-                    cy={1}
-                    cr={1}
-                    className="absolute inset-0 opacity-30 mask-[radial-gradient(500px_circle_at_center,white,transparent)] fill-sale-1/16 dark:fill-sale-1/10"
-                />
-                {/* Decorative blobs */}
-                <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--sale-1)_16%,transparent)] dark:bg-[color-mix(in_oklch,var(--sale-1)_12%,transparent)]" />
-                <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl bg-[color-mix(in_oklch,var(--sale-2)_14%,transparent)] dark:bg-[color-mix(in_oklch,var(--sale-2)_10%,transparent)]" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl bg-[color-mix(in_oklch,var(--sale-3)_8%,transparent)] dark:bg-[color-mix(in_oklch,var(--sale-3)_6%,transparent)]" />
-
-                <div className="container relative z-10 mx-auto px-4 py-10 md:py-14">
+        <div className="relative bg-background">
+            {/* Hero */}
+            <section className="border-b border-border bg-red-50/70 dark:bg-red-950/10">
+                <div className="container mx-auto px-4 py-8 md:py-10">
                     <nav
                         aria-label="Breadcrumb"
                         className="mb-6 flex flex-wrap items-center gap-1 text-sm text-muted-foreground"
@@ -235,38 +220,35 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                             className="h-4 w-4 shrink-0 opacity-60"
                             aria-hidden
                         />
-                        <span className="font-medium text-brand-3 dark:text-brand-2">
+                        <span className="font-medium text-red-700 dark:text-red-300">
                             Sale
                         </span>
                     </nav>
 
                     <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                         <div className="max-w-2xl">
-                            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-sale-1/40 bg-[color-mix(in_oklch,var(--sale-2)_12%,white)] px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sale-1 dark:border-sale-1/35 dark:bg-[color-mix(in_oklch,var(--sale-1)_15%,transparent)] dark:text-sale-2 shadow-sm">
+                            <div className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-red-700 dark:text-red-300">
                                 <Flame
                                     className="h-4 w-4"
                                     aria-hidden
                                 />
                                 <span>Flash Sale</span>
                             </div>
-                            <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
-                                Giảm Giá{" "}
-                                <span className="heading-gradient-vi text-gradient-sale">
-                                    Sốc
-                                </span>
+                            <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                                Sản phẩm đang giảm giá
                             </h1>
-                            <p className="mt-3 text-base text-muted-foreground md:text-lg">
+                            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
                                 Nhanh tay chọn ngay — ưu đãi có hạn, giá cực
                                 tốt! Tiết kiệm lên đến 70% cho các sản phẩm
                                 thời trang hàng hiệu.
                             </p>
                         </div>
                         <div className="flex shrink-0 flex-wrap gap-3 md:flex-col md:items-end">
-                            <span className="inline-flex items-center gap-2 rounded-full border border-sale-1/30 bg-[color-mix(in_oklch,var(--sale-2)_10%,white)] dark:border-sale-1/25 dark:bg-[color-mix(in_oklch,var(--sale-1)_12%,transparent)] px-4 py-2 text-sm font-bold tabular-nums text-sale-1 dark:text-sale-2 shadow-sm">
+                            <span className="inline-flex items-center gap-2 rounded-md border border-red-200 bg-background px-4 py-2 text-sm font-bold tabular-nums text-red-700 dark:border-red-900 dark:text-red-300">
                                 <BadgePercent className="h-4 w-4" />
                                 {totalSaleProducts} sản phẩm giảm giá
                             </span>
-                            <span className="inline-flex items-center gap-2 rounded-full border border-sale-3/30 bg-[color-mix(in_oklch,var(--sale-3)_10%,white)] dark:border-sale-3/25 dark:bg-[color-mix(in_oklch,var(--sale-3)_10%,transparent)] px-4 py-2 text-sm font-semibold text-sale-1 dark:text-sale-2 shadow-sm">
+                            <span className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-semibold">
                                 <Timer className="h-4 w-4" />
                                 Ưu đãi có hạn
                             </span>
@@ -278,8 +260,8 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
             {/* Content */}
             <div className="container mx-auto px-4 py-8 md:py-10 lg:py-12">
                 <div className="flex flex-col gap-8 lg:flex-row lg:gap-10 xl:gap-12">
-                    <aside className="w-full shrink-0 lg:w-72 lg:max-w-[20rem]">
-                        <div className="rounded-2xl border border-border/60 bg-card/50 p-4 shadow-sm backdrop-blur-sm md:p-5 lg:sticky lg:top-24">
+                    <aside className="hidden w-full shrink-0 lg:block lg:w-72 lg:max-w-[20rem]">
+                        <div className="rounded-md border border-border bg-card p-4 md:p-5 lg:sticky lg:top-24">
                             <ProductFilters
                                 categories={categories}
                                 brands={brands}
@@ -291,7 +273,13 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                     <div className="min-w-0 flex-1">
                         {/* Quick filters */}
                         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                                <ProductFilterDrawer
+                                    categories={categories}
+                                    brands={brands}
+                                    basePath="/collections/sale"
+                                />
+                                <div className="flex flex-wrap gap-2">
                                 <Link
                                     href={buildQuery(
                                         withoutQuickFilters(params),
@@ -300,8 +288,8 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                     className={cn(
                                         pillBase,
                                         !hasQuickFilter
-                                            ? "bg-gradient-sale-cta text-white shadow-sale-cta"
-                                            : "bg-muted/80 text-foreground hover:bg-muted",
+                                            ? "border-red-600 bg-red-600 text-white"
+                                            : "border-border bg-background text-foreground hover:bg-muted",
                                     )}
                                 >
                                     <TrendingDown className="h-3.5 w-3.5" />
@@ -315,8 +303,8 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                     className={cn(
                                         pillBase,
                                         params.featured === "true"
-                                            ? "bg-gradient-sale-cta text-white shadow-sale-cta hover:brightness-110"
-                                            : "bg-muted/80 text-foreground hover:bg-muted",
+                                            ? "border-red-600 bg-red-600 text-white hover:bg-red-600"
+                                            : "border-border bg-background text-foreground hover:bg-muted",
                                     )}
                                 >
                                     <Star className="h-3.5 w-3.5" />
@@ -330,13 +318,14 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                     className={cn(
                                         pillBase,
                                         params.new === "true"
-                                            ? "bg-gradient-sale-cta text-white shadow-sale-cta hover:brightness-110"
-                                            : "bg-muted/80 text-foreground hover:bg-muted",
+                                            ? "border-red-600 bg-red-600 text-white hover:bg-red-600"
+                                            : "border-border bg-background text-foreground hover:bg-muted",
                                     )}
                                 >
                                     <Sparkles className="h-3.5 w-3.5" />
                                     Hàng mới giảm giá
                                 </Link>
+                                </div>
                             </div>
                         </div>
 
@@ -375,7 +364,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
 
                         {/* Product grid */}
                         {products && products.length > 0 ? (
-                            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
+                            <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 md:grid-cols-3 lg:grid-cols-4">
                                 {products.map((product: any) => (
                                     <ProductCard
                                         key={product.id}
@@ -384,14 +373,14 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                 ))}
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-muted/20 px-6 py-16 text-center md:py-24">
-                                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand-soft-2/50 dark:bg-brand-soft-1/25">
-                                    <Percent
-                                        className="h-8 w-8 text-sale-1 dark:text-sale-2"
+                            <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-border bg-muted/20 px-6 py-16 text-center md:py-24">
+                                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                                    <PackageSearch
+                                        className="h-8 w-8 text-muted-foreground"
                                         aria-hidden
                                     />
                                 </div>
-                                <h2 className="text-2xl font-bold tracking-tight">
+                                <h2 className="text-2xl font-semibold tracking-tight">
                                     Chưa có sản phẩm giảm giá
                                 </h2>
                                 <p className="mt-2 max-w-md text-muted-foreground">
@@ -401,7 +390,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                 </p>
                                 <Link
                                     href="/products"
-                                    className="mt-8 inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-sale-cta px-5 py-2.5 text-sm font-semibold text-white shadow-sale-cta transition-[transform,filter] hover:brightness-110 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    className="mt-8 inline-flex min-h-11 items-center justify-center rounded-md bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     Khám phá sản phẩm
                                 </Link>
@@ -427,7 +416,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                         })}
                                         aria-disabled={page <= 1}
                                         className={cn(
-                                            "inline-flex min-h-11 min-w-[44px] cursor-pointer items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                            "inline-flex min-h-11 min-w-[44px] cursor-pointer items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                                             page <= 1 &&
                                                 "pointer-events-none opacity-40",
                                         )}
@@ -454,9 +443,9 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                                             : String(item),
                                                 })}
                                                 className={cn(
-                                                    "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-2xl border text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                                    "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md border text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                                                     item === page
-                                                        ? "border-sale-1 bg-gradient-sale-cta text-white"
+                                                        ? "border-red-600 bg-red-600 text-white"
                                                         : "border-border bg-background hover:bg-muted",
                                                 )}
                                                 aria-current={
@@ -487,7 +476,7 @@ export default async function SaleCollectionPage({ searchParams }: Props) {
                                         }
                                         aria-disabled={page >= totalPages}
                                         className={cn(
-                                            "inline-flex min-h-11 min-w-[44px] cursor-pointer items-center justify-center rounded-2xl border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                            "inline-flex min-h-11 min-w-[44px] cursor-pointer items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                                             page >= totalPages &&
                                                 "pointer-events-none opacity-40",
                                         )}

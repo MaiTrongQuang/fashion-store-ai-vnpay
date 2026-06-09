@@ -13,7 +13,7 @@ export default function ProductsLoading() {
                     <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                         <div className="max-w-2xl space-y-3">
                             <div className="h-7 w-28 rounded-full bg-muted/60" />
-                            <div className="h-12 w-72 rounded-2xl bg-muted/60" />
+                            <div className="h-12 w-72 rounded-lg bg-muted/60" />
                             <div className="h-5 w-96 rounded-full bg-muted/40" />
                         </div>
                         <div className="h-10 w-32 rounded-full bg-muted/50" />
@@ -26,7 +26,7 @@ export default function ProductsLoading() {
                 <div className="flex flex-col gap-8 lg:flex-row lg:gap-10 xl:gap-12">
                     {/* Sidebar */}
                     <aside className="w-full shrink-0 lg:w-72 lg:max-w-[20rem]">
-                        <div className="rounded-2xl border border-border/60 bg-card/50 p-5 space-y-6">
+                        <div className="rounded-lg border border-border/60 bg-card/50 p-5 space-y-6">
                             {Array.from({ length: 4 }).map((_, i) => (
                                 <div key={i} className="space-y-3">
                                     <div className="h-5 w-24 rounded bg-muted/70" />

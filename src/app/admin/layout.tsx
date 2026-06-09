@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { SITE_NAME } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
+import AnimatedLogo from "@/components/layout/AnimatedLogo";
 
 const ADMIN_NAV = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -90,12 +91,11 @@ export default function AdminLayout({
             <div className="p-4 border-b">
                 <Link
                     href="/admin"
-                    className="flex items-center gap-2"
+                    aria-label={`Về dashboard ${SITE_NAME}`}
+                    className="inline-flex rounded-md transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     onClick={() => setSidebarOpen(false)}
                 >
-                    <span className="text-lg font-bold heading-gradient-vi text-gradient-brand">
-                        {SITE_NAME}
-                    </span>
+                    <AnimatedLogo textClassName="text-lg" />
                 </Link>
                 <p className="text-xs text-muted-foreground mt-1">
                     Quản trị hệ thống
